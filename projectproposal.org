@@ -1,0 +1,34 @@
+#+TITLE: Project Proposal
+#+AUTHOR: Lukas Hofmaier
+
+* Problem description
+The website artoffer.ch provides ca. 12000 artists a platform to present their works of art to broad audience on the web. 
+Visitors can discover the art of artists and get in contact with them. 
+It is also possible to buy pieces of art. 
+For visitors it’s hard to find pieces of art, which matches their taste because there are too many of them (100000 items).
+
+Collaborative filtering is a method of making automatic predictions (filtering) about the user preferences or taste.
+To compute the prediction collaborative filtering is collecting ratings or behavior information from many users from the past. 
+Model-based collaborative filtering describes user and items as a set of latent factor vectors. 
+The inner product can be used to predict the interest of a user for an item.
+The method can be applied to present the visitors of artoffer.ch pieces of art that could interest them.
+
+Building the latent factor model is expensive. 
+As the numbers of users and items grow, model-based collaborative filtering will suffer serious scalability problems. 
+Cloud computing services, like Microsoft Azure, satisfy the demand of a higher scalability. 
+
+* Projectgoals
+- Study of cloud computing and the fundamentals of the technologies Microsoft Azure, Azure Machine Learning and Apache Spark
+- Comparison: Microsoft Azure Machine Learning vs. Apache Spark
+- Analysis and usage of implicit feedback of the visitors
+- Build a recommender for artoffer.ch
+- A technical report containing the theoretical and practical results.
+
+| Projectstart   | March 2015     |
+| Projectend     | September 2015 |
+| Semester       | FS 2015        |
+| Projectpartner | ?              |
+| Advisor        | ?              |
+| Titel          | ?              |
+|                |                |
+
