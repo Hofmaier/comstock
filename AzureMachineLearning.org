@@ -1,0 +1,11 @@
+Azure Machine Learning
+Ich kann kein Experiment in Azure Machine Learning erstellen. Es gibt ML nur in South Central US.
+ 
+
+Movie recommmendation mit HDInsight und Mahout
+* Data Set
+* Provision HDInsight Cluster mit Powershell
+Man benoetigt zuerst eine Azure Storage
+** Was sind publishsettings file. enthaelt die Subscription. Kann mit Get-AzurePublishSettingsFile heruntergeladen werden
+
+Social tagging in recommender systems: a survey of the state-of-the-art and possible extensions
