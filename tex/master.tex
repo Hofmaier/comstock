@@ -6,9 +6,50 @@
 \section{Introduction}
 \label{sec:intro}
 
-\section{Recall}
-\label{sec:evaluation}
+\subsection{Recommender engines}
+\label{sec:recommenderengines}
 
+Recommender engines are services that recommend articles (items) to users based on their past actions. They attempt to infer taste and preferences and identify unknown items that are of interest.
+E-commerce sites that deploy a recommender engine can have a increase in sales of 8 - 13 percent \footnote{http://www.practicalecommerce.com/articles/1942-10-Questions-on-Product-Recommendations}.
+
+\section{Baseline Algorithm}
+\label{sec:baselinealgorithm}
+
+
+
+\section{Precision/Recall (Evaluation)}
+\label{sec:evaluation}
+Recommenders answer the question "What are the best recommendations for a user?". If we want to evaluate a recommender, we have to define, what's a "good" recommendation.
+Some recommender predict the preferences of a user. One possibility to evaluate a recommender is to calculate the difference between the estimated preference and the actual preference.
+
+Those actual prefences don't exist. Nobody knows how a user likes some new item in the future.
+But we can simulate the prefencences of the future by setting aside a small part of the real data set as test data. These preferences aren't present in the training data set. Instead the recommender predicts the preferences for the missing test data set and the estimates are compared to the actual values.
+
+Another approach to evaluate a recommender is to take a broader view of the recommender problem. It's not strictly necessary to estimate preference values in order to produce recommendations. In many cases presenting a ordered list of recommendations is sufficient. The list is ordered from best to worst recommendation.
+
+\begin{description}
+\item[Precision] Precision is the proportion of top results that relevant. Suppose the recommender recommends 5 items. If 3 items are good recommendations then the precision is $3/5$.
+\item[Recall] Recall is the proportion of good recommendations that appear in the recommendation result. Suppose there are 9 good recommendations. If the recommender results contains 3 of these good recommendations then the recall is 3/9.
+\end{description}
+
+In order to calculate precision and recall the implementation determines the top \verb|n| preferences for each user. It removes those preferences from the data model. It evaluates precision and recall with the new data model. It calculates a top-N recommendation list for each user and compares it with the real top-N preferences.
+
+The evaluation process has the following paramters:
+\begin{description}
+\item[Size of the result] The number of recommendations to consider. The length of the recommendation list.
+\item[Relevance] Determines if an item is relevant or not.
+\end{description}
+
+\verb|GenericRecommenderIRStatsEvaluator|
+\subsection{Example data set}
+\label{sec:exampledataset}
+
+The example data set is a small set of user preferences. It has constructect properties:
+\begin{itemize}
+\item Items 108, 109 und 111 are similiar.
+\item User 9 likes the items 111, 109 
+
+\end{itemize}
 \section{Similaritity}
 \label{sec:similarity}
 
@@ -20,7 +61,22 @@
 
 \subsection{Apache Spark}
 \label{sec:spark}
-\verb|spark-rowsimilarity| is a script that comes with spark. It takes as input a text file representation of a matrix of sparse vectors. It finds similar rows. The input is in text-delimited form where there are three delimiters used. By default it reads (rowID<tab>columnID1:strength1<space>columnID2:strength2...) The job only supports LLR similarity.Since this job only supports LLR similarity,p
+\verb|spark-rowsimilarity| is a script that comes with spark. It takes as input a text file representation of a matrix of sparse vectors. It finds similar rows. The input is in text-delimited form where there are three delimiters used. By default it reads (rowID<tab>columnID1:strength1<space>columnID2:strength2...) The job only supports LLR similarity. This job only supports LLR similarity.
+The input has the following format:
+\begin{verbatim}
+1	1
+2	2
+3	3 
+\end{verbatim}
 
+\section{Case Study: artoffer.ch}
+\label{sec:artoffer}
+
+The following action are used as indicators
+\begin{itemize}
+\item When a user visits the page of a item. (boolean)
+\item When a user likes an item.
+\item Tags
+\end{itemize}
 
 \end{document}
