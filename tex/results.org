@@ -1,0 +1,4 @@
+| Method        | Similarity         | indicators | precisionat |             Precision |               Recall |
+|---------------+--------------------+------------+-------------+-----------------------+----------------------|
+| itembased     | Pearsoncorrelation | Ratings    |          10 | 0.0028380634390651103 | 0.003148766462622891 |
+| search eninge | Pearson            | Ratings    |             |                       |                      |
