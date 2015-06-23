@@ -12,10 +12,18 @@
 Recommender engines are services that recommend articles (items) to users based on their past actions. They attempt to infer taste and preferences and identify unknown items that are of interest.
 E-commerce sites that deploy a recommender engine can have a increase in sales of 8 - 13 percent \footnote{http://www.practicalecommerce.com/articles/1942-10-Questions-on-Product-Recommendations}.
 
+There are serveral ways to design and build a recommender eninge \cite{Dunning}.
+
+\begin{itemize}
+\item Design a custom recommender engine. That approach requires a team of highly trained engineer and data scientist.
+\item Use products that offer drag-and-drop approaches. Some of these product try to automaticaly select the right algorithms. This recommender engines aren't very effective and a most of the effort required is put into getting the data into the right format.
+\item Use the service of a high-end machine-learning consultancy. These companies achieve effective results by trying a huge collection of algorithms at each problem and selecting the algoritm that gives the best result.
+\end{itemize}
+
+In this article we use a simplified approach to the recommender problem described in \cite{Dunning}. The goal of the apporach presented in this article is to provide a simple solutions that gives the user practical recommendation. There are academic approaches that produce recommendation with a smaller error but these require complex mathematical models. The goal of the apporach presented in this article is to provide a simplified, general solution for the recommender problem. In contrast to an academic approach it is easear to extend the recommender engine to a multimodel recommender.
+
 \section{Baseline Algorithm}
 \label{sec:baselinealgorithm}
-
-
 
 \section{Precision/Recall (Evaluation)}
 \label{sec:evaluation}
@@ -40,7 +48,18 @@ The evaluation process has the following paramters:
 \item[Relevance] Determines if an item is relevant or not.
 \end{description}
 
-\verb|GenericRecommenderIRStatsEvaluator|
+\section{Multimodalrecommender}
+\label{sec:multimodalrecommender}
+
+The recommender has the follwowing parameters:
+\begin{itemize}
+\item The number of ratings or tags that are used for the query.
+\end{itemize}
+
+\section{Results}
+\label{sec:results}
+
+
 \subsection{Example data set}
 \label{sec:exampledataset}
 
@@ -50,6 +69,27 @@ The example data set is a small set of user preferences. It has constructect pro
 \item User 9 likes the items 111, 109 
 
 \end{itemize}
+
+\section{Dataset}
+\label{sec:dataset}
+
+\subsection{Movielens}
+\label{sec:movielens}
+
+The MovieLens dataset describes 5-star rating and free-text tagging activity from MovieLens, a movie recommendation service. It contains 100023 ratings and 2488 tag applications across 8570 movies. These data were created by 706 users 
+
+All selected users had rated at least 20 movies.
+All ratings are contained in the file ratings.csv. Each line of this file after the header row represents one rating of one movie by one user, and has the following format:
+
+\begin{verbatim}
+userId,movieId,rating,timestamp.
+\end{verbatim}
+
+All tags are contained in the file $tags.csv$. Each line of this file after the header row represents one tag applied to one movie by one user, and has the following format:
+\begin{verbatim}
+userId,movieId,tag,timestamp
+\end{verbatim}
+
 \section{Similaritity}
 \label{sec:similarity}
 
@@ -78,5 +118,6 @@ The following action are used as indicators
 \item When a user likes an item.
 \item Tags
 \end{itemize}
-
+\bibliographystyle{plain}
+\bibliography{a}
 \end{document}
