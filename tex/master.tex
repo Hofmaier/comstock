@@ -12,7 +12,7 @@
 Recommender engines are services that recommend articles (items) to users based on their past actions. They attempt to infer taste and preferences and identify unknown items that are of interest.
 E-commerce sites that deploy a recommender engine can have a increase in sales of 8 - 13 percent \footnote{http://www.practicalecommerce.com/articles/1942-10-Questions-on-Product-Recommendations}.
 
-There are serveral ways to design and build a recommender eninge \cite{Dunning}.
+There are serveral ways to design and build a recommender eninge \cite{Dunning14}.
 
 \begin{itemize}
 \item Design a custom recommender engine. That approach requires a team of highly trained engineer and data scientist.
@@ -20,7 +20,28 @@ There are serveral ways to design and build a recommender eninge \cite{Dunning}.
 \item Use the service of a high-end machine-learning consultancy. These companies achieve effective results by trying a huge collection of algorithms at each problem and selecting the algoritm that gives the best result.
 \end{itemize}
 
-In this article we use a simplified approach to the recommender problem described in \cite{Dunning}. The goal of the apporach presented in this article is to provide a simple solutions that gives the user practical recommendation. There are academic approaches that produce recommendation with a smaller error but these require complex mathematical models. The goal of the apporach presented in this article is to provide a simplified, general solution for the recommender problem. In contrast to an academic approach it is easear to extend the recommender engine to a multimodel recommender.
+There are several problem and challenges in building a recommender engine:
+\begin{itemize}
+\item Many algorithms relies on user ratings. Ratings come from a subset of users. Only user who like to rate will rate items. 
+\end{itemize}
+
+In this article we use a simplified approach to the recommender problem described in \cite{Dunning14}. The goal of the apporach presented in this article is to provide a simple solutions that gives the user practical recommendation. There are academic approaches that produce recommendation with a smaller error but these require complex mathematical models. The goal of the apporach presented in this article is to provide a simplified, general solution for the recommender problem. In contrast to an academic approach it is easear to extend the recommender engine to a multimodel recommender.
+
+The recommender described in this article is divided in two parts.
+\begin{itemize}
+\item Computation of simililarity and the update of the text search engine is done offline, ahead of time.
+\item Recommendations are generated instantly by quering the text search eninge using rescents actions of the user.
+\end{itemize}
+
+\section{Co-occurence based recommender}
+\label{sec:cooccurence}
+
+In order to make recommendations, the recommenders uses items in recent user history as a query to find all items that are similar. Similar items have the items from the user history stored as indicator.s
+
+\subsection{Log-likelihood similarity}
+\label{sec:llr}
+
+The co-occurence based recommender uses the user history in order to make recommendations. The user history doesnt contains explicit preference values. Explicit user preferences are ratings of a user for an item. The user history only contains interactions of users and items. The log-likelihood similiarity is based on the number of users (or tags) in common between two items. According to \cite{Dunning93} the log-likelihood similiarity is suitable for data that only captures the interaction and no preference between users and items. 
 
 \section{Baseline Algorithm}
 \label{sec:baselinealgorithm}
