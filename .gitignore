@@ -109,3 +109,9 @@ sympy-plots-for-*.tex/
 *.xdy
 *.tex~
 *.org~
+
+solr/collection1/data/
+solr/collection1/conf/velocity/
+solr/collection1/conf/xslt/
+solr/collection1/conf/lang/
+solr/collection1/conf/clustering
