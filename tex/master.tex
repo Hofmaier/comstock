@@ -31,6 +31,7 @@ The recommender described in this article is divided in two parts.
 \begin{itemize}
 \item Computation of simililarity and the update of the text search engine is done offline, ahead of time.
 \item Recommendations are generated instantly by quering the text search eninge using rescents actions of the user.
+
 \end{itemize}
 
 \section{Co-occurence based recommender}
@@ -38,10 +39,62 @@ The recommender described in this article is divided in two parts.
 
 In order to make recommendations, the recommenders uses items in recent user history as a query to find all items that are similar. Similar items have the items from the user history stored as indicator.s
 
+The described design has the following benefits
+\begin{itemize}
+\item Exploit existing search engine technology.
+\item The search engine can be used for conventional search as well.
+\item Users can use search engine to search for metadata.
+\item Recommender engine can be extended with additional indicators.
+\end{itemize}
+
 \subsection{Log-likelihood similarity}
 \label{sec:llr}
 
-The co-occurence based recommender uses the user history in order to make recommendations. The user history doesnt contains explicit preference values. Explicit user preferences are ratings of a user for an item. The user history only contains interactions of users and items. The log-likelihood similiarity is based on the number of users (or tags) in common between two items. According to \cite{Dunning93} the log-likelihood similiarity is suitable for data that only captures the interaction and no preference between users and items. 
+Co-occurence in data science describes the circumstance that two items are similar when the same users interact (like, purchase, etc) interact with them.
+
+The co-occurence based recommender uses the user history in order to make recommendations. The user history doesnt contains explicit preference values. Explicit user preferences are ratings of a user for an item. The user history only contains interactions of users and items. The log-likelihood similiarity is based on the number of users (or tags) in common between two items. According to \cite{Dunning93} the log-likelihood similiarity is suitable for data that only captures the interaction and no preference between users and items. A property of log likelihood is that anomalous co-occurences have a higher similiarity than items that occur in every user history. For example if the movies Titanic and Terminator are liked by most users. They have a high co-occurence but a low log-likelihood similarity.
+
+\section{Dataset}
+\label{sec:dataset}
+
+This dataset used in this project describes rating and free-text tagging activity from MovieLens, a movie recommendation service \cite{movielensdata}.
+MovieLens data sets were collected by the GroupLens Research Project at the University of Minnesota.
+ 
+This data set consists of:
+\begin{itemize}
+\item 100,000 ratings (1-5) from 943 users on 1682 movies. 
+\item Each user has rated at least 20 movies. 
+\end{itemize}
+
+The data was collected through the MovieLens web site (movielens.umn.edu) during the seven-month period from September 19th, 
+1997 through April 22nd, 1998.
+
+All selected users had rated at least 20 movies.
+All ratings are contained in the file ratings.csv. Each line of this file after the header row represents one rating of one movie by one user, and has the following format:
+
+\begin{verbatim}
+userId,movieId,rating,timestamp.
+\end{verbatim}
+
+All tags are contained in the file $tags.csv$. Each line of this file after the header row represents one tag applied to one movie by one user, and has the following format:
+\begin{verbatim}
+userId,movieId,tag,timestamp
+\end{verbatim}
+
+\section{Apache Solr}
+\label{sec:solr}
+
+Solr is a search engine that is optimized to search large volumes of text-centric data and return results sorted by relevance. 
+
+A reason why we deploy a search engine is that the application is read-dominant. The recommender will query the data far more often than it will create new documents or update the indicators. Solr is optimized to for executing queries as opposed to storing data.
+
+Solr stores the documents in a flat structure.
+
+Solr return documents sorted in descending order by a score that indicates the strength of the match of the document to the query. In a relational database a row either mathces a query or it does not.
+
+The reason why we deploy a search engine in order to make recommendations is that Solr scores documents based on the presence of query terms in the document similar to a recommendations engine based on the presence of indicator.
+
+Solr is able to parse text streams. It extract the structure and make it searchable.
 
 \section{Baseline Algorithm}
 \label{sec:baselinealgorithm}
@@ -99,17 +152,6 @@ The example data set is a small set of user preferences. It has constructect pro
 
 The MovieLens dataset describes 5-star rating and free-text tagging activity from MovieLens, a movie recommendation service. It contains 100023 ratings and 2488 tag applications across 8570 movies. These data were created by 706 users 
 
-All selected users had rated at least 20 movies.
-All ratings are contained in the file ratings.csv. Each line of this file after the header row represents one rating of one movie by one user, and has the following format:
-
-\begin{verbatim}
-userId,movieId,rating,timestamp.
-\end{verbatim}
-
-All tags are contained in the file $tags.csv$. Each line of this file after the header row represents one tag applied to one movie by one user, and has the following format:
-\begin{verbatim}
-userId,movieId,tag,timestamp
-\end{verbatim}
 
 \section{Similaritity}
 \label{sec:similarity}
