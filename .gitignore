@@ -115,3 +115,5 @@ solr/collection1/conf/velocity/
 solr/collection1/conf/xslt/
 solr/collection1/conf/lang/
 solr/collection1/conf/clustering
+
+updatesolr/target

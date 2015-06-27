@@ -1,0 +1,2 @@
+Downloads/solr-4.7.2/example/solr/collection1/conf/schema.xml
+hier ist das schema fuer die collection gespeichert.
