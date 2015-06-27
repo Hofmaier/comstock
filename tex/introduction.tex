@@ -1,0 +1,52 @@
+\section{Introduction}
+\label{sec:intro}
+
+\subsection{Recommender engines}
+\label{sec:recommenderengines}
+
+Recommender engines are services that recommend articles (items) to users based on their past actions. They attempt to infer taste and preferences. A recommender engine presents the user previously unknown items that are of interest for the user. 
+
+For example, if a user has purchased the movies "Terminator 2" and "Transformers" the recommender engine will present the activ user a list of other similar movies.
+
+E-commerce sites that deploy a recommender engine can have a increase in sales of 8 - 13 percent \footnote{http://www.practicalecommerce.com/articles/1942-10-Questions-on-Product-Recommendations}.
+
+\subsection{Strategies}
+\label{sec:strategies}
+
+There are different strategies to discover to recommend a user new items \cite{Owen}.
+\begin{description}
+\item[Collaborative Filtering] This strategy is only based on the preference or taste information from many users. For example, a recommender engine based on collaborativ filtering uses the ratings of all users to compute the similarity between all items. 
+
+It requires no knowledge of the properties of the items. Recommender engines based on collaborative filtering do not care what the items are and what attributes they have. This can be an advantage because the same technique can be applied to different types of items. 
+\item[Content based filterting] Content-based recommendation techniques use attributes of the items in order to predict preferences of users. For example, if a recommender recommends movies of a Steven Spielberg because the active user likes other movies of Steven Spielberg it uses content based filtering.
+\end{description}
+
+This article describes a recommender engine based on collaborative filtering. The recommendations are only based on user input. The recommender engine is designed to mixe any number of user actions (clicks, purchases, likes, tags). The ratings of a user and the applied tags will be used to compute recommendations.
+
+\subsection{Challenges and Problems}
+
+There are serveral ways to design and build a recommender eninge \cite{Dunning14}.
+
+\begin{itemize}
+\item Design a custom recommender engine. That approach requires a team of highly trained engineer and data scientist.
+\item Use products that offer drag-and-drop approaches. Some of these product try to automaticaly select the right algorithms. This recommender engines aren't very effective and a most of the effort required is put into getting the data into the right format.
+\item Use the service of a high-end machine-learning consultancy. These companies achieve effective results by trying a huge collection of algorithms at each problem and selecting the algoritm that gives the best result.
+\end{itemize}
+
+There are several problem and challenges in building a recommender engine:
+\begin{itemize}
+\item Many algorithms relies on user ratings. Ratings come from a subset of users. Only user who like to rate will rate items. 
+\end{itemize}
+
+In this article we use a simplified approach to the recommender problem described in \cite{Dunning14}. The goal of the apporach presented in this article is to provide a simple solutions that gives the user practical recommendation. There are academic approaches that produce recommendation with a smaller error but these require complex mathematical models. The goal of the apporach presented in this article is to provide a simplified, general solution for the recommender problem. In contrast to an academic approach it is easiear to extend the recommender engine to a multimodel recommender.
+
+The recommender described in this article is divided in two parts.
+\begin{itemize}
+\item Computation of simililarity and the update of the text search engine is done offline, ahead of time.
+\item Recommendations are generated instantly by quering the text search eninge using rescents actions of the user.
+
+\end{itemize}
+
+\subsection{Overview}
+
+The next section will describe the design of the co-occurence based recommender. 

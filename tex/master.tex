@@ -1,40 +1,29 @@
 \documentclass[twoside,a4paper]{article}
 
 \usepackage{graphicx}
+\usepackage{url}
 
+\title{ Multimodal recommender engine based on Apache Mahout and Apache Solr }
+\author{
+	Author \\
+	Lukas Hofmaier \\
+	lukas.hofmaier@hsr.ch
+ 	\and
+	Supervisors \\
+        Hansj''org Huser
+}
+\date{
+	\textsc{University of Applied Sciences Rapperswil}\\
+	Project Thesis,
+	\today
+}
 \begin{document}
-\section{Introduction}
-\label{sec:intro}
+\maketitle
+\tableofcontents
 
-\subsection{Recommender engines}
-\label{sec:recommenderengines}
+\input{introduction}
 
-Recommender engines are services that recommend articles (items) to users based on their past actions. They attempt to infer taste and preferences and identify unknown items that are of interest.
-E-commerce sites that deploy a recommender engine can have a increase in sales of 8 - 13 percent \footnote{http://www.practicalecommerce.com/articles/1942-10-Questions-on-Product-Recommendations}.
-
-There are serveral ways to design and build a recommender eninge \cite{Dunning14}.
-
-\begin{itemize}
-\item Design a custom recommender engine. That approach requires a team of highly trained engineer and data scientist.
-\item Use products that offer drag-and-drop approaches. Some of these product try to automaticaly select the right algorithms. This recommender engines aren't very effective and a most of the effort required is put into getting the data into the right format.
-\item Use the service of a high-end machine-learning consultancy. These companies achieve effective results by trying a huge collection of algorithms at each problem and selecting the algoritm that gives the best result.
-\end{itemize}
-
-There are several problem and challenges in building a recommender engine:
-\begin{itemize}
-\item Many algorithms relies on user ratings. Ratings come from a subset of users. Only user who like to rate will rate items. 
-\end{itemize}
-
-In this article we use a simplified approach to the recommender problem described in \cite{Dunning14}. The goal of the apporach presented in this article is to provide a simple solutions that gives the user practical recommendation. There are academic approaches that produce recommendation with a smaller error but these require complex mathematical models. The goal of the apporach presented in this article is to provide a simplified, general solution for the recommender problem. In contrast to an academic approach it is easear to extend the recommender engine to a multimodel recommender.
-
-The recommender described in this article is divided in two parts.
-\begin{itemize}
-\item Computation of simililarity and the update of the text search engine is done offline, ahead of time.
-\item Recommendations are generated instantly by quering the text search eninge using rescents actions of the user.
-
-\end{itemize}
-
-\section{Co-occurence based recommender}
+\section{Co-occurence based multimodal recommender}
 \label{sec:cooccurence}
 
 In order to make recommendations, the recommenders uses items in recent user history as a query to find all items that are similar. Similar items have the items from the user history stored as indicator.s
@@ -84,7 +73,7 @@ userId,movieId,tag,timestamp
 \section{Apache Solr}
 \label{sec:solr}
 
-Solr is a search engine that is optimized to search large volumes of text-centric data and return results sorted by relevance. 
+Solr is a search engine that is optimized to search large volumes of text-centric data and return results sorted by relevance. It is built on Apache Lucene, an information retrieval library.
 
 A reason why we deploy a search engine is that the application is read-dominant. The recommender will query the data far more often than it will create new documents or update the indicators. Solr is optimized to for executing queries as opposed to storing data.
 
@@ -145,7 +134,6 @@ The example data set is a small set of user preferences. It has constructect pro
 \end{itemize}
 
 \section{Dataset}
-\label{sec:dataset}
 
 \subsection{Movielens}
 \label{sec:movielens}
