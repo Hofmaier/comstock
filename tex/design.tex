@@ -1,0 +1,182 @@
+\section{Co-occurence based multimodal recommender}
+\label{sec:design}
+
+The recommender design we discuss will use the histories of users behavior to compute the similarity between all items. We use co-occurence to compute the similarity of two items. The recommenders looks up items that appear in the recent user history and presents the user a list with similar items.
+
+All movies are stored as documents in a database (we use Apache Solr). The documents contain metainformation (e.g. title, tags, genre) about the items in fields. The fields are indexed by a search engine and made searchable.
+
+In addidion the document has indicator fields. Indicator fields contain id's of that are found to be worth recommending in the co-occurence analysis.
+
+The recommender discussed in this article has to parts.
+\begin{description}
+\item[Analysing User Input (offline)] In this part the user action are analised in order to compute the similarities of items. The similiarities are stored as indicators.
+\item[Generate personalized recommendations (online)] A systems formats a list of recommended items.
+\end{description}
+We will first discuss the computation of similarities.
+
+
+The described design has the following benefits
+\begin{itemize}
+\item Exploit existing search engine technology.
+\item The search engine can be used for conventional search as well.
+\item Users can use search engine to search for metadata.
+\item Recommender engine can be extended with additional indicators.
+\end{itemize}
+
+\subsection{Input Data}
+\label{sec:inputdata}
+
+Many collaborative recommender engines use excplicit user ratings to train their model. Corresponding to \cite{Dunning14} the best choice of input data is history of what a user actually does on a website. The recommender discussed in this article uses two user action actions
+
+\begin{itemize}
+\item The user expressed somehow (click, like-button) that he likes the item
+\item Every item is associated with tags. User are able to tag items.
+\end{itemize}
+
+Listing \ref{lst:weblog} shows part of an example log file that capture user actions.
+
+\lstset{
+basicstyle=\ttfamily,
+columns=fullflexible,
+keepspaces=true,
+captionpos=b
+}
+\begin{lstlisting}[caption={User actions are stored in a web log.},label={lst:weblog}]
+userId,movieId,tag,timestamp,action
+23,103,980730408,,like
+26,104,980731766,,like
+40,1,animation,1306926135,tag
+40,1,fantasy,1306926130,tag
+40,47,dark,1306930201,tag
+35,102,980730769,,like
+\end{lstlisting}
+
+\begin{figure}
+\centering
+\begin{tikzpicture}[node distance=20mm,
+data/.style={
+rectangle,
+draw,
+thin,
+minimum height=3.5em
+},
+to/.style={->,>=stealth',shorten >=1pt,semithick,font=\footnotesize},
+]
+\node (web) [data] {Web server};
+\node (log) [data,below of = web, align=left] {User actions\\log file};
+\node (browser) [data,left of=web,node distance=50mm] {Webbrowser};
+\draw[to] (web) -- (log);
+\draw[to] (browser) -- node[midway,above] {user actions} (web);
+\end{tikzpicture}
+\caption{The webserver capture user behavior in a log file.}
+\end{figure}
+
+The user history does not contain explicit preference values. Explicit user preferences are ratings of a user for an item. The user history only contains interactions of users and items. 
+
+\subsection{Log-likelihood similarity}
+\label{sec:llr}
+
+In order to compute the similarity between two items we use co-occurence or the log likelihood similarity.
+Co-occurence in the context of recommender systems describes the circumstance that two items are similar when the same users interact (like, purchase, etc) interact with them.
+
+The co-occurence based recommender uses the user behavior log in order to compute a similarity model. 
+
+\begin{figure}
+\centering
+\begin{tikzpicture}[node distance=40mm,
+data/.style={
+rectangle,
+draw,
+thin,
+minimum height=3.5em
+},
+to/.style={->,>=stealth',shorten >=1pt,semithick,font=\footnotesize},
+]
+\node (log) [data, align=left] {User actions\\log file};
+\node (spark) [data,right of=log,align=left] {Apache Spark\\LLR job};
+\node (model) [data,right of=spark,align=left] {Similarity\\model};
+\draw[to] (log) -- (spark);
+\draw[to] (spark) -- (model);
+\end{tikzpicture}
+\caption{The {\ttfamily spark-itemsimilarity} job of Apache Spark computes the LLR similarity based on the user behavior log file.}
+\end{figure}
+
+ The log-likelihood similiarity is based on the number of users (or tags) in common between two items. According to \cite{Dunning93} the log-likelihood similiarity is suitable for data that only captures the interaction and no preference between users and items. 
+
+Compared to the Jaccard coefficient \cite{Hartung} the log-likelihood-based similarity computes higher similarites for anomalous co-occurences than for items that occur in every user history. The log-likelihood similarity  is the probability that two users share the same items due to chance. For a detailed explanation of the math involved see \cite{Dunning93}. 
+
+We describe the log-likelihood-based similarity with a small example dataset. Suppose we analyse the following web log of user purchases represented as a table (see appendix of raw web log).
+
+\begin{table}
+\begin{center}
+\begin{tabular}{rllll}
+ & 101 & 102 & 103 & 104\\
+1 & x & x & x & \\
+2 & x &  & x & x\\
+3 & x & x & x & \\
+4 &  & x & x & x\\
+5 & x & x & x & x\\
+\end{tabular}
+\end{center}
+\caption{Example dataset. The columns represent the user interaction with an item. Items are named 1 - 4 and users 101 - 104}
+\label{tbl:llr}
+\end{table}
+
+Table \ref{tbl:llr} shows the purchases of four users for five items. The items are represented with ids 1-4 and the users with ids 101 - 104.
+In the example dataset of table \ref{tbl:llr} the items 1 and 2 are similar because they purchased the same items. 
+
+In order to get the similarity between all items we compute the log-likelihood ratio strength for every item pair. This will produce a $5 \times 5$ indicator matrix. Table \ref{tab:indicatormatrix} shows the indicator matrix for the sample dataset from table \ref{tbl:llr}
+
+\begin{table}
+  \centering
+\begin{center}
+\begin{tabular}{rrrrrr}
+ & 1 & 2 & 3 & 4 & 5\\
+1 &  & 0.40 & 0.81 & 0.63 & 0\\
+2 & 0.40 &  & 0.40 & 0.63 & 0\\
+3 & 0.81 & 0.40 &  & 0.63 & 0\\
+4 & 0.63 & 0.63 & 0.63 &  & 0\\
+5 & 0 & 0 & 0 & 0 & \\
+ &  &  &  &  & \\
+\end{tabular}
+\end{center}
+  \caption{Indicator matrix for item purchases}
+  \label{tab:indicatormatrix}
+\end{table}
+
+
+Allthoug item 5 share all users with item 1 and 3, the log-likelihood ratio is 0. Every user purchased item 5. It would not be interesting to recommend item 5 to a user because it is to obious.
+
+Apache Mahout provides an implemenation of log-likelihood similarity with the class \verb|LogLikelihoodSimilarity|. Calculation the the log-likelihood similarity is computationally expensive. In order to compute the co-occurence at the scale of big data Apache Spark provides the \verb|spark-itemsimilarity| job. 
+
+Apache Spark is a cluster computer framework. It allows user programs to load data into a cluster's memory. It is well suited to machine learning algorithms \cite{Karau}.
+
+Once we have deployed Apache Spark the \verb|spark-itemsimilarity| job can create a similarity model. The input text file has to be in the following format:
+\begin{verbatim}
+userID, action, itemID
+\end{verbatim}
+\verb|spark-itemsimilarity| will output an indicator matrix created by comparing every user's interactions with every other user. The job will output the standard text version of a distributed row matrix.
+\begin{verbatim}
+itemID1<tab>itemID2:similarityvalue<space>itemID3:similarityvalue
+\end{verbatim}
+
+\subsection{Retrieve recommendation with Apache Solr}
+\label{sec:solr}
+
+Before we describe why we use a the search engine Apache Solr to deploy a recommendation engine, we give a short introduction to Apache Solr.
+
+Apache Solr is a search engine that is optimized to search large volumes of text-centric data and return results sorted by relevance. It is built on Apache Lucene, an information retrieval library \cite{grainger}.
+
+A reason why we deploy a search engine is that the application is read-dominant. The recommender will query the data far more often than it will create new documents or update the indicators. Solr is optimized to for executing queries as opposed to storing data.
+
+Solr stores the documents in a flat structure.
+
+Solr return documents sorted in descending order by a score that indicates the strength of the match of the document to the query. In a relational database a row either mathces a query or it does not.
+
+The reason why we deploy a search engine in order to make recommendations is that Solr scores documents based on the presence of query terms in the document similar to a recommendations engine based on the presence of indicator.
+
+Solr is able to parse text streams. It extract the structure and make it searchable.
+
+Solr is used in the offline and the online part of the recommendation engine.
+The items and their corresponding similarity indicators from the Apache Spark job are stored with Apache Solr. 
+
