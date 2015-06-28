@@ -42,13 +42,18 @@ There are several problem and challenges in building a recommender engine:
 
 In this article we use a simplified approach to the recommender problem described in \cite{Dunning14}. The goal of the apporach presented in this article is to provide a simple solutions that gives the user practical recommendation. There are academic approaches that produce recommendation with a smaller error but these require complex mathematical models. The goal of the apporach presented in this article is to provide a simplified, general solution for the recommender problem. In contrast to an academic approach it is easiear to extend the recommender engine to a multimodel recommender.
 
+
+Many existing collaborativ filtering type recommenders use one user activity to model preference \cite{ferrel}. But a variety of user activities can be use in combination to improve the quality of recommendations. Section \ref{sec:design} will describe how different type of interactions is used as input data to train the recommender.
+
+
 The recommender described in this article is divided in two parts.
 \begin{itemize}
 \item Computation of simililarity and the update of the text search engine is done offline, ahead of time.
 \item Recommendations are generated instantly by quering the text search eninge using rescents actions of the user.
 
+
 \end{itemize}
 
 \subsection{Overview}
 
-The next section will describe the design of the co-occurence based recommender. 
+Section \ref{sec:design} will describe the design of the co-occurence based recommender. The similiarity metric log-likelihood ratio is described and a short introduction for the search engine Apache Solr is given.
