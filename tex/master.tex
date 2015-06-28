@@ -24,137 +24,22 @@
 \maketitle
 \tableofcontents
 
+\begin{abstract}
+The behavior of users provide data to predict the relevance of recommendations to individual users. The recommender engine discussed in this article has a two part design.
+Co-occurence can be computed at scale with Apache Mahout's \verb|spark-itemsimilarity| job.
+Recommendations are generated query results of the search engine Apache Solr.
+\end{abstract}
+
 \input{introduction}
 
-\section{Co-occurence based multimodal recommender}
-\label{sec:cooccurence}
-
-The recommender design we discuss will use the histories of users behavior to compute the similarity between all items. We use co-occurence to compute the similarity of two items. The recommenders looks up items that appear in the recent user history and presents the user a list with similar items.
-
-All movies are stored as documents in a database (we use Apache Solr). The documents contain metainformation (e.g. title, tags, genre) about the items in fields. The fields are indexed by a search engine and made searchable.
-
-In addidion the document has indicator fields. Indicator fields contain id's of that are found to be worth recommending in the co-occurence analysis.
-
-\tikzset{
- mynode/.style={rectangle,rounded corners,draw=black, top color=white, bottom color=yellow!50,very thick, inner sep=1em, minimum size=3em, text centered}
-}
-\tikzstyle{format} = [draw, thin, fill=blue!20]
-\tikzstyle{medium} = [ellipse, draw, thin, fill=green!20, minimum height=2.5em]
-\begin{figure}
-\centering
-\begin{tikzpicture}[node distance=20mm,
-data/.style={
-rectangle,
-draw,
-thin,
-fill=blue!20
-}]
-\node (recommender) [data] {Recommender};
-\node (topn) [data,right of = recommender, node distance=50mm] {Recommendations};
-\node (history) [data,below of = recommender] {Behavior log File};
-\node (db) [data,above of= recommender] {Search Engine};
-\end{tikzpicture}
-\caption{Recommender engine}
-\end{figure}
-
-The described design has the following benefits
-\begin{itemize}
-\item Exploit existing search engine technology.
-\item The search engine can be used for conventional search as well.
-\item Users can use search engine to search for metadata.
-\item Recommender engine can be extended with additional indicators.
-\end{itemize}
-
-\subsection{Log-likelihood similarity}
-\label{sec:llr}
-
-In order to compute the similarity between two items we use co-occurence or the log likelihood similarity.
-Co-occurence in the context of recommender systems describes the circumstance that two items are similar when the same users interact (like, purchase, etc) interact with them.
-
-The co-occurence based recommender uses the user history in order to make recommendations. The user history doesnt contains explicit preference values. Explicit user preferences are ratings of a user for an item. The user history only contains interactions of users and items. 
-
-We can use various user actions to compute the similarity of two items. For example:
-\begin{itemize}
-\item Purchase action
-\item Click action
-\item The user might click on a like button for evrey item
-\end{itemize}
-
- The log-likelihood similiarity is based on the number of users (or tags) in common between two items. According to \cite{Dunning93} the log-likelihood similiarity is suitable for data that only captures the interaction and no preference between users and items. 
-
-Compared to the Jaccard coefficient \cite{Hartung} the log-likelihood-based similarity computes higher similarites for anomalous co-occurences than for items that occur in every user history. The log-likelihood similarity  is the probability that two users share the same items due to chance. For a detailed explanation of the math involved see \cite{Dunning93}. 
-
-We describe the log-likelihood-based similarity with a small example dataset. Suppose we analyse the following web log of user purchases represented as a table (see appendix of raw web log).
-
-\begin{table}
-\begin{center}
-\begin{tabular}{rllll}
- & 101 & 102 & 103 & 104\\
-1 & x & x & x & \\
-2 & x &  & x & x\\
-3 & x & x & x & \\
-4 &  & x & x & x\\
-5 & x & x & x & x\\
-\end{tabular}
-\end{center}
-\caption{Example dataset. The columns represent the user interaction with an item. Items are named 1 - 4 and users 101 - 104}
-\label{tbl:llr}
-\end{table}
-
-Table \ref{tbl:llr} shows the purchases of four users for five items. The items are represented with ids 1-4 and the users with ids 101 - 104.
-In the example dataset of table \ref{tbl:llr} the items 1 and 2 are similar because they purchased the same items. 
-
-In order to get the similarity between all items we compute the log-likelihood ratio strength for every item pair. This will produce a $5 \times 5$ indicator matrix. Table \ref{tab:indicatormatrix} shows the indicator matrix for the sample dataset from table \ref{tbl:llr}
-
-\begin{table}
-  \centering
-\begin{center}
-\begin{tabular}{rrrrrr}
- & 1 & 2 & 3 & 4 & 5\\
-1 &  & 0.40 & 0.81 & 0.63 & 0\\
-2 & 0.40 &  & 0.40 & 0.63 & 0\\
-3 & 0.81 & 0.40 &  & 0.63 & 0\\
-4 & 0.63 & 0.63 & 0.63 &  & 0\\
-5 & 0 & 0 & 0 & 0 & \\
- &  &  &  &  & \\
-\end{tabular}
-\end{center}
-  \caption{Indicator matrix for item purchases}
-  \label{tab:indicatormatrix}
-\end{table}
-
-
-Allthoug item 5 share all users with item 1 and 3, the log-likelihood ratio is 0. Every user purchased item 5. It would not be interesting to recommend item 5 to a user because it is to obious.
-\subsection{Apache Solr}
-\label{sec:solr}
-
-Solr is a search engine that is optimized to search large volumes of text-centric data and return results sorted by relevance. It is built on Apache Lucene, an information retrieval library.
-
-A reason why we deploy a search engine is that the application is read-dominant. The recommender will query the data far more often than it will create new documents or update the indicators. Solr is optimized to for executing queries as opposed to storing data.
-
-Solr stores the documents in a flat structure.
-
-Solr return documents sorted in descending order by a score that indicates the strength of the match of the document to the query. In a relational database a row either mathces a query or it does not.
-
-The reason why we deploy a search engine in order to make recommendations is that Solr scores documents based on the presence of query terms in the document similar to a recommendations engine based on the presence of indicator.
-
-Solr is able to parse text streams. It extract the structure and make it searchable.
-
-\subsection{Apache Spark}
-\label{sec:spark}
-\verb|spark-rowsimilarity| is a script that comes with spark. It takes as input a text file representation of a matrix of sparse vectors. It finds similar rows. The input is in text-delimited form where there are three delimiters used. By default it reads (rowID<tab>columnID1:strength1<space>columnID2:strength2...) The job only supports LLR similarity. This job only supports LLR similarity.
-The input has the following format:
-\begin{verbatim}
-1	1
-2	2
-3	3 
-\end{verbatim}
-
+\input{design}
 
 \section{Evaluation}
 \label{sec:evaluation}
 Recommenders answer the question "What are the best recommendations for a user?". If we want to evaluate a recommender, we have to define, what's a "good" recommendation.
 Some recommender predict the preferences of a user. One possibility to evaluate a recommender is to calculate the difference between the estimated preference and the actual preference.
+
+Evaluation is important to decide if the quality of the recommender engine archives the desired results. Evaluation allows us to adjust the parameters in order to get better results.
 
 Those actual prefences don't exist. Nobody knows how a user likes some new item in the future.
 But we can simulate the prefencences of the future by setting aside a small part of the real data set as test data. These preferences aren't present in the training data set. Instead the recommender predicts the preferences for the missing test data set and the estimates are compared to the actual values.
@@ -243,6 +128,13 @@ The example data set is a small set of user preferences. It has constructect pro
 \label{sec:similarity}
 
 A large amount of work was required to convert formats between the user logs the Apache Mahout and Apache Solr.
+
+The system may be improved throug 
+\begin{description}
+\item[Dithering] 
+\item[Anti-flood] 
+\end{description}
+dithering.
 
 \section{Infrastructur}
 \label{sec:infrastructur}
