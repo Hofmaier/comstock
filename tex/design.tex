@@ -103,7 +103,7 @@ to/.style={->,>=stealth',shorten >=1pt,semithick,font=\footnotesize},
 
  The log-likelihood similiarity is based on the number of users (or tags) in common between two items. According to \cite{Dunning93} the log-likelihood similiarity is suitable for data that only captures the interaction and no preference between users and items. 
 
-Compared to the Jaccard coefficient \cite{Hartung} the log-likelihood-based similarity computes higher similarites for anomalous co-occurences than for items that occur in every user history. The log-likelihood similarity  is the probability that two users share the same items due to chance. For a detailed explanation of the math involved see \cite{Dunning93}. 
+Compared to the Jaccard coefficient \cite{Hartung} the log-likelihood-based similarity computes higher similarites for anomalous co-occurences than for items that occur in every user history. The log-likelihood similarity  is the probability that two users share the same items due to chance. It finds important cooccurence and filters out the coinidental. For a detailed explanation of the math involved see \cite{Dunning93}. 
 
 We describe the log-likelihood-based similarity with a small example dataset. Suppose we analyse the following web log of user purchases represented as a table (see appendix of raw web log).
 
@@ -147,7 +147,7 @@ In order to get the similarity between all items we compute the log-likelihood r
 
 Allthoug item 5 share all users with item 1 and 3, the log-likelihood ratio is 0. Every user purchased item 5. It would not be interesting to recommend item 5 to a user because it is to obious.
 
-Apache Mahout provides an implemenation of log-likelihood similarity with the class \verb|LogLikelihoodSimilarity|. Calculation the the log-likelihood similarity is computationally expensive. In order to compute the co-occurence at the scale of big data Apache Spark provides the \verb|spark-itemsimilarity| job. 
+Apache Mahout provides an implemenation of log-likelihood similarity with the class \verb|LogLikelihoodSimilarity|. Calculation the the log-likelihood similarity is computationally expensive. In order to compute the co-occurence at the scale of big data Apache Spark provides the \verb|spark-itemsimilarity| job \cite{Schelter}. 
 
 Apache Spark is a cluster computer framework. It allows user programs to load data into a cluster's memory. It is well suited to machine learning algorithms \cite{Karau}.
 
@@ -165,17 +165,51 @@ itemID1<tab>itemID2:similarityvalue<space>itemID3:similarityvalue
 
 Before we describe why we use a the search engine Apache Solr to deploy a recommendation engine, we give a short introduction to Apache Solr.
 
-Apache Solr is a search engine that is optimized to search large volumes of text-centric data and return results sorted by relevance. It is built on Apache Lucene, an information retrieval library \cite{grainger}.
-
-A reason why we deploy a search engine is that the application is read-dominant. The recommender will query the data far more often than it will create new documents or update the indicators. Solr is optimized to for executing queries as opposed to storing data.
-
-Solr stores the documents in a flat structure.
-
-Solr return documents sorted in descending order by a score that indicates the strength of the match of the document to the query. In a relational database a row either mathces a query or it does not.
+Apache Solr is a search engine that is optimized to search large volumes of text-centric data and return results sorted by relevance. It is built on Apache Lucene, an information retrieval library \cite{grainger}. Solr stores the documents in a flat structure and we can search for terms in the documents.
+Solr returns documents sorted in descending order by a score that indicates the strength of the match of the document to the query. In a relational database a row either matches a query or it does not. That is the reason why a search engine is more suitable for our use case.
 
 The reason why we deploy a search engine in order to make recommendations is that Solr scores documents based on the presence of query terms in the document similar to a recommendations engine based on the presence of indicator.
 
-Solr is able to parse text streams. It extract the structure and make it searchable.
+\subsection{Connection a recommender and a search engine}
+\label{sec:relation}
+
+There are similarities between weighting of indicator scores and the mathematics that underlie text retrival engines
+
+Let's say we represent the recommendations for a user as a vector $r$. The elements of $r$ are floating point number which represent preferences for all items for a user. Most collaborative filtering type recommenders compute $r$ by multiplying the given preferences of a user $h_u$ with the indicator matrix $M$ for all items. In our example $M$ contains the similarity values of the log-likelihood cooccurence.
+
+\begin{equation}
+  \label{eq:cf}
+  r = h_u M
+\end{equation}
+
+Equations \ref{eq:cf} actually means to compare the user history $h_u$ to the rows of the indicator matrix $M$. This result in a vector $r$ containing a score that indicates the strength of the match of the item to the history $h_p$. The recommender ranks the items by the score and presents them to the user. These items form the recommendations.
+
+This is exactly what the ranked retrieval feature of a search eninge does.
+The user history $h_U$ is the query. The items are the documents. And the text of the fields contain similar items.
+
+In addition we can use TF-IDF \cite{Manning} weighting to mitigate popular items.
+
+This is why we deploy Solr to build a recommender.
+
+We store all items as documents in Solr. The documents contain the metadata like (title, genre, tags, etc). In addidtion we populate a filed for every indicator with the similar item ID's discovered with the coocuccence similartiy from section \ref{sec:llr}.
+
+\begin{lstlisting}[caption={Item metadata and similar items are stored in Solr.},label={lst:solrdoc}]
+{
+    "id": "1",
+    "title": ["Toy Story (1995)"],
+    "tags":"Pixar animation fantasy",
+    "likeindicator": "1688 1834 3893 4366 6281 33162 50872 53000 ",
+    "_version_": 1505056335358591000
+}
+\end{lstlisting}
+
+In order to build a recommender using a search engine we store the output of the co-occurence analysis in Solr. The search engine actually delivers the recommendations to our users.
+
+In order to produce recommendations we compose a Solr query from the user history. The user history is stored in the web log. The web server sends this query to Solr. Solr responds with a ranked result set. The web server then formats the response from Solr and sends a list of recommended items to the user.
+
+Another reason why we deploy a search engine is that the application is read-dominant. The recommender will query the data far more often than it will create new documents or update the indicators. Solr is optimized to for executing queries as opposed to storing data.
+
+
 
 Solr is used in the offline and the online part of the recommendation engine.
 The items and their corresponding similarity indicators from the Apache Spark job are stored with Apache Solr. 
