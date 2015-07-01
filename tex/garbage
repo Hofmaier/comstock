@@ -22,3 +22,5 @@
 \end{itemize}
 
 takes several types of interactions (e.g. clicks, purchases, tags). We will explain the metric with the interaction "like". The metrix
+
+Solr is able to parse text streams. It extract the structure and make it searchable.
