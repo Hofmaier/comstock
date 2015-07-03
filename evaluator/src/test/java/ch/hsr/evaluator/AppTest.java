@@ -1,4 +1,4 @@
-package ch.hsr.updatesolrdb;
+package ch.hsr.evaluator;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
