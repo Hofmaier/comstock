@@ -9,7 +9,6 @@ import org.apache.mahout.cf.taste.eval.RecommenderBuilder;
 import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
 import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
 import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
-import org.apache.mahout.cf.taste.impl.model.GenericItemPreferenceArray;
 import org.apache.mahout.cf.taste.impl.model.GenericUserPreferenceArray;
 import org.apache.mahout.cf.taste.impl.recommender.GenericItemBasedRecommender;
 import org.apache.mahout.cf.taste.impl.recommender.RandomRecommender;
@@ -34,7 +33,6 @@ public class Evaluator {
 		long userID = 111;
 		float threshold = 3.0f;
 		DataModel dataModel = filedataModel;
-		int nrOfretrievedItems = 5;
 		int nrOfRecommendedItems = 100;
 		
 		DataModel trainingDataModel = removeRelevantItemsFromDataModel(dataModel, userID, threshold);
@@ -47,9 +45,6 @@ public class Evaluator {
 		int nrRelevantItems = relevantItems.size();
 		log.info("nr of relevant items: " + nrRelevantItems);
 		log.info("nr of recommendations: " + recommendations.size());
-		for(RecommendedItem i : recommendations){
-			//log.info("relevant item: " + i.getItemID());
-		}
 		for(RecommendedItem i : recommendations){
 			log.info("item from recommendation: " + i.getItemID());
 			for(Preference pref : relevantItems){
@@ -138,8 +133,6 @@ public class Evaluator {
 		return new RecommenderBuilder() {
 			public Recommender buildRecommender(DataModel dataModel)
 					throws TasteException {
-				ItemSimilarity similarity = new PearsonCorrelationSimilarity(
-						dataModel);
 				return new RandomRecommender(dataModel);
 			}
 		};

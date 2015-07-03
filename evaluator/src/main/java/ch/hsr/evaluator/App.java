@@ -17,10 +17,10 @@ public class App
 {
     public static void main( String[] args )
     {
-    	String smallinput = "/home/lukas/comstock/data/d";
+    	//String smallinput = "/home/lukas/comstock/data/d";
     	String mlratings = "/home/lukas/Downloads/ml-latest-small/ratings.csv";
     	String input = mlratings;
-    	int precisionat = 30;
+    	int precisionat = 200;
     	double evaluationPercentage = 1.0;
     	double threshhold = 5.0;
     	try {
