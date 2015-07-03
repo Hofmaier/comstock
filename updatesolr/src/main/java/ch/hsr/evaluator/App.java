@@ -20,8 +20,9 @@ public class App
     	String smallinput = "/home/lukas/comstock/data/d";
     	String mlratings = "/home/lukas/Downloads/ml-latest-small/ratings.csv";
     	String input = mlratings;
-    	int precisionat = 10;
-    	double evaluationPercentage = 0.1;
+    	int precisionat = 30;
+    	double evaluationPercentage = 1.0;
+    	double threshhold = 5.0;
     	try {
 			DataModel dataModel = new FileDataModel(new File(input));
 			RecommenderIRStatsEvaluator evaluator = new GenericRecommenderIRStatsEvaluator();
@@ -29,24 +30,17 @@ public class App
 			Evaluator recommenderfactory = new Evaluator(); 
 			//recommenderfactory.recall(dataModel);
 			IRStatistics itemirstats = null;
+
+					
 			
 			itemirstats = evaluator.evaluate(recommenderfactory.itembased(), 
 					null, 
 					dataModel, 
 					null,
 					precisionat,
-					GenericRecommenderIRStatsEvaluator.CHOOSE_THRESHOLD, 
+					threshhold, 
 					evaluationPercentage);
 					
-			/*
-			itemirstats = evaluator.evaluate(recommenderfactory.svd(), 
-					null, 
-					dataModel, 
-					null,
-					precisionat,
-					GenericRecommenderIRStatsEvaluator.CHOOSE_THRESHOLD, 
-					evaluationPercentage);
-					*/
 			log.info(itemirstats.toString());
 		} catch (IOException e) {
 			e.printStackTrace();

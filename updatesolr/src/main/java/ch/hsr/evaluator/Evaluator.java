@@ -12,6 +12,7 @@ import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
 import org.apache.mahout.cf.taste.impl.model.GenericItemPreferenceArray;
 import org.apache.mahout.cf.taste.impl.model.GenericUserPreferenceArray;
 import org.apache.mahout.cf.taste.impl.recommender.GenericItemBasedRecommender;
+import org.apache.mahout.cf.taste.impl.recommender.RandomRecommender;
 import org.apache.mahout.cf.taste.impl.recommender.svd.ALSWRFactorizer;
 import org.apache.mahout.cf.taste.impl.recommender.svd.SVDRecommender;
 import org.apache.mahout.cf.taste.impl.similarity.PearsonCorrelationSimilarity;
@@ -129,6 +130,17 @@ public class Evaluator {
 						dataModel);
 				return new GenericItemBasedRecommender(dataModel,
 						similarity);
+			}
+		};
+	}
+	
+	public RecommenderBuilder random(){
+		return new RecommenderBuilder() {
+			public Recommender buildRecommender(DataModel dataModel)
+					throws TasteException {
+				ItemSimilarity similarity = new PearsonCorrelationSimilarity(
+						dataModel);
+				return new RandomRecommender(dataModel);
 			}
 		};
 	}
