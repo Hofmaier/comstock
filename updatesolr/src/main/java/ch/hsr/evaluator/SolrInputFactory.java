@@ -1,4 +1,4 @@
-package ch.hsr.updatesolrdb;
+package ch.hsr.evaluator;
 
 
 

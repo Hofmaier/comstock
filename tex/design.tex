@@ -51,6 +51,8 @@ userId,movieId,tag,timestamp,action
 35,102,980730769,,like
 \end{lstlisting}
 
+It makes sense to start recording behavioral data month's before depoying the recommender engine because have to analyze the data and compute the indicator matrix in order to create personalized recommendations.
+
 \begin{figure}
 \centering
 \begin{tikzpicture}[node distance=20mm,
@@ -101,7 +103,7 @@ to/.style={->,>=stealth',shorten >=1pt,semithick,font=\footnotesize},
 \caption{The {\ttfamily spark-itemsimilarity} job of Apache Spark computes the LLR similarity based on the user behavior log file.}
 \end{figure}
 
- The log-likelihood similiarity is based on the number of users (or tags) in common between two items. According to \cite{Dunning93} the log-likelihood similiarity is suitable for data that only captures the interaction and no preference between users and items. 
+ The log-likelihood similiarity is based on the number of users (or tags) in common between two items \cite{montgomery}. According to \cite{Dunning93} the log-likelihood similiarity is suitable for data that only captures the interaction and no preference between users and items. 
 
 Compared to the Jaccard coefficient \cite{Hartung} the log-likelihood-based similarity computes higher similarites for anomalous co-occurences than for items that occur in every user history. The log-likelihood similarity  is the probability that two users share the same items due to chance. It finds important cooccurence and filters out the coinidental. For a detailed explanation of the math involved see \cite{Dunning93}. 
 
@@ -207,9 +209,29 @@ In order to build a recommender using a search engine we store the output of the
 
 In order to produce recommendations we compose a Solr query from the user history. The user history is stored in the web log. The web server sends this query to Solr. Solr responds with a ranked result set. The web server then formats the response from Solr and sends a list of recommended items to the user.
 
+\begin{figure}
+\centering
+\begin{tikzpicture}[node distance=20mm,
+data/.style={
+rectangle,
+draw,
+thin,
+minimum height=3.5em
+},
+to/.style={->,>=stealth',shorten >=1pt,semithick,font=\footnotesize},
+]
+\node (web) [data] {Web server};
+\node (log) [data,below of = web, align=left] {User actions\\log file};
+\node (browser) [data,left of=web,node distance=50mm] {Webbrowser};
+\node (solr) [data,right of=web,node distance=50mm] {Search engine};
+\draw[to] (web) -- (log);
+\draw[to] (browser) -- node[midway,above] {user actions} (web);
+\end{tikzpicture}
+\caption{The web server sends this query to Solr. Solr responds with a ranked result set.}
+\end{figure}
+
+
 Another reason why we deploy a search engine is that the application is read-dominant. The recommender will query the data far more often than it will create new documents or update the indicators. Solr is optimized to for executing queries as opposed to storing data.
-
-
 
 Solr is used in the offline and the online part of the recommendation engine.
 The items and their corresponding similarity indicators from the Apache Spark job are stored with Apache Solr. 

@@ -24,3 +24,24 @@
 takes several types of interactions (e.g. clicks, purchases, tags). We will explain the metric with the interaction "like". The metrix
 
 Solr is able to parse text streams. It extract the structure and make it searchable.
+
+Recommenders answer the question "What are the best recommendations for a user?".
+possibility to evaluate a recommender is to calculate the difference between the estimated preference and the actual preference.
+
+
+In order to calculate precision and recall the implementation determines the top \verb|n| preferences for each user. It removes those preferences from the data model. It evaluates precision and recall with the new data model. It calculates a top-N recommendation list for each user and compares it with the real top-N preferences.
+
+
+Another approach to evaluate a recommender is to take a broader view of the recommender problem. It's not strictly necessary to estimate preference values in order to produce recommendations. In many cases presenting a ordered list of recommendations is sufficient. The list is ordered from best to worst recommendation.
+
+
+\subsection{Example data set}
+\label{sec:exampledataset}
+
+The example data set is a small set of user preferences. It has constructect properties:
+\begin{itemize}
+\item Items 108, 109 und 111 are similiar.
+\item User 9 likes the items 111, 109 
+
+\end{itemize}
+
