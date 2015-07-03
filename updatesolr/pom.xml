@@ -5,11 +5,11 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>ch.hsr</groupId>
-  <artifactId>updatesolrdb</artifactId>
+  <artifactId>evaluator</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
 
-  <name>updatesolrdb</name>
+  <name>evaluator</name>
   <url>http://maven.apache.org</url>
 
   <properties>
@@ -23,7 +23,11 @@
       <version>0.9</version>
       <scope>compile</scope>
     </dependency>
-    
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <version>1.7.12</version>
+    </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
