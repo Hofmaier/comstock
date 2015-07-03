@@ -8,17 +8,18 @@ public class EvaluatorTest extends TestCase{
 
 	@Test
 	public void testRelevantItems() {
-		fail("Not yet implemented");
 	}
 
 	@Test
 	public void testItembased() {
-		fail("Not yet implemented");
+		Evaluator test = new Evaluator();
+		assertNotNull(test.itembased()); 
 	}
 
 	@Test
 	public void testRandom() {
-		fail("Not yet implemented");
+		Evaluator test = new Evaluator();
+		assertNotNull(test.random());
 	}
 
 }
