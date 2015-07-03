@@ -1,10 +1,10 @@
 package ch.hsr.evaluator;
 
-import static org.junit.Assert.*;
+import junit.framework.TestCase;
 
 import org.junit.Test;
 
-public class EvaluatorTest {
+public class EvaluatorTest extends TestCase{
 
 	@Test
 	public void testRelevantItems() {
