@@ -20,7 +20,7 @@ public class App
     	//String smallinput = "/home/lukas/comstock/data/d";
     	String mlratings = "/home/lukas/Downloads/ml-latest-small/ratings.csv";
     	String input = mlratings;
-    	int precisionat = 200;
+    	int precisionat = 15;
     	double evaluationPercentage = 1.0;
     	double threshhold = 5.0;
     	try {
@@ -33,14 +33,14 @@ public class App
 
 					
 			
-			itemirstats = evaluator.evaluate(recommenderfactory.itembased(), 
+			itemirstats = evaluator.evaluate(recommenderfactory.svd(), 
 					null, 
 					dataModel, 
 					null,
 					precisionat,
-					threshhold, 
+					GenericRecommenderIRStatsEvaluator.CHOOSE_THRESHOLD, 
 					evaluationPercentage);
-					
+		//	GenericRecommenderIRStatsEvaluator.CHOOSE_THRESHOLD
 			log.info(itemirstats.toString());
 		} catch (IOException e) {
 			e.printStackTrace();
