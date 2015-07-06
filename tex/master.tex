@@ -70,6 +70,17 @@ sbt build
 
 \appendix
 
+\section{Tools, libraries and frameworks}
+
+The following software was used to build the evaluator, the search engine update job and the web application.
+\begin{itemize}
+\item Maven Java build tool. Maven was used to build Spark and evaluator and the search engine. version 3.19
+\item Solr version 4.7.2
+\item Spark version 1.4.0
+\item Playlay version 2.4
+\item AngularJS. Javascript Framework. Used for WebGUI.
+\end{itemize}
+
 \subsection{Apache Spark}
 \label{sec:spark}
 \verb|spark-rowsimilarity| is a script that comes with spark. It takes as input a text file representation of a matrix of sparse vectors. It finds similar rows. The input is in text-delimited form where there are three delimiters used. By default it reads (rowID<tab>columnID1:strength1<space>columnID2:strength2...) The job only supports LLR similarity. This job only supports LLR similarity.
