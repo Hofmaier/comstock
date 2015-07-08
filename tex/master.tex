@@ -5,6 +5,7 @@
 \usepackage{verbatim}
 \usepackage{pgfplots}
 \usepackage{tikz}
+\usetikzlibrary{positioning}
 \usepackage{amsmath}
 \usepackage{amsfonts}
 \usetikzlibrary{arrows,shapes}
@@ -67,17 +68,18 @@ To start the Webapplication run:
 sbt build 
 \end{verbatim}
 
-
 \appendix
 
 \section{Tools, libraries and frameworks}
 
 The following software was used to build the evaluator, the search engine update job and the web application.
 \begin{itemize}
+\item JVM 1.8.45 OpenJDK. Solr, Spark and Play run on the JVM.
+\item Scala Compiler 2.11.7. The web application is written in Scala.
 \item Maven Java build tool. Maven was used to build Spark and evaluator and the search engine. version 3.19
 \item Solr version 4.7.2
 \item Spark version 1.4.0
-\item Playlay version 2.4
+\item Playlay version 2.4. We used the Play framework because it runs on the JVM and we can use the Solr Client Library in the Webserver.
 \item AngularJS. Javascript Framework. Used for WebGUI.
 \end{itemize}
 
