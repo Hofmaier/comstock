@@ -7,6 +7,7 @@ import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.eval.IRStatistics;
 import org.apache.mahout.cf.taste.eval.RecommenderIRStatsEvaluator;
 import org.apache.mahout.cf.taste.impl.eval.GenericRecommenderIRStatsEvaluator;
+import org.apache.mahout.cf.taste.impl.model.GenericBooleanPrefDataModel;
 import org.apache.mahout.cf.taste.impl.model.file.FileDataModel;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.slf4j.Logger;
@@ -18,11 +19,12 @@ public class App
     public static void main( String[] args )
     {
     	//String smallinput = "/home/lukas/comstock/data/d";
+    	String ml100k = "/home/lukas/Downloads/ml-100k/u.data";
     	String mlratings = "/home/lukas/Downloads/ml-latest-small/ratings.csv";
     	String input = mlratings;
-    	int precisionat = 15;
+    	int precisionat = 5;
     	double evaluationPercentage = 1.0;
-    	double threshhold = 5.0;
+    	double threshhold = -1;
     	try {
 			DataModel dataModel = new FileDataModel(new File(input));
 			RecommenderIRStatsEvaluator evaluator = new GenericRecommenderIRStatsEvaluator();
@@ -30,18 +32,20 @@ public class App
 			Evaluator recommenderfactory = new Evaluator(); 
 			//recommenderfactory.recall(dataModel);
 			IRStatistics itemirstats = null;
-
-					
+			GenericBooleanPrefDataModel booleanDataModel = new GenericBooleanPrefDataModel(dataModel);
+			//float pref = booleanDataModel.getMaxPreference();
 			
-			itemirstats = evaluator.evaluate(recommenderfactory.svd(), 
+			
+			itemirstats = evaluator.evaluate(recommenderfactory.itembased(), 
 					null, 
 					dataModel, 
 					null,
 					precisionat,
-					GenericRecommenderIRStatsEvaluator.CHOOSE_THRESHOLD, 
+					threshhold,
 					evaluationPercentage);
 		//	GenericRecommenderIRStatsEvaluator.CHOOSE_THRESHOLD
 			log.info(itemirstats.toString());
+			
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (TasteException e) {
