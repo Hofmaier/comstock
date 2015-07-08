@@ -50,3 +50,13 @@ The example data set is a small set of user preferences. It has constructect pro
 \label{sec:movielens}
 
 The MovieLens dataset describes 5-star rating and free-text tagging activity from MovieLens, a movie recommendation service. It contains 100023 ratings and 2488 tag applications across 8570 movies. These data were created by 706 users 
+
+For recommenders which predict the preferences of a user we can evaluate it by calculating the difference between the estimated preference and the actual preference.
+For this reason we measure the quality of the recommender with precision and recall.
+
+Those ratings are unknown at the time of the recommendation. 
+We can simulate the prefencences of the future by setting aside a small part of the real data set as test data. We split the collected input data into two sets.
+\begin{itemize}
+\item Training data set
+\item Test data set
+\end{itemize}
