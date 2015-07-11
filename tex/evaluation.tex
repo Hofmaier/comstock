@@ -1,20 +1,18 @@
 \section{Evaluation}
 \label{sec:evaluation}
 
-This section describes the evaluation process and presents the results of the evaluation.
+This section describes the evaluation process and presents the results of the evaluation. In order to run the evaluation we created a small Java project called \verb|evaluator|. It contains the classes to evaluate the performance of the recommender discussed in this report and the Top Popular recommender (see section \ref{sec:baseline}).
 
 Evaluation is important because:
 \begin{itemize}
   \item It allows us to decide if the quality of the recommender engine archives the desired results. 
-  \item We are able to compare the recommender
+  \item We are able to compare the discussed approach to other recommender algorithms. It allows us to compare different recommender techniques.
   \item Evaluation allows us to adjust the parameters in order to get better results.
-  \item It allows us to compare different recommender techniques.
 \end{itemize}
-
 
 Most commonly accepted evaluation measure for recommender systems is the Mean Average Error or Root Mean Squared Error of the predicted ratings and the actual one \cite{Ricci}.
 
-The recommender engine discussed in this article does not estimate preference values in order to produce recommendations. It presents a ordered list of $n$ recommendations.   The list is ordered from best to worst recommendation. It produces a Top-N list of recommendations. The recommenders classifies recommendable items. If we look at the recommender problem as a classification problem we can make use of precision and recall. Precision and Recall are two information retrieval concepts. We provide a brief summary here to each of these measures.
+The recommender engine discussed in this article does not estimate preference values in order to produce recommendations. It presents a ordered list of $N$ recommendations. The list is ordered from best to worst recommendation. It produces a \glspl{topn}. The recommenders classifies recommendable items. If we look at the recommender problem as a classification problem we can make use of precision and recall. Precision and Recall are two information retrieval concepts. We provide a brief summary here to each of these meaesures.
 
 Precision and recall depend on the following measures.
 \begin{description}
@@ -70,7 +68,7 @@ Figure \ref{fig:confusionmatrix} visualizes the measures used for precision and 
   \end{equation}
 We can formulate this with the measures from the confusion matrix.
   \begin{equation}
-    \label{eq:recallcm}
+    \label{eq:precisionm}
     \text{Precision} = TP/(TP+FP)
   \end{equation}
 
@@ -122,9 +120,8 @@ recall =  relevantItemsRetrieved / (double) relevantItems.size());
 		      
 \end{lstlisting}
 
-
 \subsubsection{Testing Methodology}
-\label{sec:relevant}
+\label{sec:methodology}
 
 If we want to evaluate a recommender, we have to define, what is a relevant item for the active user. For the user a relevant item is one that he does not know and he would like (or purchase). Those items are unknown at the time of the recommendation. Relevancy depends on the goal of the recommender. For example, an item is relevant if the user would give it a high rating or if he would purchase the item.
 
@@ -132,29 +129,138 @@ Unfortunatly we do not know how a user likes some new item in the future.
 But we can simulate the prefencences of the future by setting aside a small part of the real data set as test data. We split the collected input data into as follows:
 
 
-We get the all ratings of user $u$. We sort these rating according the rating value. Then we select the top $N$ items $T$ from the sorted list. Items in $T$ have a high rating and we assume that it is relevant to the user $u$.
-All ratings in $T$ are removed from the overall input set. The remaining preferences form the training data set $M$. 
+We get the all ratings of user $u$. We sort these rating according the rating value. Then we select the top $N$ items $T$ that are greater then a given threshhold $t$ from the sorted list. Items in $T$ have a high rating and we assume they are relevant to the user $u$. Items in $T$ form the set $TP + FN$ (see figure \ref{fig:confusionmatrix}.
 
-In order to measure precision and recall we first train the recommender with the data in $M$.
+The threshhold prevents us from adding items with a low rating to $T$. If a user rates three items with the rating 5.0, 1.0 and 1.0 the evaluation algorithm would add the items with the bad rating 1.0 to $T$. Hence the items with bad rating 1.0 lead to lower recall measures. 
 
-We determine the top the top $N$ preferences for each user. Then we remove these values from the input data set. The resulting set is the training data set. We use this set to train the recommender engine. For instance, if we evaluate a co-occurence based recommender we compute indicator matrix from section \ref{sec:llr} with this set.
+All ratings in $T$ are removed from the overall input set. The remaining preferences form the training data set $M$. In order to measure precision and recall we first train the recommender with the data in $M$. For instance, if we evaluate a co-occurence based recommender we compute indicator matrix from section \ref{sec:llr} with this set.
 
-The removed entries form the test data set. Items in the test data set are the relevant items. 
-For example, if $n$ is 5 this would mean precision is evaluated by removing the top 5 preferences for a user and then finding the percentage of those 5 items included in the top 5 recommendations for that user. 
+We use the trained recommender to form the top-N recommendation list. 
 
-The evaluatuation of the recommender can be devided into several steps:
+We check how many items are contained in the top-N list that are in $T$. These items are the set $TP$ (see figure \ref{fig:confusionmatrix}. 
+
+For example, if $N$ is 5 this would mean precision and recall are evaluated by removing the top 5 preferences for a user and then finding the percentage of those 5 items included in the top-N recommendation list for that user. 
+
+In short the evaluatuation process for a single user $u$ can be devided into several steps:
 \begin{enumerate}
-\item  Compute the indicator matrix with the training set.
-\item Update the search engine with the similarity values.
-\item Generate a list of recommendations $r_u$ for each user.
-\item Measure the precision and recall for all generated recommendations list $r$ and return the mean value.
+\item Retrieve relevant items $T$ for user $u$.
+\item Build the training set $M$ by removing the corresponding preferences from input data set.
+\item Train the recommender eninge with $M$.
+\item Form a top-N recommendation list for $u$.
+\item Count the number of items that appear in the top-N list.
+\item Compute precision and recall based on $TP$, $FP$ and $FN$.
 \end{enumerate}
 
 The evaluation process has the following parameters:
 \begin{description}
-\item[Size of the result] The number of recommendations to consider. The length of the recommendation list.
+\item[Size of the result] The length $N$ of recommendations list and number of the relevant items. 
 \item[Relevance threshold] Determines if an item is relevant or not.
 \end{description}
+
+\subsection{Baseline algorithms}
+\label{sec:baseline}
+
+In order to get a feel what values of precision an recall to excpect and to determine the performance of the search engine based, multimodal recommender compare it with three base line algorithms.we measured an itembased recommender and random generated recommendations list. This section gives a brief description of item based recommenders.
+
+\begin{itemize}
+\item Random generated \gls{topn}
+\item Top popular items
+\item Itembased with cosine similarity
+\end{itemize}
+
+\begin{lstlisting}[label=lst:toppop, caption={Implementation of top popular recommender}]
+Map<Long, Integer> item2pop = new HashMap<Long, Integer>();
+LongPrimitiveIterator iter = dataModel.getUserIDs();
+while (iter.hasNext()) {
+PreferenceArray prefs = dataModel.getPreferencesFromUser(iter
+	.nextLong());
+for (int i = 0; i < prefs.length(); i++) {
+	Integer counter = item2pop.get(prefs.getItemID(i));
+	if (counter == null) {
+		item2pop.put(prefs.getItemID(i), 1);
+	} else {
+		item2pop.put(prefs.getItemID(i), counter + 1);
+	}
+      }
+}
+List<RecommendedItem> popitems = transfom2list(item2pop);
+Collections.sort(itemidcounter, new RecommenderItemComparator()); 
+return popitems
+\end{lstlisting}
+
+\begin{description}
+\item[Random] The recommender randomly recommends $N$ items to the user. This algorithms serves just as baseline for the more complex algorithms.
+\item[Top popular]  It creates a list of items ordered by the numbers of ratings for a specific item. Top Popular is a non-personalized recommender because it presents the same list of items to any user \cite{Cremonesi}. Listing \ref{lst:toppop} shows the implementation of the the Top Popular algorithm. 
+\item[Itembased with cosine similarity] 
+\end{description} Itembased algorithms is a model-based, collaborative filtering algorithm. It computes the simililarities between all items and predicts user prefences for a user by based his ratings. We use the cosine similarity \cite{ekstrand11} to measure the similarity between two items. The itembased algorithm selects $k$ neirest neighbors $N$ of $i$. It then weights every item in $N$ with the similarity $sim(i,i')$ and compute the sum of that. The predicted rating $r_{u,i}$ for user $u$ and item $i$ is the normalized value of the sum \cite{jannach11}:
+
+\begin{equation}
+  \label{eq:computeprediction}
+  r_{u,i} = \frac{\sum_{u' \in N}{sim(u,u') r_{u',i}}}{\sum_{u' \in N}{|s(u,u')|}}
+\end{equation}
+
+We use Mahouts implementation of an item based recommender. Mahout provides the \verb|GenericItemBasedRecommender| class with an implementation of an item based recommender. To compute the similiarty we use \verb|UncenteredCosineSimilarity|.
+
+\subsection{Dataset}
+\label{sec:dataset}
+
+This dataset used in this project contains ratings and tagging activity from MovieLens, a movie recommendation service \cite{movielensdata}.
+MovieLens data sets were collected by the GroupLens Research Project at the University of Minnesota. The data was collected through the MovieLens web site (movielens.umn.edu) during the seven-month period from September 19th, 1997 through April 22nd, 1998 \cite{movielensdata}.
+
+This data set consists of:
+\begin{itemize}
+\item 100,000 ratings. The ratings are scores from 1 to 5. A rating is made by one user to one movie at a specific time. Each line of this file after the header row represents one rating of one movie by one user, and has the following format:
+\begin{verbatim}
+userId,movieId,rating,timestamp.
+\end{verbatim}
+The co-occurence based recommender takes user actions as an input. Before we compute the indicator matrix we transform the rating file to an user action file. All ratings with a score above 4 are considered as likes.
+\item 943 users. Each user has rated at least 20 movies
+\item 1682 movies. Movies are categorized in genres. A movie has an ID, a title, and a list of associated genres. The \verb|movies.csv| file has the following format:
+\begin{verbatim}
+7,Sabrina (1995),Comedy|Romance
+\end{verbatim}
+\item 2488 tag appliciations. A tag is applied by one user to one movie at a specific time. Tags are user-generated metadata about movies. Each tag is typically a single word or short phrase. The meaning, value, and purpose of a particular tag is determined by each user. All tags are contained in the file $tags.csv$. Each line of this file after the header row represents one tag applied to one movie by one user, and has the following format:
+\begin{verbatim}
+userId,movieId,tag,timestamp
+\end{verbatim}
+\end{itemize}
+
+Time in the ratings and tags dataset is formatted as timestamps that represends seconds since midnight Coordinated Universal Time (UTC) of January 1, 1970.
+ 
+We choose this dataset due to several reasons:
+\begin{itemize}
+\item It contains ratings and tagging activity. Hence we can use two indicators for the multimodal co-occurence, based recommender.
+\item In order to apply the evaluation process described in section \ref{sec:methodology} we need rating scores to select the top $N$ ratings.
+\item The movielens data set fulfills this requirement. It is common to evaluate a recommender engine with it. Hence it is easier to compare the results with other evaluations. 
+\end{itemize}
+
+The co-occurence based recommender takes Boolean preferences as input. In order to simulate likes we generated a new data set based on the MovieLens data set. We select all preferences with a score  equal or avove 4.0. This dataset represents user actions that indicates that the user likes the item.
+
+\begin{lstlisting}[caption={To simulate the user action ``like'' we extract all ratings equal or above a score of 4.0 and use the result as training set},label={lst:pref2like}]
+ public GenericBooleanPrefDataModel pref2like(DataModel dataModel,
+	float threshold) {
+	try {
+	FastByIDMap<FastIDSet> userlikes = new FastByIDMap<FastIDSet>(
+					dataModel.getNumUsers());
+	LongPrimitiveIterator iter = dataModel.getUserIDs();
+	while (iter.hasNext()) {
+          long userid = iter.nextLong();
+          PreferenceArray prefs = dataModel
+		.getPreferencesFromUser(userid);
+          FastIDSet ids = new FastIDSet(prefs.length());
+          for (Preference p : prefs) {
+		if (p.getValue() >= threshold) {
+                  ids.add(p.getItemID());
+			}
+		}
+	userlikes.put(userid, ids);
+	}
+    return new GenericBooleanPrefDataModel(userlikes);
+\end{lstlisting}
+
+\subsection{Evaluationresults}
+
+The co-occurence based recommender for the MovieLens data uses three \glspl{indicator}.
 
 \pgfplotsset{width=7cm}
 \begin{figure}
@@ -163,81 +269,29 @@ The evaluation process has the following parameters:
 \begin{axis}[
 xbar,
 xmin=0,
-xmax=0.084,
+xmax=0.11,
 width=12cm,
-height=5.5cm,
-enlarge y limits=0.83,
-xlabel={precision},
-symbolic y coords={random, itembased,most-popular},
+height=6.5cm,
+enlarge y limits=1,
+xlabel={Precision},
+symbolic y coords={random,toppopular,itembased},
 ytick=data,
-nodes near coords,
-nodes near coords align={horizontal},
+x tick label style={/pgf/number format/fixed}
 ]
 
-\addplot coordinates {(0.00035,random) (0.00626,most-popular) (0.0864,itembased) };
+\addplot coordinates {(0.0035,random) (0.0626,toppopular) (0.0864,itembased)};
 \end{axis}
 \end{tikzpicture} 
-  \caption{Precision and recall comparison of an random generated recommendations and recommendations of itembased recommonder. The number of recommended items is 15}
+\caption{Precision comparison of recommender algorithsm, random generated recommendations, Top Popular and itembased with precision at 5 and $N$ = 5 (number of recommended items)}
   \label{fig:precisionrecallvalues}
 \end{figure}
 
-In order to get a feel what values of precision an recall to excpect we measured an itembased recommender and random generated recommendion list \cite{jannach11}.
-An itembased recommender engine archives an average precision value of 0.00358. This seems a small value but if we return randomly generated recommendations we get a precision of 0.00095. Hence an itembased recommender improves the precision with a factor of 3. Figure \ref{fig:precisionrecallvalues} shows the comparison of the two measurements. We used the movielens data set for this evaluation (see section \ref{sec:dataset}).
-
-Precision and recall has the following paramters
-\begin{itemize}
-\item Size of the recommendation list $N$. How many recommended items are expected. The number of items retrieved. True positives and false positives.
-\item What are relevant items. Relevant items could be a threshhold in preference. Or it could be a function that return user's average preference value plus one standard deviation.
-\end{itemize}
-
-\subsection{Mahouts Evaluator}
-\label{sec:mahouteval}
-
-The library Apache Mahout provides a method to evaluate precision and recall. It is implemented in 
- \verb|GenericRecommenderIRStatsEvaluator| in the package \verb|org.apache.mahout.cf.taste.impl.eval|. The problem with this method is that the number of retrieved document $n$ is equal to the number of relevant documents and if a user has many items above threshold  \verb|GenericRecommenderIRStatsEvaluator| takes only $n$ of those. It's desirable to parameterize the definition of relevant items and number of retrieved items independently.
-
-\begin{quote}
-For each user, these implementation determine the top n preferences, then evaluate the IR statistics based on a DataModel that does not have these values. This number n is the "at" value, as in "precision at 5". For example, this would mean precision evaluated by removing the top 5 preferences for a user and then finding the percentage of those 5 items included in the top 5 recommendations for that user. 
-\end{quote}
-
-\begin{quote}
-  items whose preference value is at least this value are considered "relevant" for the purposes of computations
-\end{quote}
-
-What is the impact of the parameter relevanceThreshold. According to the class description the relevant items are the users top n preferences. 
-
-According to the description of the parameter relevanceThreshold the items whose preference is at least the threshhold are relevant. 
-
-
-
-\subsection{Dataset}
-\label{sec:dataset}
-
-This dataset used in this project describes rating and free-text tagging activity from MovieLens, a movie recommendation service \cite{movielensdata}.
-MovieLens data sets were collected by the GroupLens Research Project at the University of Minnesota.
-
-The data was collected through the MovieLens web site (movielens.umn.edu) during the seven-month period from September 19th, 1997 through April 22nd, 1998 \cite{movielensdata}.
- 
-This data set consists of:
-\begin{itemize}
-\item 100,000 ratings. The ratings are numbers from 1 to 5. A rating is made by one user to one movie at a specific time. Each line of this file after the header row represents one rating of one movie by one user, and has the following format:
-\begin{verbatim}
-userId,movieId,rating,timestamp.
-\end{verbatim}
-\item 943 users. Each user has rated at least 20 movies
-\item 1682 movies. Movies are categorized in genres. 
-\item 2488 tag appliciations. A tag is applied by one user to one movie at a specific time. Tags are user-generated metadata about movies. Each tag is typically a single word or short phrase. The meaning, value, and purpose of a particular tag is determined by each user. All tags are contained in the file $tags.csv$. Each line of this file after the header row represents one tag applied to one movie by one user, and has the following format:
-\begin{verbatim}
-userId,movieId,tag,timestamp
-\end{verbatim}
-\end{itemize}
-
-Time in the the ratings and tags set is formatted as timestamps that represends seconds since midnight Coordinated Universal Time (UTC) of January 1, 1970.
+An itembased recommender engine achieves an average precision value of 0.00358. This seems a small value but if we return randomly generated recommendations we get a precision of 0.00095. Hence an itembased recommender improves the precision with a factor of 3. Figure \ref{fig:precisionrecallvalues} shows the comparison of the two measurements. We used the movielens data set for this evaluation (see section \ref{sec:dataset}).
 
 \subsection{Baseline Algorithm}
 \label{sec:baselinealgorithm}
 
-We compare the co-occurence based recommender to an item-based recommender. This section will give a brief description of item based recommenders.
+We compare the co-occurence based recommender to an item-based recommender. 
 
 \subsection{Results}
 \label{sec:results}

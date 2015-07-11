@@ -162,7 +162,7 @@ userID, action, itemID
 itemID1<tab>itemID2:similarityvalue<space>itemID3:similarityvalue
 \end{verbatim}
 
-\subsection{Retrieve recommendation with Apache Solr}
+\subsection{Apache Solr}
 \label{sec:solr}
 
 Before we describe why we use a the search engine Apache Solr to deploy a recommendation engine, we give a short introduction to Apache Solr.
@@ -172,7 +172,7 @@ Solr returns documents sorted in descending order by a score that indicates the 
 
 The reason why we deploy a search engine in order to make recommendations is that Solr scores documents based on the presence of query terms in the document similar to a recommendations engine based on the presence of indicator.
 
-\subsection{Connection a recommender and a search engine}
+\subsection{Connection of a recommender and a search engine}
 \label{sec:relation}
 
 There are similarities between weighting of indicator scores and the mathematics that underlie text retrival engines
@@ -207,6 +207,8 @@ We store all items as documents in Solr. The documents contain the metadata like
 
 In order to build a recommender using a search engine we store the output of the co-occurence analysis in Solr. The search engine actually delivers the recommendations to our users.
 
+\subsection{Retrieve recommendation}
+
 In order to produce recommendations we compose a Solr query from the user history. The user history is stored in the web log. The web server sends this query to Solr. Solr responds with a ranked result set. The web server then formats the response from Solr and sends a list of recommended items to the user.
 
 \begin{figure}
@@ -236,3 +238,11 @@ Another reason why we deploy a search engine is that the application is read-dom
 Solr is used in the offline and the online part of the recommendation engine.
 The items and their corresponding similarity indicators from the Apache Spark job are stored with Apache Solr. 
 
+\subsection{Parameters}
+\label{sec:parameters}
+
+This section descripes the paratemter of the recommender discussed in this report.
+\begin{description}
+\item[similarity threshold] We have to define a threshold to separate similar items occording to the LLR similarity from the rest (e.g. 0.5).
+\item[user history to consider] We retrieve recommendations with a part of the user history. We have to define the number of log entries to consider.
+\end{description}

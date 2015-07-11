@@ -4,13 +4,16 @@
 \usepackage{url}
 \usepackage{verbatim}
 \usepackage{pgfplots}
+\pgfplotsset{compat=1.11}
 \usepackage{tikz}
 \usetikzlibrary{positioning}
 \usepackage{amsmath}
 \usepackage{amsfonts}
 \usetikzlibrary{arrows,shapes}
 \usepackage{listings}
-\title{ Building a multimodal co-occurence-based recommender engine with Apache Mahout and Apache Solr }
+\usepackage[xindy]{glossaries}
+\makeglossaries
+\title{ Building and evaluating multimodal co-occurence-based recommender engine with Apache Mahout and Apache Solr }
 \author{
 	Author \\
 	Lukas Hofmaier \\
@@ -24,6 +27,9 @@
 	Project Thesis,
 	\today
 }
+
+
+\input{glossary}
 \begin{document}
 \maketitle
 \tableofcontents
@@ -31,11 +37,15 @@
 \begin{abstract}
 Building a recommendation engine can be a daunting task. Understanding all possible techniques and choosing the most suitable for the job at hand presupposes that you have a strong mathematical background. To make matters worse the options of algorithms is constantly changing as researchers coming up with new ones. Having said that not all companies can afford to employ an army of data scientist and mathematicens to build a recommender system. They a have to trade-off the development the accuracy of recommender against the development costs. 
 
-This article describes a simple pratical approach. The discussed recommender exploits existing, proved technologies. The model is computed with Apache Spark. The list of recommendation is served by the modern scalable search engine Apache Solr.
+This article describes a simple pratical approach. The discussed recommender exploits existing, proved technologies. 
+
+The model is computed with Apache Spark. The list of recommendation is served by the modern scalable search engine Apache Solr.
 
 The behavior of users provide data to predict the relevance of recommendations to individual users. The recommender engine discussed in this article has a two part design.
 Co-occurence can be computed at scale with Apache Mahout's \verb|spark-itemsimilarity| job.
 Recommendations are query results of the search engine Apache Solr.
+
+In this report we evaluate the accuracy of the descibed recommender throug precisoin and recall.
 \end{abstract}
 
 \input{introduction}
@@ -45,7 +55,20 @@ Recommendations are query results of the search engine Apache Solr.
 \section{Conclusion}
 \label{sec:similarity}
 
+We have built a prototype of a co-occurence based, multimodel recommender.
 A large amount of work was required to convert formats between the user logs the Apache Mahout and Apache Solr.
+
+The proposed design by \cite{Dunning14} includes the application of the technologies Apache Solr, Apache Mahout und Apache Spark. We did not have make descision about the similarity metrics or the used recommender algorithm. This simplifies the development process and lowers the entry barrier for developer without a strong mathematical background. 
+
+Unfortunatly \cite{Dunning14} does not descibe an evaluation method for the proposed design. We evaluated the recommnender with the accuracy metrics precision and recall. The usefulness of these metrics depends on the definition of relevant items. We defined items that the user has given a high rating as relevant. The evaluation method used in this report penalizes items that the user never has rated or even seen. 
+
+Another problem with precision and recall emerge when the preferences are Boolaen data. We used the MovieLens data set that contains preference values. If the preferences are boolean (like, dislike) we can not pick the $N$ best rated items and have to select them at random.
+
+The evaluation results of the co-occurence based recommender are not overwhelming. Compared to the TopPopular recommender the increase of quality is small. But the evaluation method only considers items that the users already liked as relevant. We do not know how usefull a recommendation for an individual user is. It could be that the co-occurence based recommender is suggesting items that the user never has seen and that are desirable for the user.
+
+We improved the quality of the top-N recommendations list by extending the recommender with an additional indicators. It is possible to extend the recommender with additional indicators, hence the design is flexible.
+
+The calculation of indicators and therefore the update process of the search engine is computational expensive. The two part design of the recommnend allows us to do the heavy lifting upfront. In return the \gls{topn} is performed blazingly fast because Apache Solr is optimized for text retrieval queries. 
 
 The system may be improved throug 
 \begin{description}
@@ -79,9 +102,35 @@ The following software was used to build the evaluator, the search engine update
 \item Maven Java build tool. Maven was used to build Spark and evaluator and the search engine. version 3.19
 \item Solr version 4.7.2
 \item Spark version 1.4.0
-\item Playlay version 2.4. We used the Play framework because it runs on the JVM and we can use the Solr Client Library in the Webserver.
+\item Play version 2.4. We used the Play framework because it runs on the JVM and we can use the Solr Client Library in the Webserver.
 \item AngularJS. Javascript Framework. Used for WebGUI.
+\item Mahout 0.9 
 \end{itemize}
+
+\section{Apache Mahout}
+\label{sec:mahout}
+
+Apache mahout is a top-level Apache project that provide implementations of collaborative filtering algorithms among other machine learning techniques. The development began in 2008 \cite{Owen}. It provides server Apache Spark jobs in order to process large amount of data. We used it because it's Spark support and because it's well documented.
+
+\subsection{Data representation}
+\label{sec:datarepresentation}
+
+Apache Mahout uses it's own data structures to store and access preference data. Mahout provides it's own map implementation \verb|FastByIDMap|. Keys in \verb|FastByIDMap| are long primitives instead of java objects. In addition \verb|FastByIDMap| has no additional \verb|Map.Entry| object per entry. The avoidance of java object saves memory. Depending on the implementation of the JVM a java object allocates about 28 bytes of memory. \verb|FastByIDMap| consumes about 28 bytes per entry, compared to about 84 byte per entry for \verb|HashMap| from \verb|java.util|.
+
+\subsection{Why we did not use Mahout'ss evaluator}
+\label{sec:mahouteval}
+
+The library Apache Mahout provides a method to evaluate precision and recall. It is implemented in 
+ \verb|GenericRecommenderIRStatsEvaluator| in the package \verb|org.apache.mahout.cf.taste.impl.eval|. The problem with this method is that the number of retrieved document $n$ is equal to the number of relevant documents and if a user has many items above threshold  \verb|GenericRecommenderIRStatsEvaluator| takes only $n$ of those. It's desirable to parameterize the definition of relevant items and number of retrieved items independently.
+
+\begin{quote}
+For each user, these implementation determine the top n preferences, then evaluate the IR statistics based on a DataModel that does not have these values. This number n is the "at" value, as in "precision at 5". For example, this would mean precision evaluated by removing the top 5 preferences for a user and then finding the percentage of those 5 items included in the top 5 recommendations for that user. 
+\end{quote}
+
+\begin{quote}
+  items whose preference value is at least this value are considered "relevant" for the purposes of computations
+\end{quote}
+
 
 \subsection{Apache Spark}
 \label{sec:spark}
@@ -148,6 +197,8 @@ The following action are used as indicators
 \item When a user likes an item.
 \item Tags
 \end{itemize}
+\printglossary
 \bibliographystyle{plain}
 \bibliography{a}
 \end{document}
+
