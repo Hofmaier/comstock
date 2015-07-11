@@ -60,3 +60,37 @@ We can simulate the prefencences of the future by setting aside a small part of 
 \item Training data set
 \item Test data set
 \end{itemize}
+
+
+We determine the top the top $N$ preferences for each user. Then we remove these values from the input data set. The resulting set is the training data set. We use this set to train the recommender engine. 
+
+The removed entries form the test data set. Items in the test data set are the relevant items.
+
+
+Precision and recall has the following parameters
+\begin{itemize}
+\item Size of the recommendation list $N$. How many recommended items are expected. The number of items retrieved. True positives and false positives.
+\item What are relevant items. Relevant items could be a threshhold in preference. Or it could be a function that return user's average preference value plus one standard deviation.
+\end{itemize}
+
+
+What is the impact of the parameter relevanceThreshold. According to the class description the relevant items are the users top n preferences. 
+
+According to the description of the parameter relevanceThreshold the items whose preference is at least the threshhold are relevant. 
+
+@article{ekstrand11,
+  title =	"Collaborative Filtering Recommender Systems",
+  author =	"Michael D. Ekstrand and John Riedl and Joseph A.
+		 Konstan",
+  journal =	"Foundations and Trends in Human-Computer Interaction",
+  year = 	2011,
+  number =	2,
+  volume =	4,
+  bibdate =	"2011-07-07",
+  bibsource =	"DBLP,
+		 http://dblp.uni-trier.de/db/journals/fthci/fthci4.html#EkstrandRK11",
+  pages =	"175--243",
+  URL =  	"http://dx.doi.org/10.1561/1100000009",
+}
+\
+  In order to minimize the memory footprint Mahout provides it's own implementation of a map.has and the key is a long primitive instead of an object. This saves memory  

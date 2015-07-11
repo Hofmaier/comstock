@@ -1,30 +1,62 @@
 package ch.hsr.searchengineupdater;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
+import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
+import org.apache.mahout.cf.taste.model.DataModel;
+import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.common.SolrInputDocument;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 public class SearchEngine {
 	
-	public void update(Collection<SolrInputDocument> alldocs) {
-		SolrClient client = new HttpSolrClient(
-				"http://localhost:8983/solr/collection1");
+	String connectionString = "http://localhost:8983/solr/collection1";
+	SolrClient solrClient = new HttpSolrClient(connectionString);
+	Logger log = LoggerFactory.getLogger(SearchEngine.class);
+	
+	public void update(List<SolrInputDocument> solrdocs) {
+	
 
 		try {
-			client.deleteByQuery("*:*");
-			client.commit();
-			client.add(alldocs);
-			client.commit();
-			client.close();
+			clearSolr();
+			updateSolr(solrdocs);
 		} catch (SolrServerException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		
+	}
+	
+	private void clearSolr() {
+		try {
+			solrClient.deleteByQuery("*:*");
+			solrClient.commit();
+		} catch (SolrServerException e) {
+			log.error("couldn't drop db");
+		} catch (IOException e) {
+			log.error("could not connect to solr");
+		}
+	}
+	
+
+	
+	private void updateSolr(List<SolrInputDocument> solrdocs)
+			throws SolrServerException, IOException {
+		log.info("update solr " + solrdocs.size());
+		solrClient.add(solrdocs);
+		solrClient.commit();
+		solrClient.close();
 	}
 
 }
