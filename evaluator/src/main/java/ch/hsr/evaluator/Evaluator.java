@@ -17,7 +17,6 @@ import org.apache.mahout.cf.taste.impl.recommender.GenericItemBasedRecommender;
 import org.apache.mahout.cf.taste.impl.recommender.RandomRecommender;
 import org.apache.mahout.cf.taste.impl.recommender.svd.ALSWRFactorizer;
 import org.apache.mahout.cf.taste.impl.recommender.svd.SVDRecommender;
-import org.apache.mahout.cf.taste.impl.similarity.PearsonCorrelationSimilarity;
 import org.apache.mahout.cf.taste.impl.similarity.UncenteredCosineSimilarity;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Preference;
@@ -31,8 +30,6 @@ import org.slf4j.LoggerFactory;
 public class Evaluator {
 	private Logger log = LoggerFactory.getLogger(Evaluator.class);
 	
-	
-	
 	public double precisionAndRecall(DataModel filedataModel) throws TasteException{
 		long userID = 111;
 		float threshold = 3.0f;
@@ -42,27 +39,17 @@ public class Evaluator {
 		DataModel trainingDataModel = removeRelevantItemsFromDataModel(dataModel,userID,threshold);
 		Recommender rec = itembasedr(dataModel);
 		List<RecommendedItem> recommendations = rec.recommend(userID, nrOfRecommendedItems);
-		int relevantItemsRetrieved2 = 0;
 		List<Preference> relevantItems = relevantItems(userID, dataModel, threshold);
 		int nrRelevantItems = relevantItems.size();
 		log.info("nr of relevant items: " + nrRelevantItems);
 		log.info("nr of recommendations: " + recommendations.size());
-		for(RecommendedItem i : recommendations){
-			log.info("item from recommendation: " + i.getItemID());
-			for(Preference pref : relevantItems){
-				log.info("relevant item: " + pref.getItemID());
-				if(pref.getItemID() == i.getItemID()){
-					log.info("found relevant item");
-					relevantItemsRetrieved2++;
-				}
-			}
-		}
-		int topNsize;
+
+		int topNsize = 0;
 		FastIDSet relevantItemIDs = null;
 		
-		double precision = 0;
-		double recall = 0;
-		int relevantItemsRetrieved = 0;
+double precision = 0;
+
+int relevantItemsRetrieved = 0;
 
 List<RecommendedItem> reItems = rec.recommend(userID, topNsize);
 	for (RecommendedItem recommendedItem : reItems) {
@@ -71,15 +58,15 @@ List<RecommendedItem> reItems = rec.recommend(userID, topNsize);
 		}
 	}
 
-	// Precision
-	int numRecommendedItems = reItems.size();
-	precision = ((double) relevantItemsRetrieved / (double) topNsize);
+// Precision
+int numRecommendedItems = reItems.size();
+precision = ((double) relevantItemsRetrieved / (double) topNsize);
 		      
-	// Recall
-	recall =  relevantItemsRetrieved / (double) relevantItems.size());
+// Recall
+double recall = 0;
+recall =  relevantItemsRetrieved / (double) relevantItems.size();
 		      
-		double precision = 0.0;
-		log.info("relevant items retrieved: " + relevantItemsRetrieved);
+		log.info("relevant items retrieved: " + recall);
 	return precision;
 }
 	
@@ -134,29 +121,6 @@ List<RecommendedItem> reItems = rec.recommend(userID, topNsize);
 		return relevantItems;
 	}
 	
-	public RecommenderBuilder svd(){
-		return new RecommenderBuilder() {
-			public Recommender buildRecommender(DataModel dataModel)
-					throws TasteException {
-				return new SVDRecommender(dataModel,
-						new ALSWRFactorizer(dataModel, 10, 0.5, 10));
-			}
-		};
-	}
-	
-	public RecommenderBuilder itembased(){
-		return new RecommenderBuilder() {
-			public Recommender buildRecommender(DataModel dataModel)
-					throws TasteException {
-				ItemSimilarity similarity = null;
-				GenericBooleanPrefDataModel booleanDatamodel = new GenericBooleanPrefDataModel(dataModel);
-				//similarity = new PearsonCorrelationSimilarity(dataModel);
-				similarity = new UncenteredCosineSimilarity(dataModel);
-				return new GenericItemBasedRecommender(dataModel,similarity);
-				//return new GenericBooleanPrefItemBasedRecommender(booleanDatamodel,similarity);
-			}
-		};
-	}
 	
 	public Recommender itembasedr(DataModel dataModel) throws TasteException{
 		GenericBooleanPrefDataModel booleanDatamodel = new GenericBooleanPrefDataModel(dataModel);
@@ -164,21 +128,7 @@ List<RecommendedItem> reItems = rec.recommend(userID, topNsize);
 		return new GenericBooleanPrefItemBasedRecommender(booleanDatamodel,similarity);
 	}
 	
-	public RecommenderBuilder mostpopular(){
-		return new RecommenderBuilder() {
-			public Recommender buildRecommender(DataModel dataModel)
-					throws TasteException {
-				return new MostPopular(dataModel);
-			}
-		};
-	}
+
 	
-	public RecommenderBuilder random(){
-		return new RecommenderBuilder() {
-			public Recommender buildRecommender(DataModel dataModel)
-					throws TasteException {
-				return new RandomRecommender(dataModel);
-			}
-		};
-	}
+
 }

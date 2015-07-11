@@ -7,7 +7,6 @@ import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.eval.IRStatistics;
 import org.apache.mahout.cf.taste.eval.RecommenderIRStatsEvaluator;
 import org.apache.mahout.cf.taste.impl.eval.GenericRecommenderIRStatsEvaluator;
-import org.apache.mahout.cf.taste.impl.model.GenericBooleanPrefDataModel;
 import org.apache.mahout.cf.taste.impl.model.file.FileDataModel;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.slf4j.Logger;
@@ -19,24 +18,21 @@ public class App
     public static void main( String[] args )
     {
     	//String smallinput = "/home/lukas/comstock/data/d";
-    	String ml100k = "/home/lukas/Downloads/ml-100k/u.data";
+    	//String ml100k = "/home/lukas/Downloads/ml-100k/u.data";
     	String mlratings = "/home/lukas/Downloads/ml-latest-small/ratings.csv";
     	String input = mlratings;
-    	int precisionat = 5;
-    	double evaluationPercentage = 1.0;
+    	int precisionat = 20;
+    	double evaluationPercentage = 1;
     	double threshhold = -1;
     	try {
 			DataModel dataModel = new FileDataModel(new File(input));
 			RecommenderIRStatsEvaluator evaluator = new GenericRecommenderIRStatsEvaluator();
 			Logger log = LoggerFactory.getLogger(App.class);
-			Evaluator recommenderfactory = new Evaluator(); 
+			RecommenderFactory recommenderfactory = new RecommenderFactory(); 
 			//recommenderfactory.recall(dataModel);
 			IRStatistics itemirstats = null;
-			GenericBooleanPrefDataModel booleanDataModel = new GenericBooleanPrefDataModel(dataModel);
-			//float pref = booleanDataModel.getMaxPreference();
 			
-			
-			itemirstats = evaluator.evaluate(recommenderfactory.itembased(), 
+			itemirstats = evaluator.evaluate(recommenderfactory.likellr(), 
 					null, 
 					dataModel, 
 					null,
