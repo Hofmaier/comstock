@@ -212,7 +212,6 @@ public class LLRRecommender implements Recommender {
 			strbuilder.append(" " + iter2.next().getItemID());
 		}
 		
-		
 		strbuilder.append("\n");
 		
 		strbuilder.append("llr:");
