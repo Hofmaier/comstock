@@ -93,4 +93,39 @@ According to the description of the parameter relevanceThreshold the items whose
   URL =  	"http://dx.doi.org/10.1561/1100000009",
 }
 \
-  In order to minimize the memory footprint Mahout provides it's own implementation of a map.has and the key is a long primitive instead of an object. This saves memory  
+  In order to minimize the memory footprint Mahout provides it's own implementation of a map.has and the key is a long primitive instead of an object. This saves memory
+
+
+
+\subsection{Baseline Algorithm}
+\label{sec:baselinealgorithm}
+
+We compare the co-occurence based recommender to an item-based recommender. 
+
+\subsection{Results}
+\label{sec:results}
+\begin{figure}
+  \centering
+\begin{tikzpicture}
+\begin{axis}[
+ybar,
+%enlargelimits=0.45,
+legend style={at={(0.5,-0.15)},
+anchor=north,legend columns=-1},
+ylabel={Recall/Precision},
+symbolic x coords={Precision,Recall},
+xtick=data,
+%ybar=5pt,% configures ‘bar shift’
+%bar width=9pt,
+nodes near coords,
+nodes near coords align={vertical},
+]
+\addplot coordinates {(Precision,0.0028) (Recall,0.00315)}; 
+\addplot coordinates {(Precision,0.0175) (Recall,0.0079)};
+
+\legend{itembased,co-coccurence with preferences}
+\end{axis}
+\end{tikzpicture} 
+  \caption{Precision and recall comparison of an item-itembased recommonder and the cooccurrence based. The result setsize is 10}
+  \label{fig:results}
+\end{figure}

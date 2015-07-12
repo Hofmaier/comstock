@@ -262,6 +262,16 @@ The co-occurence based recommender takes Boolean preferences as input. In order 
 
 The co-occurence based recommender for the MovieLens data uses three \glspl{indicator}.
 
+\begin{description}
+\item[Co-occurence user likes] A described in section \ref{sec:dataset} we generated a user action history with ``like'' actions. We calculate the log-likelihood strengths between all items and use the last interactions as query.
+\item[User ratings] We use the preference values to calculate the log-likelihood similarity between all items.
+\item[Tags] We use the tags associated with an item to compute a tag \gls{indicator} matrix. We use the tags associated with the user to create a query.
+\end{description}
+
+We created three recommenders. We measure precision and recall first with the recommender ``1.indicator'' that only considers co-occurence of user likes. Then we add the indicator ``user ratings'' to the multimodal recommender ``2 indicators'' and then we use all 3 indicators to retieve a \gls{topn} (``3. indicators''). 
+
+We measure precision and recall at $N=10$. Hence we retrieve a list of 10 items. Relevant items are the 5 best rated items above a threshold of $\mu + \sigma$ all user ratings.
+
 \pgfplotsset{width=7cm}
 \begin{figure}
   \centering
@@ -271,52 +281,26 @@ xbar,
 xmin=0,
 xmax=0.11,
 width=12cm,
-height=6.5cm,
-enlarge y limits=1,
+height=11cm,
+enlarge y limits=0.3,
 xlabel={Precision},
-symbolic y coords={random,toppopular,itembased},
+symbolic y coords={3 indicators,2 indicators,1 indicator,itembased,toppopular,random},
 ytick=data,
 x tick label style={/pgf/number format/fixed}
 ]
 
-\addplot coordinates {(0.0035,random) (0.0626,toppopular) (0.0864,itembased)};
+\addplot coordinates {(0.00035,random) (0.0626,toppopular) (0.0864,itembased) (0.0524,1 indicator) (0.077,2 indicators) (0.0804,3 indicators)};
+\addplot coordinates {(0.00054,random) (0.0636,toppopular) (0.0874,itembased) (0.0447,1 indicator) (0.072,2 indicators) (0.078,3 indicators)};
+\legend{Precision, Recall};
 \end{axis}
 \end{tikzpicture} 
-\caption{Precision comparison of recommender algorithsm, random generated recommendations, Top Popular and itembased with precision at 5 and $N$ = 5 (number of recommended items)}
+\caption{Precision comparison of recommender algorithsm, random generated recommendations, Top Popular and itembased with precision at 10 and $N$ = 10 (number of recommended items)}
   \label{fig:precisionrecallvalues}
 \end{figure}
 
-An itembased recommender engine achieves an average precision value of 0.00358. This seems a small value but if we return randomly generated recommendations we get a precision of 0.00095. Hence an itembased recommender improves the precision with a factor of 3. Figure \ref{fig:precisionrecallvalues} shows the comparison of the two measurements. We used the movielens data set for this evaluation (see section \ref{sec:dataset}).
+Figure \ref{fig:precisionrecallvalues} shows the comparison of \gls{coocc} based recommender with one, two and three indicators with the baseline algorithms from section \ref{sec:baseline}.
+The multimodal co-coccurence  achieves an average precision and recall of 8 and 7.8 percent. This seems low. The recommender rarely recommends an item that the user liked explicitly. On the other hand we do not know if the recommended items are appealing to the user if he never rated them.
 
-\subsection{Baseline Algorithm}
-\label{sec:baselinealgorithm}
+The evaluation shows that the quality of the recommender increases when we take more indicators into account. If we use just the user action ``like'' precision and recall are 5.2 and 4.5 percent. If we use user ratings and tags as indicator precision and recall are  8 and 7.8 percent. That an increase of 53 and 73 percent.
 
-We compare the co-occurence based recommender to an item-based recommender. 
-
-\subsection{Results}
-\label{sec:results}
-\begin{figure}
-  \centering
-\begin{tikzpicture}
-\begin{axis}[
-ybar,
-%enlargelimits=0.45,
-legend style={at={(0.5,-0.15)},
-anchor=north,legend columns=-1},
-ylabel={Recall/Precision},
-symbolic x coords={Precision,Recall},
-xtick=data,
-%ybar=5pt,% configures ‘bar shift’
-%bar width=9pt,
-nodes near coords,
-nodes near coords align={vertical},
-]
-\addplot coordinates {(Precision,0.0028) (Recall,0.00315)}; 
-\addplot coordinates {(Precision,0.0175) (Recall,0.0079)};
-
-\legend{itembased,co-coccurence with preferences}
-\end{axis}
-\end{tikzpicture} 
-  \caption{Precision and recall comparison of an item-itembased recommonder and the cooccurrence based. The result setsize is 10}
-  \label{fig:results}
-\end{figure}
+Compared to the baseline algorithms the \gls{coocc} based recommender achieves the second best results. It performs better than the non-personalized TopPopular algorithm and slightly worse than the itembased algorithm. The reason for this is the lack of a relevancy score for the similarities. The itembased algorithms considers the similirity value. The search engine does not have this information. Either a item id is part of a indicator field or not. This circumstance could be improved by using payloads in Solr. Another interesting fact is that the non-personalized algorithm almost match the quality of the more sophisticated approaches. Compared to randomly generated recommendations the \gls{coocc} improves the quality with a factor of about 250.
