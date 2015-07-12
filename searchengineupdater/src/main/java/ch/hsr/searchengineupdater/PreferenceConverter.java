@@ -37,6 +37,7 @@ public class PreferenceConverter {
 				}
 				userlikes.put(userid, ids);
 			}
+			log.info("finished 2likes conversion");
 			return new GenericBooleanPrefDataModel(userlikes);
 		} catch (TasteException e) {
 			log.error("DataModel contains no users");

@@ -34,7 +34,7 @@ public class App
         ItemSimilarity tagsimilarity = new LogLikelihoodSimilarity(tagDataModel);
         
         PreferenceConverter converter = new PreferenceConverter();
-        DataModel likes = converter.pref2like(dataModel);
+        DataModel likes = converter.pref2like(dataModel, 4.0f);
         ItemSimilarity llrsimilarity = new LogLikelihoodSimilarity(likes);
         
         List<SolrInputDocument> documents = inputfactory.createSolrDocs(dataModel, tagsimilarity, similarity, llrsimilarity);
