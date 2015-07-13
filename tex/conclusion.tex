@@ -1,0 +1,27 @@
+\section{Conclusion}
+\label{sec:conclusion}
+
+We have built a prototype of a co-occurence based, multimodel recommender.
+A large amount of work was required to convert formats between the user logs the Apache Mahout and Apache Solr.
+
+The proposed design by \cite{Dunning14} includes the application of the technologies Apache Solr, Apache Mahout und Apache Spark. We did not have make descision about the similarity metrics or the used recommender algorithm. This simplifies the development process and lowers the entry barrier for developer without a strong mathematical background. 
+
+Unfortunatly \cite{Dunning14} does not descibe an evaluation method for the proposed design. We evaluated the recommnender with the accuracy metrics precision and recall. The usefulness of these metrics depends on the definition of relevant items. We defined items that the user has given a high rating as relevant. The evaluation method used in this report penalizes items that the user never has rated or even seen. 
+
+Another problem with precision and recall emerge when the preferences are Boolaen data. We used the MovieLens data set that contains preference values. If the preferences are boolean (like, dislike) we can not pick the $N$ best rated items and have to select them at random.
+
+The evaluation results of the co-occurence based recommender are not overwhelming. Compared to the TopPopular recommender the increase of quality is small. But the evaluation method only considers items that the users already liked as relevant. We do not know how usefull a recommendation for an individual user is. It could be that the co-occurence based recommender is suggesting items that the user never has seen and that are desirable for the user.
+
+We improved the quality of the top-N recommendations list by extending the recommender with an additional indicators. It is possible to extend the recommender with additional indicators, hence the design is flexible.
+
+The calculation of indicators and therefore the update process of the search engine is computational expensive. The two part design of the recommnend allows us to do the heavy lifting upfront. In return the \gls{topn} is performed blazingly fast because Apache Solr is optimized for text retrieval queries. 
+
+The system may be improved throug 
+\begin{description}
+\item[Dithering] 
+\item[Anti-flood] 
+\item[Cross-coooccurence]
+\end{description}
+dithering.
+
+Mahout provides a large set of recommender algorithms. And it is easy to evaluate and compare several algorithms on a specific dataset.

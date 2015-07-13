@@ -1,0 +1,13 @@
+\begin{abstract}
+Building a recommendation engine can be a daunting task. Understanding all possible techniques and choosing the most suitable for the job at hand presupposes that you have a strong mathematical background. To make matters worse the options of algorithms is constantly changing as researchers coming up with new ones. Having said that not all companies can afford to employ an army of data scientist and mathematicens to build a recommender system. They a have to trade-off the development the accuracy of recommender against the development costs. 
+
+This article describes a simple pratical approach. The discussed recommender exploits existing, proved technologies. 
+
+The model is computed with Apache Spark. The list of recommendation is served by the modern scalable search engine Apache Solr.
+
+The behavior of users provide data to predict the relevance of recommendations to individual users. The recommender engine discussed in this article has a two part design.
+Co-occurence can be computed at scale with Apache Mahout's \verb|spark-itemsimilarity| job.
+Recommendations are query results of the search engine Apache Solr.
+
+In this report we evaluate the accuracy of the descibed recommender throug precisoin and recall.
+\end{abstract}
