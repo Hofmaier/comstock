@@ -129,3 +129,17 @@ nodes near coords align={vertical},
   \caption{Precision and recall comparison of an item-itembased recommonder and the cooccurrence based. The result setsize is 10}
   \label{fig:results}
 \end{figure}
+
+
+This article describes a recommender engine based on collaborative filtering. The recommendations are only based on user input. The recommender engine is designed to mixe any number of user actions (clicks, purchases, likes, tags). The ratings of a user and the applied tags will be used to compute recommendations.
+
+
+There are serveral ways to design and build a recommender eninge
+
+\begin{itemize}
+\item Design a custom recommender engine. That approach 
+\item 
+\item Use the service of a high-end machine-learning consultancy. 
+\end{itemize}
+
+ This approach is proposto solve the recommender problem described in \cite{Dunning14}.
