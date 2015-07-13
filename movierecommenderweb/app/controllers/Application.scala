@@ -7,6 +7,9 @@ import play.api.data.Form
 import play.api.libs.json._
 import play.api.Logger
 import model.Movie
+import play.api.db.DB
+import play.api.Play.current
+import play.api.db.Databases
 
 class Application extends Controller {
 
@@ -38,7 +41,25 @@ class Application extends Controller {
     
   }
   def movies = Action {request => 
-    val json = Json.toJson(Movie.list)
+   val database = Databases(
+  driver = "org.sqlite.JDBC",
+  url = "jdbc:sqlite:/home/lukas/comstock/python/movie.db")
+    val conn = database.getConnection()
+    var movies: List[String] = List[String]()
+    try {
+      val stmt = conn.createStatement
+      val rs = stmt.executeQuery("SELECT id as ID, title as Title FROM movie")
+      while (rs.next()) {
+        val title = rs.getString("title")
+        val id = rs.getString("id")
+        //val movie = new Movie(id, title, List("action", "romance"));
+        movies = title::movies
+      }
+    } finally {
+      conn.close()
+    }
+     val json = Json.toJson(movies)
+   
     Ok(json)
     }
   

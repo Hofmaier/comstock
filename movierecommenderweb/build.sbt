@@ -12,6 +12,7 @@ libraryDependencies ++= Seq(
   ws,
   specs2 % Test,
   "org.apache.solr" % "solr-solrj" % "5.1.0",
+  "org.xerial" % "sqlite-jdbc" % "3.8.10.1",
   "org.scalatest" %% "scalatest" % "2.2.1" % "test",
   "org.scalatestplus" %% "play" % "1.4.0-M3" % "test"	
 )

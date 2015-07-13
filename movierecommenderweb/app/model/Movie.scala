@@ -11,14 +11,14 @@ import scala.collection.Iterable
 import scala.collection.JavaConversions.collectionAsScalaIterable
 import java.util.Collection
 
-case class Movie(title: String, tags: List[String])
+case class Movie(id: String, title: String, tags: List[String])
 
 object Movie {
   def doc2movie( doc: SolrDocument) = {
       val title = doc.getFieldValue("title").asInstanceOf[String]
       val tags: String = doc.getFieldValue("tags").asInstanceOf[String]
       val tagarray = tags.split(" ")
-      new Movie(title, tagarray.toList)
+      new Movie("23", title, tagarray.toList)
   }
   
   val list: Seq[Movie] = {
