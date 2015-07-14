@@ -96,6 +96,7 @@ sbt build
 
 \subsection{Apache Spark}
 \label{sec:spark}
+Apache Spark is a parallel execution engine.
 \verb|spark-rowsimilarity| is a script that comes with spark. It takes as input a text file representation of a matrix of sparse vectors. It finds similar rows. The input is in text-delimited form where there are three delimiters used. By default it reads (rowID<tab>columnID1:strength1<space>columnID2:strength2...) The job only supports LLR similarity. This job only supports LLR similarity.
 The input has the following format:
 \begin{verbatim}

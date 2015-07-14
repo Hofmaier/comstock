@@ -23,57 +23,64 @@ The described design has the following benefits
 \item Recommender engine can be extended with additional indicators.
 \end{itemize}
 
-\subsection{Input Data}
-\label{sec:inputdata}
+\subsection{What problem does the recommender solve?}
+\label{sec:problem}
+This section describes the mathematical problem that the \gls{coocc}-based recommender solves.
 
-Many collaborative recommender engines use excplicit user ratings to train their model. Corresponding to \cite{Dunning14} the best choice of input data is history of what a user actually does on a website. The recommender discussed in this article uses two user action actions
+$n$ ist the number of items to recommend. $M$ is a $n \times n$. The rows and the columns represent items. Each cell of $M$ contains a value that represents the similarty between two items. $M$ is symetric and the diagonal of $M$ contains ones. $M$ is called the indicatormatrix. Equation \ref{eq:similaritymatrix} shows an example of an indicator matrix with 4 items.
 
-\begin{itemize}
-\item The user expressed somehow (click, like-button) that he likes the item
-\item Every item is associated with tags. User are able to tag items.
-\end{itemize}
+\begin{equation}
+  \label{eq:similaritymatrix}
+M =\bordermatrix{~ & 1 & 2 & 3 & 4 \cr
+ 1 & 1  & 0.40 & 0.9 & 0.1 \cr
+2 & 0.40 &1  & 0.9 & 0.1 \cr
+ 3& 0.9 & 0.9 &1  & 0.63 \cr
+ 4 & 0.1 & 0.1 & 0.63 &1  \cr}
+\end{equation}
 
-Listing \ref{lst:weblog} shows part of an example log file that capture user actions.
+$h_u$ is a vector of length $n$. It contains an element of every item. The elements are booleans and present interaction of user $u$ with all items. For example equation \ref{eq:history} show an example history for a user who has purchased item 1 and 2.
 
-\lstset{
-basicstyle=\ttfamily,
-columns=fullflexible,
-keepspaces=true,
-captionpos=b
-}
-\begin{lstlisting}[caption={User actions are stored in a web log.},label={lst:weblog}]
-userId,movieId,tag,timestamp,action
-23,103,980730408,,like
-26,104,980731766,,like
-40,1,animation,1306926135,tag
-40,1,fantasy,1306926130,tag
-40,47,dark,1306930201,tag
-35,102,980730769,,like
-\end{lstlisting}
+\begin{equation}
+\label{eq:history}
+h_u =
+\begin{pmatrix}
+ 1 \\
+ 1 \\
+ 0 \\
+ 0 \\
+\end{pmatrix}
+\end{equation}
 
-It makes sense to start recording behavioral data month's before depoying the recommender engine because have to analyze the data and compute the indicator matrix in order to create personalized recommendations.
+To compute recommendation for user $u$ we compute the matrix vector product $r$. $r$ is vector that contains a \gls{preference} predictions for all items.
 
-\begin{figure}
-\centering
-\begin{tikzpicture}[node distance=20mm,
-data/.style={
-rectangle,
-draw,
-thin,
-minimum height=3.5em
-},
-to/.style={->,>=stealth',shorten >=1pt,semithick,font=\footnotesize},
-]
-\node (web) [data] {Web server};
-\node (log) [data,below of = web, align=left] {User actions\\log file};
-\node (browser) [data,left of=web,node distance=50mm] {Webbrowser};
-\draw[to] (web) -- (log);
-\draw[to] (browser) -- node[midway,above] {user actions} (web);
-\end{tikzpicture}
-\caption{The webserver capture user behavior in a log file.}
-\end{figure}
+\begin{align}
+  \label{eq:recommendation}
+r_u &= Mh_u 
+&=
+\begin{pmatrix}
+  1  & 0.40 & 0.9 & 0.1 \\
+ 0.40 &1  & 0.9 & 0.1 \\
+  0.9 & 0.9 &1  & 0.63 \\
+  0.1 & 0.1 & 0.63 &1 \\  
+\end{pmatrix} 
+\begin{pmatrix}
+ 1 \\
+ 1 \\
+ 0 \\
+ 0 \\
+\end{pmatrix}
+&= 
+\begin{pmatrix}
+ 1.4 \\
+ 1.4 \\
+ 1.8 \\
+ 0.2 \\
+\end{pmatrix}
+\end{align}
 
-The user history does not contain explicit preference values. Explicit user preferences are ratings of a user for an item. The user history only contains interactions of users and items. 
+We create a list of all item the user hasn't seen (the ones with zeros in $h_u$) and sort the list according the preference preditions from highest rating to lowest. In other words we return a ranked list of items. This list forms the \gls{topn}. In our exaple we would recommend item 3 followed by item 4.
+
+The log-likelihood ratio is a probabilistic measure of the importance of a cooccurrence.
 
 \subsection{Log-likelihood similarity}
 \label{sec:llr}
@@ -146,7 +153,6 @@ In order to get the similarity between all items we compute the log-likelihood r
   \label{tab:indicatormatrix}
 \end{table}
 
-
 Allthoug item 5 share all users with item 1 and 3, the log-likelihood ratio is 0. Every user purchased item 5. It would not be interesting to recommend item 5 to a user because it is to obious.
 
 \begin{figure}
@@ -181,6 +187,58 @@ userID, action, itemID
 \begin{verbatim}
 itemID1<tab>itemID2:similarityvalue<space>itemID3:similarityvalue
 \end{verbatim}
+
+\subsection{Input Data}
+\label{sec:inputdata}
+
+Many collaborative recommender engines use excplicit user ratings to train their model. Corresponding to \cite{Dunning14} the best choice of input data is history of what a user actually does on a website. The recommender discussed in this article uses two user action actions
+
+\begin{itemize}
+\item The user expressed somehow (click, like-button) that he likes the item
+\item Every item is associated with tags. User are able to tag items.
+\end{itemize}
+
+Listing \ref{lst:weblog} shows part of an example log file that capture user actions.
+
+\lstset{
+basicstyle=\ttfamily,
+columns=fullflexible,
+keepspaces=true,
+captionpos=b
+}
+\begin{lstlisting}[caption={User actions are stored in a web log.},label={lst:weblog}]
+userId,movieId,tag,timestamp,action
+23,103,980730408,,like
+26,104,980731766,,like
+40,1,animation,1306926135,tag
+40,1,fantasy,1306926130,tag
+40,47,dark,1306930201,tag
+35,102,980730769,,like
+\end{lstlisting}
+
+It makes sense to start recording behavioral data month's before depoying the recommender engine because have to analyze the data and compute the indicator matrix in order to create personalized recommendations.
+
+\begin{figure}
+\centering
+\begin{tikzpicture}[node distance=20mm,
+data/.style={
+rectangle,
+draw,
+thin,
+minimum height=3.5em
+},
+to/.style={->,>=stealth',shorten >=1pt,semithick,font=\footnotesize},
+]
+\node (web) [data] {Web server};
+\node (log) [data,below of = web, align=left] {User actions\\log file};
+\node (browser) [data,left of=web,node distance=50mm] {Webbrowser};
+\draw[to] (web) -- (log);
+\draw[to] (browser) -- node[midway,above] {user actions} (web);
+\end{tikzpicture}
+\caption{The webserver capture user behavior in a log file.}
+\end{figure}
+
+The user history does not contain explicit preference values. Explicit user preferences are ratings of a user for an item. The user history only contains interactions of users and items. 
 
 \subsection{Apache Solr}
 \label{sec:solr}

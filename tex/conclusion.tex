@@ -1,7 +1,8 @@
 \section{Conclusion}
 \label{sec:conclusion}
 
-We have built a prototype of a co-occurence based, multimodel recommender.
+We have built a prototype of a co-occurence based, multimodel recommender. Creating a \gls{topn} is very fast because we exploit the capabilities of a optimized search engine. Another advantage is the ability to use collaborative filtering data and content data at the same time in order to increase the accuracy. Mahout \verb|spark-itemsimilarity| job allows us to compute LLR co-coccurence at scale.
+
 A large amount of work was required to convert formats between the user logs the Apache Mahout and Apache Solr.
 
 The proposed design by \cite{Dunning14} includes the application of the technologies Apache Solr, Apache Mahout und Apache Spark. We did not have make descision about the similarity metrics or the used recommender algorithm. This simplifies the development process and lowers the entry barrier for developer without a strong mathematical background. 
