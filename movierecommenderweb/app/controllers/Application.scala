@@ -10,6 +10,8 @@ import model.Movie
 import play.api.db.DB
 import play.api.Play.current
 import play.api.db.Databases
+import java.sql.PreparedStatement
+import java.util.Date
 
 class Application extends Controller {
 
@@ -41,27 +43,52 @@ class Application extends Controller {
     
   }
   def movies = Action {request => 
-   val database = Databases(
-  driver = "org.sqlite.JDBC",
-  url = "jdbc:sqlite:/home/lukas/comstock/python/movie.db")
-    val conn = database.getConnection()
-    var movies: List[String] = List[String]()
+
+    val conn = DB.getConnection()
+    var jsonarr = JsArray()
     try {
       val stmt = conn.createStatement
-      val rs = stmt.executeQuery("SELECT id as ID, title as Title FROM movie")
+      
+      val rs = stmt.executeQuery("SELECT id as ID, title as Title FROM movie LIMIT 5  ")
       while (rs.next()) {
         val title = rs.getString("title")
         val id = rs.getString("id")
-        //val movie = new Movie(id, title, List("action", "romance"));
-        movies = title::movies
+        val json = JsObject(Seq(
+              "title" -> JsString(title),
+              "id" -> JsString(id)
+            ))
+         jsonarr = jsonarr :+ json   
       }
     } finally {
       conn.close()
     }
-     val json = Json.toJson(movies)
-   
-    Ok(json)
+    Ok(jsonarr)
     }
+  
+  case class Like(id: String)
+  
+//  implicit val likeReads: Reads[Like] = new Reads[Like]{
+//    def reads()
+//  }
+
+  def like = Action(BodyParsers.parse.json) { request =>
+    val json:JsValue = request.body
+    val movieid = (json  \ "movieid").as[String]
+     val conn = DB.getConnection()
+    try {
+      val stmt = conn.createStatement
+      val insertstat = "INSERT INTO like VALUES (?,?,?)";
+      val preparedstatement:PreparedStatement = conn.prepareStatement(insertstat);
+      val userid = "1";
+      preparedstatement.setString(1, userid)
+      preparedstatement.setString(2, movieid)
+      preparedstatement.setString(3,"jetzt")
+      preparedstatement.executeUpdate()
+    } finally {
+      conn.close()
+    }
+     Ok("ok")
+  }
   
 }
 

@@ -143,3 +143,30 @@ There are serveral ways to design and build a recommender eninge
 \end{itemize}
 
  This approach is proposto solve the recommender problem described in \cite{Dunning14}.
+
+For example if the user purchased the movies ``Terminator'' and ``Transformers'' w
+
+\begin{equation}
+
+r_u = M h_u = 
+\begin{matrix}
+  1  & 0.40 & 0.9 & 0.1 \\
+2 & 0.40 &1  & 0.9 & 0.1 \\
+ 3& 0.9 & 0.9 &1  & 0.63 \\
+ 4 & 0.1 & 0.1 & 0.63 &1 \\
+\end{matrix}
+
+\begin{matrix}
+ 1 \\
+ 1 \\
+ 0 \\
+ 0 \\
+\end{matrix}
+=
+\begin{matrix}
+ 1.4 \\
+ 1.4 \\
+ 1.8 \\
+ 0.2 \\
+\end{matrix}
+\end{equation}
