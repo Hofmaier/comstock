@@ -82,7 +82,13 @@ For each user, these implementation determine the top n preferences, then evalua
   items whose preference value is at least this value are considered "relevant" for the purposes of computations
 \end{quote}
 
+\section{Log-likelihood ratio}
+\label{sec:llrratio}
+The log-likelihood metric quantifies the propability of how
+unlikely it is that two items interact with the same users is due to chance. The less likely, the more similar we are.
+In order to compute the \gls{llr} ratio of the \gls{coocc} among item $A$ and item $B$ we have to count how many users interacted both with $A$ and $B$, how many users interacted with $A$ without interacting with $B$, how many users interacted with $B$ without interacting with $A$ and how many user interacted with none of them.
 
+ \todo{llr contency table einfuegen und formel fuer llr}
 \section{Infrastructur}
 \label{sec:infrastructur}
 

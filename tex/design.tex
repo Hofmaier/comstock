@@ -23,11 +23,11 @@ The described design has the following benefits
 \item Recommender engine can be extended with additional indicators.
 \end{itemize}
 
-\subsection{What problem does the recommender solve?}
+\subsection{How to compute the top-N recommendations list}
 \label{sec:problem}
 This section describes the mathematical problem that the \gls{coocc}-based recommender solves.
 
-$n$ ist the number of items to recommend. $M$ is a $n \times n$. The rows and the columns represent items. Each cell of $M$ contains a value that represents the similarty between two items. $M$ is symetric and the diagonal of $M$ contains ones. $M$ is called the indicatormatrix. Equation \ref{eq:similaritymatrix} shows an example of an indicator matrix with 4 items.
+$n$ is the number of possible items to recommend. $M$ is a $n \times n$ matrix. The rows and the columns represent items. Each cell of $M$ contains a value that represents the similarty of the row item to the column item. The magnitude of the value determines the strength of similarity. $M$ is symetric and the diagonal of $M$ contains ones. $M$ is called the indicatormatrix. Equation \ref{eq:similaritymatrix} shows an example of an indicator matrix with 4 items.
 
 \begin{equation}
   \label{eq:similaritymatrix}
@@ -38,7 +38,7 @@ M =\bordermatrix{~ & 1 & 2 & 3 & 4 \cr
  4 & 0.1 & 0.1 & 0.63 &1  \cr}
 \end{equation}
 
-$h_u$ is a vector of length $n$. It contains an element of every item. The elements are booleans and present interaction of user $u$ with all items. For example equation \ref{eq:history} show an example history for a user who has purchased item 1 and 2.
+$h_u$ is a vector of length $n$. It contains an element for every item. The elements are booleans and represent interactions of user $u$ with all items. For example equation \ref{eq:history} show an example history for a user who has purchased item 1 and 2.
 
 \begin{equation}
 \label{eq:history}
@@ -51,11 +51,11 @@ h_u =
 \end{pmatrix}
 \end{equation}
 
-To compute recommendation for user $u$ we compute the matrix vector product $r$. $r$ is vector that contains a \gls{preference} predictions for all items.
+To create a \gls{topn} for user $u$ we compute the matrix vector product $r$. $r$ is vector that contains a \gls{preference} predictions for all items.
 
 \begin{align}
   \label{eq:recommendation}
-r_u &= Mh_u 
+r_u &= M h_u 
 &=
 \begin{pmatrix}
   1  & 0.40 & 0.9 & 0.1 \\
@@ -80,39 +80,21 @@ r_u &= Mh_u
 
 We create a list of all item the user hasn't seen (the ones with zeros in $h_u$) and sort the list according the preference preditions from highest rating to lowest. In other words we return a ranked list of items. This list forms the \gls{topn}. In our exaple we would recommend item 3 followed by item 4.
 
-The log-likelihood ratio is a probabilistic measure of the importance of a cooccurrence.
-
-\subsection{Log-likelihood similarity}
+\subsection{How to measure similarity among items?}
 \label{sec:llr}
 
-In order to compute the similarity between two items we use co-occurence or the log likelihood similarity.
-Co-occurence in the context of recommender systems describes the circumstance that two items are similar when the same users interact (like, purchase, etc) interact with them.
+In section \ref{sec:problem} we use a matrix $M$ that contains similarity strength among items. This section describes how $M$ is computed.
 
-The co-occurence based recommender uses the user behavior log in order to compute a similarity model. 
+In order to compute the similarity between two items \cite{Dunning14} proposes to count the \gls{coocc} among two items with respect to a particular user action and then compute the the \gls{llr} ratio of that \gls{coocc}.
 
-\begin{figure}
-\centering
-\begin{tikzpicture}[node distance=40mm,
-data/.style={
-rectangle,
-draw,
-thin,
-minimum height=3.5em
-},
-to/.style={->,>=stealth',shorten >=1pt,semithick,font=\footnotesize},
-]
-\node (log) [data, align=left] {User actions\\log file};
-\node (spark) [data,right of=log,align=left] {Apache Spark\\LLR job};
-\node (model) [data,right of=spark,align=left] {Similarity\\model};
-\draw[to] (log) -- (spark);
-\draw[to] (spark) -- (model);
-\end{tikzpicture}
-\caption{The {\ttfamily spark-itemsimilarity} job of Apache Spark computes the LLR similarity based on the user behavior log file.}
-\end{figure}
+\gls{coocc} is the number of times a pair of items appear together in some user's action history. For instance, if there are 5 users who purchased both items $A$ and $B$ then $A$ and $B$ co-occur 5 times. \gls{coocc} is indicates similarity. The more two items turn up togheter, the more related they probably are.
 
- The log-likelihood similiarity is based on the number of users (or tags) in common between two items \cite{montgomery}. According to \cite{Dunning93} the log-likelihood similiarity is suitable for data that only captures the interaction and no preference values between users and items. 
+The \gls{llr} ratio is a probabilistic measure of the importance of a \gls{coocc}. 
 
-Compared to the Jaccard coefficient \cite{Hartung} the log-likelihood-based similarity computes higher similarites for anomalous co-occurences than for items that occur in every user history. The log-likelihood similarity  is the probability that two users share the same items because the items are similar and not due to chance. It finds important cooccurence and filters out the coinidental. For a detailed explanation of the math involved see \cite{Dunning93}. 
+Co-occurence in the context of the recommender engine could be user-item interaction (like, purchase, etc) and tag-item associations is the number of same users that interact with them.
+
+According to \cite{Dunning93} the log-likelihood similiarity is suitable for data that only captures the interaction and no preference values between users and items. 
+Compared to the Jaccard coefficient \cite{Hartung} the log-likelihood-based similarity computes higher similarites for anomalous co-occurences than for items that occur in every user history. The log-likelihood similarity  is the probability that two users share the same items because the items are similar and not due to chance. It finds important cooccurence and filters out the coinidental. For a detailed explanation of the math involved see appendix and \cite{Dunning93}. 
 
 We describe the log-likelihood-based similarity with a small example dataset. Suppose we analyse the following web log of user purchases represented as a table (see appendix of raw web log).
 
@@ -120,10 +102,10 @@ We describe the log-likelihood-based similarity with a small example dataset. Su
 \begin{center}
 \begin{tabular}{rllll}
  & 101 & 102 & 103 & 104\\
-1 & x & x & x & \\
-2 & x &  & x & x\\
-3 & x & x & x & \\
-4 &  & x & x & x\\
+1 & x & x & x &  \\
+2 & x &   & x & x\\
+3 & x & x & x &  \\
+4 &   & x & x & x\\
 5 & x & x & x & x\\
 \end{tabular}
 \end{center}
@@ -132,16 +114,35 @@ We describe the log-likelihood-based similarity with a small example dataset. Su
 \end{table}
 
 Table \ref{tbl:llr} shows the purchases of four users for five items. The items are represented with ids 1-4 and the users with ids 101 - 104.
-In the example dataset of table \ref{tbl:llr} the items 1 and 2 are similar because they purchased the same items. 
+In the example dataset of table \ref{tbl:llr} the items 1 and 2 are similar because they were purchased by the same users. 
 
-In order to get the similarity between all items we compute the log-likelihood ratio strength for every item pair. This will produce a $5 \times 5$ indicator matrix. Table \ref{tab:indicatormatrix} shows the indicator matrix for the sample dataset from table \ref{tbl:llr}
+In order to get the similarities between all items we count the \gls{coocc} of purchases for all item pairs. This leads to the \gls{indicatorm} shown in table \ref{tab:cooccurencematrix}.
 
 \begin{table}
   \centering
 \begin{center}
 \begin{tabular}{rrrrrr}
- & 1 & 2 & 3 & 4 & 5\\
-1 &  & 0.40 & 0.81 & 0.63 & 0\\
+  & 1 & 2 & 3 & 4 & 5\\
+1 & 4 & 2 & 3 & 2 & 3\\
+2 & 2 & 3 & 2 & 1 & 3\\
+3 & 3 & 2 & 3 & 2 & 3\\
+4 & 2 & 1 & 2 & 3 & 3\\
+5 & 3 & 3 & 3 & 3 & 4\\
+ &  &  &  &  & \\
+\end{tabular}
+\end{center}
+  \caption{Co-occurence matrix for item purchases}
+  \label{tab:cooccurencematrix}
+\end{table}
+
+In the next step we compute the log-likelihood ratio strength of the \glspl{coocc} for every item pair. This will produce a $5 \times 5$ \gls{indicatorm}. Table \ref{tab:indicatormatrix} shows the \gls{indicatorm} for the sample dataset from table \ref{tbl:llr}
+
+\begin{table}
+  \centering
+\begin{center}
+\begin{tabular}{rrrrrr}
+  & 1 & 2 & 3 & 4 & 5\\
+1 &   & 0.40 & 0.81 & 0.63 & 0\\
 2 & 0.40 &  & 0.40 & 0.63 & 0\\
 3 & 0.81 & 0.40 &  & 0.63 & 0\\
 4 & 0.63 & 0.63 & 0.63 &  & 0\\
@@ -168,25 +169,70 @@ to/.style={->,>=stealth',shorten >=1pt,semithick,font=\footnotesize},
 ]
 \node (hist) [data, align=left] {User actions\\history};
 \node (co) [data,right of=hist,align=left] {Co-occurence};
-\node (in) [data,right of=spark,align=left] {LLR\\indicator\\matrix};
+\node (in) [data,right of=co,align=left] {LLR\\indicator\\matrix};
 \draw[to] (hist) -- (co);
 \draw[to] (co) -- (in);
 \end{tikzpicture}
 \caption{To compute the indicator matrix {\ttfamily spark-itemsimilarity} computes the co-occurence  of user actions and then compute the indicator matrix with the log-likelihood strengths.}
 \end{figure}
 
-Apache Mahout provides an implemenation of log-likelihood similarity with the class \verb|LogLikelihoodSimilarity|. Calculation the the log-likelihood similarity is computationally expensive. In order to compute the co-occurence at the scale of big data Apache Spark provides the \verb|spark-itemsimilarity| job \cite{Schelter}. 
+
+\subsubsection{Log-likelihood similarity implementation}
+\label{sec:llrimpl}
+
+Apache Mahout provides an implemenation of log-likelihood similarity with the class \verb|LogLikelihoodSimilarity|. Unfortunatly the \verb|LogLikelihoodSimilarity| is a non-distributed implementation. The computation of the \gls{coocc} of every item pair can be distributed by applying the MapReduce programming model as follows:
+\begin{description}
+\item[Map] Determine all \glspl{coocc} for one user's history and yield a pair of items for each \gls{coocc}
+\item[Reduce] Count for each item all \glspl{coocc} and yield a vector with all items and the corresponding \gls{coocc}.
+\end{description}
+. It would take too long to calculate the indicator matrix for  a dataset with over 10 million items. In order to compute the \gls{llr} similarity at the scale of big data Apache Mahout provides the \verb|spark-itemsimilarity| job. With the \verb|spark-itemsimilarity| job the indicator matrix can be computed in $O(n)$ \cite{Schelter}. 
 
 Apache Spark is a cluster computer framework. It allows user programs to load data into a cluster's memory. It is well suited to machine learning algorithms \cite{Karau}.
 
-Once we have deployed Apache Spark the \verb|spark-itemsimilarity| job can create a similarity model. The input text file has to be in the following format:
+To run \verb|spark-itemsimilarity| we have to deploy Apache Spark and and start it in standalone mode with the script \verb|start-master.sh|. Once startet the script will print a URL which we can pass the \verb|spark-itemsimilarity| job as ``master'' argument and the job can connect to the cluster. \verb|spark-itemsimilarity| is a command line job and we can start it from the mahout shell.
+
+\begin{verbatim}
+./mahout spark-itemsimilarity --input $infile --output $outfile
+\end{verbatim}
+
+The input text file has to be in the following format:
 \begin{verbatim}
 userID, action, itemID
 \end{verbatim}
-\verb|spark-itemsimilarity| will output an indicator matrix created by comparing every user's interactions with every other user. The job will output the standard text version of a distributed row matrix.
+\verb|spark-itemsimilarity| will output an indicator matrix created by collecting and counting all \glspl{coocc} and calculating the \gls{llr} ratio strenght. The output will be a text file that represents the indicator matrix as sparse vectors for every item. For every item we get the similarities to all other items.
 \begin{verbatim}
 itemID1<tab>itemID2:similarityvalue<space>itemID3:similarityvalue
 \end{verbatim}
+
+In our demo application we have written a python script to fetch the data from the sqlite3 database and transform to the Spark input format.
+The co-occurence based recommender uses the user behavior log in order to compute a similarity model. 
+
+\begin{figure}
+\centering
+\begin{tikzpicture}[node distance=40mm,
+data/.style={
+rectangle,
+draw,
+thin,
+minimum height=3.5em
+},
+to/.style={->,>=stealth',shorten >=1pt,semithick,font=\footnotesize},
+]
+\node (log) [data, align=left] {User actions\\log file};
+\node (spark) [data,right of=log,align=left] {Apache Spark\\LLR job};
+\node (model) [data,right of=spark,align=left] {Similarity\\model};
+\draw[to] (log) -- (spark);
+\draw[to] (spark) -- (model);
+\end{tikzpicture}
+\caption{The {\ttfamily spark-itemsimilarity} job of Apache Spark computes the LLR similarity based on the user behavior log file.}
+\end{figure}
+
+
+\subsection{Using more than one type of behavior}
+\label{sec:multimodal}
+
+Most collaborative filtering algorithm use only exlicit or implicit ratings to compute similarity.
+But we can improve the performance of the recommender engine by using multiple types of user action. In addition to likes we could use tag-associations to compute the similariy. In table \ref{tab:llr} we count co-occurence of items in a user' purchase action history. Instead of the action history we could use tags that are associated items. We count the co-occurence of items associated with a tag. This. Suppose we compute a indicator matrix based on likes $M_l$ and one based on tag associations $M_t$.
 
 \subsection{Input Data}
 \label{sec:inputdata}
@@ -252,6 +298,8 @@ The reason why we deploy a search engine in order to make recommendations is tha
 
 \subsection{Connection of a recommender and a search engine}
 \label{sec:relation}
+
+A common approach to users for coming up with good queries is to think of words that would likely appear in a relevant document, and to use those words as query.
 
 There are similarities between weighting of indicator scores and the mathematics that underlie text retrival engines
 

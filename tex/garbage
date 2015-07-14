@@ -170,3 +170,12 @@ r_u = M h_u =
  0.2 \\
 \end{matrix}
 \end{equation}
+
+usersdescribes the circumstance that two items are similar when the same
+ The similiarity we use is based on the number of users (or tags) in common between two items \cite{montgomery}.
+
+  Calculation the the log-likelihood similarity is computationally expensive.
+  The job will output the standard text version of a distributed row matrix.
+
+
+  will use to connect to   Once we have deployed Apache Spark the \verb|spark-itemsimilarity| job can calculate the indicator matrix. 
