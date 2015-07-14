@@ -17,7 +17,7 @@
 		$scope.movies = [
 		                 {
 		                     "id": "1",
-		                     "title": "Toy Story (1995)",
+		                     "title": "Local Story (1995)",
 		                     "like": false,
 		                     "tags":["fantasy", "pixar", "animation"]
 		                   },
@@ -35,18 +35,34 @@
 		                   }];
 		$http.get('/movies').success(function(data){
 			$scope.movies = data;
-		})
+		});
+		
 	$scope.addTag = function(movie, tag){
 		movie.tags.push(tag);
 		
-	}
+	};
+		
+	$scope.likeClick = function(movie){
+		$scope.like = true;
+		$http.post('/like', {movieid:movie.id}).
+		success(function(data, status, headers, config) {
+			console.log("send like");
+			  });
+			$scope.userlike = "test";
+			
+		};
+		
 	});
 	app.controller('Tag', function($scope){
 		$scope.tag = "";
 	})
-	app.controller('Movie', function($scope){
-		$scope.likeClick = function(){
+	app.controller('Movie', function($scope, $http){
+		$scope.likeClick = function(movie){
 			$scope.like = true;
+			$http.post('/like', {movieid:movie.id}).
+			  success(function(data, status, headers, config) {
+				  console.log("send like");
+			  });
 			$scope.userlike = "test";
 			
 		}
