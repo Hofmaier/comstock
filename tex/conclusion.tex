@@ -3,7 +3,19 @@
 
 We have built a prototype of a co-occurence based, multimodel recommender. Creating a \gls{topn} is very fast because we exploit the capabilities of a optimized search engine. Another advantage is the ability to use collaborative filtering data and content data at the same time in order to increase the accuracy. Mahout \verb|spark-itemsimilarity| job allows us to compute LLR co-coccurence at scale.
 
+\gls{coocc} is suitable because we can compute the \gls{indicatorm} distributet on Apache Spark.
+
 A large amount of work was required to convert formats between the user logs the Apache Mahout and Apache Solr.
+
+
+The described design has the following benefits
+\begin{itemize}
+\item Exploit existing search engine technology.
+\item The search engine can be used for conventional search as well.
+\item Users can use search engine to search for metadata.
+\item Recommender engine can be extended with additional indicators.
+\end{itemize}
+
 
 The proposed design by \cite{Dunning14} includes the application of the technologies Apache Solr, Apache Mahout und Apache Spark. We did not have make descision about the similarity metrics or the used recommender algorithm. This simplifies the development process and lowers the entry barrier for developer without a strong mathematical background. 
 

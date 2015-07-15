@@ -178,4 +178,25 @@ usersdescribes the circumstance that two items are similar when the same
   The job will output the standard text version of a distributed row matrix.
 
 
-  will use to connect to   Once we have deployed Apache Spark the \verb|spark-itemsimilarity| job can calculate the indicator matrix. 
+  will use to connect to   Once we have deployed Apache Spark the \verb|spark-itemsimilarity| job can calculate the indicator matrix.
+
+In order to compute the \gls{llr} similarity at the scale of big data Apache Mahout provides the \verb|spark-itemsimilarity| job.
+
+
+Listing \ref{lst:weblog} shows part of an example log file that capture user actions.
+
+\begin{lstlisting}[caption={User actions are stored in a web log.},label={lst:weblog}]
+userId,movieId,tag,timestamp,action
+23,103,980730408,,like
+26,104,980731766,,like
+40,1,animation,1306926135,tag
+40,1,fantasy,1306926130,tag
+40,47,dark,1306930201,tag
+35,102,980730769,,like
+\end{lstlisting}
+
+The user expresses that he likes an item. The user interface provides a button to like a movie.
+
+The user history does not contain explicit preference values. It only contains interactions of users and items.
+ Hence we remove all items contained in the user's action history. Then sort the remaining items according to their  $r$
+ 

@@ -9,7 +9,7 @@
 \usetikzlibrary{positioning}
 \usepackage{amsmath}
 \usepackage{amsfonts}
-\usetikzlibrary{arrows,shapes,positioning,shadows,trees}
+\usetikzlibrary{arrows,shapes,positioning,shadows,trees,er}
 \usepackage{listings}
 \usepackage[xindy]{glossaries}
 \usepackage{todonotes}
@@ -32,6 +32,14 @@
 
 \input{glossary}
 \begin{document}
+
+\lstset{
+basicstyle=\ttfamily,
+columns=fullflexible,
+keepspaces=true,
+captionpos=b
+}
+
 \maketitle
 \tableofcontents
 
@@ -56,6 +64,8 @@ The following software was used to build the evaluator, the search engine update
 \item Play version 2.4. We used the Play framework because it runs on the JVM and we can use the Solr Client Library in the Webserver.
 \item AngularJS. Javascript Framework. Used for WebGUI.
 \item Mahout 0.9 
+\item sqlite3 3.8.7.4 We use sqlite3 because there are JDBC driver and a python interface.
+\item python 2.7.9. Python is used to transform the date from sqlite3 to the input format of Apache Spark.
 \end{itemize}
 
 \section{Apache Mahout}
@@ -89,6 +99,30 @@ unlikely it is that two items interact with the same users is due to chance. The
 In order to compute the \gls{llr} ratio of the \gls{coocc} among item $A$ and item $B$ we have to count how many users interacted both with $A$ and $B$, how many users interacted with $A$ without interacting with $B$, how many users interacted with $B$ without interacting with $A$ and how many user interacted with none of them.
 
  \todo{llr contency table einfuegen und formel fuer llr}
+
+\section{Workflows}
+\label{sec:workflows}
+
+\begin{figure}
+\centering
+\begin{tikzpicture}[node distance=20mm,
+data/.style={
+rectangle,
+draw,
+thin,
+minimum height=3.5em
+},
+to/.style={->,>=stealth',shorten >=1pt,semithick,font=\footnotesize},
+]
+\node (web) [data] {Web server};
+\node (log) [data,below of = web, align=left] {User actions\\log file};
+\node (browser) [data,left of=web,node distance=50mm] {Webbrowser};
+\draw[to] (web) -- (log);
+\draw[to] (browser) -- node[midway,above] {user actions} (web);
+\end{tikzpicture}
+\caption{The webserver capture user behavior in a log file.}
+\end{figure}
+
 \section{Infrastructur}
 \label{sec:infrastructur}
 

@@ -1,7 +1,8 @@
 \section{Introduction}
 \label{sec:intro}
 
-Recommender engines have become very common in recent years. They help consumers or users of a platform to discover unknown article or items by suggesting them a list of items that are likely to be appealing to them. 
+A Recommender systems helps consumers to discover unknown article from an overwhelimg set of choices by suggesting them a list of items that are likely to be appealing to them. The recommended item should match the user's personal taste.
+Recommender systems have become very common in recent years. 
 For instance, they help users of a on-demand movie provider to find movies they might like. Without a recommender the user would have to choose among 100000 titles manually. Because it is not possible for a user to look at every movie separtly in order to decide if he likes it the provider infers the users preferences and present him a list of movies he might like. This list is referred as \gls{topn}. If a user has purchased the movies "Terminator 2" and "Transformers" the recommender engine will present the act him a list of other similar action movies (e.g. Matrix, Iron Man).
 E-commerce sites that deploy a recommender engine can have a increase in sales of 8 - 13 percent \footnote{http://www.practicalecommerce.com/articles/1942-10-Questions-on-Product-Recommendations}.
 
@@ -50,23 +51,16 @@ The design proposed by \cite{Dunning14} has the following goals:
 \item A small-scale development teams can build a recommender engine.
 \item To build the model use algorithms that can be computed at scale with distributed computation framework, such as Apache Hadoop or Apache Spark. We compute \gls{coocc} with Apache Spark. The system is \gls{scalable} for big data.
 \item Use the search capabilities of a existing search engine, such as Apache Solr, to produce the \gls{topn}. The search engine indexes items represented as documents instead of text documents. The fields of these documents indicate similarity to other items indicators The query is composed of the users past actions that we want to recommend. The depoyment of a search engine saves development costs. In addition it is easier to scale the system. Producing a \gls{topn} with an neighborhood based collaborative filtering algorithm is similar to process a document query in a text retrieval system. 
-\item The top-N recommender task should be fast.
+\item The top-N recommender task should be fast. Recommendations are generated instantly and online by quering the text search engine using rescents actions of the user as query. Computation of simililarity and the update of the text search engine is done offline, ahead of time.
 \item The recommender engine takes user behavior instead of explicit user ratingsas input. Because only a small subset of users are willing to rate items and user behavior is the best clue to what they want the input data should be collected user behavior, like clicking or purchasing. User behavior interaction are only associations between a user and an item and there is no notion of strength represented as number. This associations are Boolean preferences. It exist or it doesn't exist. 
 \item Several types (e.g. clicks, views, purchases) of user actions are used to improve recommendations and it is possible to extend the recommender with additional \glspl{indicator}. Many existing collaborativ filtering algorithms use only one user activity to model preference \cite{ferrel}. In addition metadata, like tags, are used to improve the accuracy. The recommender combines collaborative filtering and content-based filtering(hybrid approach). A recommender that uses a variety of user activities is called a \gls{multimodal} recommender. 
 \end{itemize}
 
 There are academic approaches that produce recommendations with a smaller error but these require complex mathematical models. The focus of this approach is not to minimize the error but to make the development and deployment of a recommender more approachable.
 
-\subsection{Two-parts design}
-
-The recommender described in this article is divided in two parts.
-\begin{itemize}
-\item Computation of simililarity and the update of the text search engine is done offline, ahead of time.
-\item Recommendations are generated instantly by quering the text search engine using rescents actions of the user.
-
-\end{itemize}
-
 \subsection{Overview}
+
+In order describe the practical recommender we built a small demo web application that illustrates the concepts by example.
 
 Section \ref{sec:design} will describe the design of the co-occurence based recommender. The similiarity metric log-likelihood ratio is described and a short introduction for the search engine Apache Solr is given.
 
