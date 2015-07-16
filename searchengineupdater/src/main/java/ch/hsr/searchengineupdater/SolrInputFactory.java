@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 
 public class SolrInputFactory {
 	Logger log = LoggerFactory.getLogger(SolrInputFactory.class);
+	String tagcsvpath = "/home/lukas/Downloads/ml-latest-small/tags.csv";
 	public List<SolrInputDocument> createSolrDocs(DataModel dm,
 			ItemSimilarity tagsim, 
 			ItemSimilarity similarity, ItemSimilarity llrSimilarity) throws TasteException {
@@ -72,7 +73,7 @@ public class SolrInputFactory {
 			BufferedReader br = new BufferedReader(in);
 			String line;
 			DataReader datareader = new DataReader();
-			MultiMap movieId2tags = datareader.movieId2tags();
+			MultiMap movieId2tags = datareader.movieId2tags(tagcsvpath);
 			ArrayList<SolrInputDocument> solrDocument = new ArrayList<SolrInputDocument>();
 			while ((line = br.readLine()) != null) {
 				String[] str = line.split(",");

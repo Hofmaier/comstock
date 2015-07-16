@@ -10,31 +10,25 @@ import org.apache.commons.collections.map.MultiValueMap;
 
 public class DataReader {
 	
-	 public MultiMap movieId2tags(){
+	 public MultiMap movieId2tags(String filepath){
 		try {
-			String line;
-			Reader in = new FileReader("/home/lukas/Downloads/ml-latest-small/tags.csv");
-			BufferedReader br = new BufferedReader(in);
+			BufferedReader br = new BufferedReader(new FileReader(filepath));
+			
 			MultiMap movieId2tags = new MultiValueMap();
+			String line;
 			while((line = br.readLine()) != null){
-				
 				String[] str = line.split(",");
-				
 				if (str[0].equals("userId")){
 					continue;
 					}
-				Integer movieid = Integer.parseInt(str[1]);
-				String tag = str[2];
-				movieId2tags.put(movieid, tag);
-		
+				movieId2tags.put(Integer.parseInt(str[1]), str[2]);
 			}
 			br.close();
 			return movieId2tags;
 		}
-			
 			catch(IOException e){
 				e.printStackTrace();
-				return null;
+				return new MultiValueMap();
 			}		
 	}
 

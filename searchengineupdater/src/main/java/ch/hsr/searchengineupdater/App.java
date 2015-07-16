@@ -7,7 +7,6 @@ import java.util.List;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.model.file.FileDataModel;
 import org.apache.mahout.cf.taste.impl.similarity.LogLikelihoodSimilarity;
-import org.apache.mahout.cf.taste.impl.similarity.PearsonCorrelationSimilarity;
 import org.apache.mahout.cf.taste.impl.similarity.UncenteredCosineSimilarity;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
@@ -23,6 +22,7 @@ public class App
     {
     	try {
     	String mlratings = "/home/lukas/Downloads/ml-latest-small/ratings.csv";
+    
     	String tagdataset = "/home/lukas/comstock/data/tagid-itemid.csv";
     	String input = mlratings;
     	
