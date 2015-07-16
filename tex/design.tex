@@ -1,293 +1,54 @@
 \section{Co-occurence based multimodal recommender}
 \label{sec:design}
+\begin{figure}
+  \centering
+  \begin{tikzpicture}
+    \node (rec) at(180:2cm) {Recommender};
+    \node (hist) at(60:2cm){History};
+    \node (se) at(300:2cm){Search engine};
+    \node (user) [left of=rec,node distance=3cm]{User};
+    \draw[->, >=latex] (170:2cm) 
+    arc (170:80:2cm);
+  \end{tikzpicture}
+  \caption{Simplified dataflow diagram}
+  \label{fig:topndataflow}
+\end{figure}
 
 The recommender we discuss will use past user behavior and metadata of items to compute the similarity between all items. Hence it is a hybrid recommender.
- 
-We use co-occurence to compute the similarity of two items. The recommenders looks up items that appear in the recent user history and presents the user a list with similar items.
-
-All movies are stored as documents in a database (we use Apache Solr). The documents contain metainformation (e.g. title, tags, genre) about the items in fields. The fields are indexed by a search engine and made searchable.
-
-In addidion the document has indicator fields. Indicator fields contain id's of that are found to be worth recommending in the co-occurence analysis.
+We use \gls{coocc} to compute the similarity of two items. Because search engine are a way of finding similar items we deploy the recommender queries a search engine in order to find similar items to the one the user already exressed some interest.
 
 The recommender discussed in this article has to parts.
 \begin{description}
 \item[Analysing User Input (offline)] In this part the user action are analised in order to compute the similarities of items. The similiarities are stored as indicators.
 \item[Generate personalized recommendations (online)] A systems formats a list of recommended items.
 \end{description}
-We will first discuss the computation of similarities.
 
 
-\subsection{Record user behavior}
-\label{sec:inputdata}
+The process of procucing a \gls{topn} can be divided into several steps. Figure \ref{fig:topndataflow} illustrates this process.
 
-\begin{figure}
-  \centering
-     \includegraphics[width=0.9\textwidth]{collectinginput}
-  \caption{The user can like and tag movies with the web front end. The user actions are recorded by the web server.}
-  \label{fig:gui}
-\end{figure}
+\begin{enumerate}
+\item User requests a \gls{topn}.
+\item The recommenders looks up items that appear in the recent user history.
+\item Based on the user' action history the recommender forms a for the search engine query.
+\item The search engine return ranked list of items according to the query.
+\item The recommender removes item already known to the user and present him a \gls{topn}.
+\end{enumerate}
 
-The \gls{rec} suggests items that are similar to the ones the user already liked in the past. In order to build a model for similarity we need to train the recommender with some data about the items.
-This section will descibe the type of input data we use  in our demo application. The report will refer to this type of input data. 
+All movies are stored as documents in a NoSQL database (we use Apache Solr). The documents contain metainformation (e.g. title, tags, genre) about the items in fields. The fields are indexed by a search engine and made searchable.
 
-Many collaborative filtering recommender engines use excplicit user ratings to train their model. Explicit user ratings of a user for an item are expressed by numbers (e.g. a rating is a number between 1 and 5). The use of explicit feedback has some drawbacks.
-\begin{itemize}
-\item Only a small subset of users will rate items. This leads to a model that is skewed against user who like to rate.
-\item The majority of ratings are associated with a small fraction of the most popular items \cite{Anderson}. As a result it is less likely that unknown items show up in the \gls{topn}. This behavior is undesirable because the goal of the recommender is to present items the a user would not find on his own.
-\end{itemize}
+In addidion the document has indicator fields. Indicator fields contain id's of that are found to be worth recommending in the co-occurence analysis.
 
+The section first describes the used input data. Than we explain the process of computing \gls{topn} and how similarity between items is measured and how the computation is implemented
 
-Corresponding to \cite{Dunning14} the best choice of input data is the history of what a user actually does on a website. Hence the input data should consist of recorded \glspl{useraction} (e.g. purchase, view, like, tag).
-
-In our demo web application we record two different user actions:
-\begin{description}
-\item[like]  Users can express their positive feedback for a movie by clicking on a ``like'' button (the \gls{like} action is an explicit rating. We use it instead of a purchase or view action in order to keep the GUI simple).
-\item[tag] User can \gls{tag} items. Every item can be associated with a list of \glspl{tag}.
-\end{description}
-The recorded like and tag action are later used to compute similarity between items.
-Figure \ref{fig:gui} shows the simplistic user interface of our demo web app.
-
-The web browser sends every user action to the web server. The web server provides a REST Web API that receives the \glspl{useraction} as HTTP \verb|Post| request and saves them to a sqlite3 \footnote{https://www.sqlite.org/} database.
-
-In order to analyse the data later we want to retrieve the action history $h_u$ for a particular user $u$ for a defined action and a list of tags for every item. Hence we have to structure the data accordingly. Figure \ref{fig:er} shows the entity relationship diagram for the user actions \gls{like} and \gls{tag}
-
-\tikzset{multi  attribute/.style={attribute ,double  distance=1.5pt}}
-\tikzset{derived  attribute/.style={attribute ,dashed}}
-\tikzset{total/.style={double  distance=1.5pt}}
-\tikzset{every  entity/.style={draw=blue , fill=blue!20}}
-\tikzset{every  attribute/.style={draw=yellow, fill=yellow!20, node distance=1.0cm}}
-\tikzset{every  relationship/.style={draw=red, fill=red!20}}
-
-\begin{figure}
-\centering
-\begin{tikzpicture}[node distance=2.0cm]
-  \node[entity](user){user};
-  \node[relationship](like)[above right of=user]{ like } edge (user);
-  \node[attribute](date2)[above of=like]{ date } edge (like);
-  \node[entity](item)[below right of=like]{item} edge (like);
-  \node[relationship](tag)[below right of=user]{ tag } edge (user) edge (item);
-  \node[attribute](text)[below right of=tag]{ text } edge (tag);
-  \node[attribute](date1)[below left of=tag]{ date } edge (tag);
-  \end{tikzpicture}
-\caption{The data model allows us to retrieve the action history for every user. Like and tag form associations of user with item.}
-\label{fig:er}
-\end{figure}
-
-It makes sense to start recording behavioral data month's before depoying the recommender engine because the recommender engine has to analyze the data and build a model of similarty among items in order to create personalized recommendations.
-
-\subsection{How to compute the top-N recommendations list?}
-\label{sec:problem}
-This section gives a mathematical description of the top-N recommendation task and hence it describes the computations required to produce recommendations. The description refers to the \gls{rec}.
-
-Suppose we have a metric to express similarity between two items as a numerical value and the magnitude of the value determines the strength of similarity. If we compute the similarity for every item pair in a set of $n$ items, we can represent the result in a matrix $M$. $M$ is a $n \times n$ matrix. Each row and each column contains the similarities between one particular item and all other items. $M$ is symetric across the diagonal because the similarity between $a$ and $b$ must be the same as between $b$ and $a$ (commutativity). The diagonal of $M$ contains the value for maximum similarity because this value represents the comparison of an item to itself. $M$ is called the \gls{indicatorm}. Equation \ref{eq:similaritymatrix} shows an example of an \gls{indicatorm} with 4 items.
-
-\begin{equation}
-  \label{eq:similaritymatrix}
-M =\bordermatrix{~ & 1 & 2 & 3 & 4 \cr
- 1 & 1  & 0.40 & 0.9 & 0.1 \cr
-2 & 0.40 &1  & 0.9 & 0.1 \cr
- 3& 0.9 & 0.9 &1  & 0.63 \cr
- 4 & 0.1 & 0.1 & 0.63 &1  \cr}
-\end{equation}
-Further we represent a user action history for each user as vector $h_l$ of length $n$. $h_l$ contains an element for every item. The user's interactions with an item are represented as binary values in $h_l$. If the there is an interaction with an item in the history the value or the corresponding element is 1. Otherwise the value is 0. For example equation \ref{eq:history} shows a user's action history for the action ``like''. He has liked item 1 and 2.
-
-\begin{equation}
-\label{eq:history}
-h_l =
-\begin{pmatrix}
- 1 \\
- 1 \\
- 0 \\
- 0 \\
-\end{pmatrix}
-\end{equation}
-
-To create a \gls{topn} for user $u$ we compute the matrix vector product of $M$ and $h_l$. The result $r$ is a vector of length $n$, that contains a value for every item. $r$ maps every item to a value that indicates how likely an item is of interest to user $u$. According to equation \ref{eq:recommendation} item 3 correspond to the best recommendation.
-
-\begin{align}
-  \label{eq:recommendation}
-r_u &= M h_u 
-&=
-\begin{pmatrix}
-  1  & 0.40 & 0.9 & 0.1 \\
- 0.40 &1  & 0.9 & 0.1 \\
-  0.9 & 0.9 &1  & 0.63 \\
-  0.1 & 0.1 & 0.63 &1 \\  
-\end{pmatrix} 
-\begin{pmatrix}
- 1 \\
- 1 \\
- 0 \\
- 0 \\
-\end{pmatrix}
-&= 
-\begin{pmatrix}
- 1.4 \\
- 1.4 \\
- 1.8 \\
- 0.2 \\
-\end{pmatrix}
-\end{align}
-
-In order to create the complete \gls{topn} based on the vector $r$ we create a list of all item the user hasn't seen (the ones with zeros in $h_u$) and sort the list according the values in $r$. Items with a high value appear first in the list. In other words we return a ranked list of items. This list forms the \gls{topn}. In the example of equation \ref{eq:recommendation} the recommender would return item 3 followed by item 4. Item 1 and to are removed because the apear in the user's history.
-
-\subsection{How to measure similarity among items?}
-\label{sec:llr}
-
-In section \ref{sec:problem} we use a matrix $M$ that contains similarity strength among items. This section describes how $M$ is computed.
-
-In order to compute the similarity between two items \cite{Dunning14} proposes to count the \gls{coocc} among two items with respect to a particular user action and then compute the the \gls{llr} ratio of that \gls{coocc}.
-
-\gls{coocc} is the number of times a pair of items appear together in some user's action history. For instance, if there are 5 users who purchased both items $A$ and $B$ then $A$ and $B$ co-occur 5 times. \gls{coocc} is indicates similarity. The more two items turn up togheter, the more related they probably are.
-
-The \gls{llr} ratio is a probabilistic measure of the importance of a \gls{coocc}. 
-
-Co-occurence in the context of the recommender engine could be user-item interaction (like, purchase, etc) and tag-item associations is the number of same users that interact with them.
-
-According to \cite{Dunning93} the log-likelihood similiarity is suitable for data that only captures the interaction and no preference values between users and items. 
-Compared to the Jaccard coefficient \cite{Hartung} the log-likelihood-based similarity computes higher similarites for anomalous co-occurences than for items that occur in every user history. The log-likelihood similarity  is the probability that two users share the same items because the items are similar and not due to chance. It finds important cooccurence and filters out the coinidental. For a detailed explanation of the math involved see appendix and \cite{Dunning93}. 
-
-We describe the log-likelihood-based similarity with a small example dataset. Suppose we analyse the following web log of user purchases represented as a table (see appendix of raw web log).
-
-\begin{table}
-\begin{center}
-\begin{tabular}{rllll}
- & 101 & 102 & 103 & 104\\
-1 & x & x & x &  \\
-2 & x &   & x & x\\
-3 & x & x & x &  \\
-4 &   & x & x & x\\
-5 & x & x & x & x\\
-\end{tabular}
-\end{center}
-\caption{Example dataset. The columns represent the user interaction with an item. Items are named 1 - 4 and users 101 - 104}
-\label{tbl:llr}
-\end{table}
-
-Table \ref{tbl:llr} shows the purchases of four users for five items. The items are represented with ids 1-4 and the users with ids 101 - 104.
-In the example dataset of table \ref{tbl:llr} the items 1 and 2 are similar because they were purchased by the same users. 
-
-In order to get the similarities between all items we count the \gls{coocc} of purchases for all item pairs. This leads to the \gls{indicatorm} shown in table \ref{tab:cooccurencematrix}.
-
-\begin{table}
-  \centering
-\begin{center}
-\begin{tabular}{rrrrrr}
-  & 1 & 2 & 3 & 4 & 5\\
-1 & 4 & 2 & 3 & 2 & 3\\
-2 & 2 & 3 & 2 & 1 & 3\\
-3 & 3 & 2 & 3 & 2 & 3\\
-4 & 2 & 1 & 2 & 3 & 3\\
-5 & 3 & 3 & 3 & 3 & 4\\
- &  &  &  &  & \\
-\end{tabular}
-\end{center}
-  \caption{Co-occurence matrix for item purchases}
-  \label{tab:cooccurencematrix}
-\end{table}
-
-In the next step we compute the log-likelihood ratio strength of the \glspl{coocc} for every item pair. This will produce a $5 \times 5$ \gls{indicatorm}. Table \ref{tab:indicatormatrix} shows the \gls{indicatorm} for the sample dataset from table \ref{tbl:llr}
-
-\begin{table}
-  \centering
-\begin{center}
-\begin{tabular}{rrrrrr}
-  & 1 & 2 & 3 & 4 & 5\\
-1 &   & 0.40 & 0.81 & 0.63 & 0\\
-2 & 0.40 &  & 0.40 & 0.63 & 0\\
-3 & 0.81 & 0.40 &  & 0.63 & 0\\
-4 & 0.63 & 0.63 & 0.63 &  & 0\\
-5 & 0 & 0 & 0 & 0 & \\
- &  &  &  &  & \\
-\end{tabular}
-\end{center}
-  \caption{Indicator matrix for item purchases}
-  \label{tab:indicatormatrix}
-\end{table}
-
-Allthoug item 5 share all users with item 1 and 3, the log-likelihood ratio is 0. Every user purchased item 5. It would not be interesting to recommend item 5 to a user because it is to obious.
-
-\begin{figure}
-\centering
-\begin{tikzpicture}[node distance=40mm,
-data/.style={
-rectangle,
-draw,
-thin,
-minimum height=3.5em
-},
-to/.style={->,>=stealth',shorten >=1pt,semithick,font=\footnotesize},
-]
-\node (hist) [data, align=left] {User actions\\history};
-\node (co) [data,right of=hist,align=left] {Co-occurence};
-\node (in) [data,right of=co,align=left] {LLR\\indicator\\matrix};
-\draw[to] (hist) -- (co);
-\draw[to] (co) -- (in);
-\end{tikzpicture}
-\caption{To compute the indicator matrix {\ttfamily spark-itemsimilarity} computes the co-occurence  of user actions and then compute the indicator matrix with the log-likelihood strengths.}
-\end{figure}
-
-
-\subsubsection{Log-likelihood similarity implementation}
-\label{sec:llrimpl}
-
-Apache Mahout provides an implemenation of log-likelihood similarity with the class \verb|LogLikelihoodSimilarity|. Unfortunatly the \verb|LogLikelihoodSimilarity| is a non-distributed implementation. It would take too long to calculate the indicator matrix for a dataset with over 10 million items and we would have difficulties to load all data into the memory. 
-
-The computation of the \gls{coocc} of every item pair can be distributed by applying the MapReduce programming model as follows:
-\begin{description}
-\item[Map] Determine all \glspl{coocc} for one user's history and yield a pair of items for each \gls{coocc}
-\item[Reduce] Count for each item all \glspl{coocc} and yield a vector with all items and the corresponding \gls{coocc}.
-\end{description}
-\todo{bild map reduce einfuegen}
-
-This task can run in parallel on different nodes on a cluster computer framework, such as Apache Spark. Hence the computation of the \gls{indicatorm} is \gls{scalable}.
-In order to compute the \gls{llr} similarity distributed, Apache Mahout provides the \verb|spark-itemsimilarity| job. \verb|spark-itemsimilarity| connects to a Spark cluster and computes the \gls{indicatorm} in parallel.  With the \verb|spark-itemsimilarity| job the indicator matrix can be computed in $O(n)$ \cite{Schelter}. 
-
-Apache Spark is a cluster computer framework. It allows user programs to load data into a cluster's memory. It is well suited to machine learning algorithms \cite{Karau}.
-
-To run \verb|spark-itemsimilarity| we have to deploy Apache Spark and and start it in standalone mode with the script \verb|start-master.sh|. Once startet the script will print a URL which we can pass the \verb|spark-itemsimilarity| job as ``master'' argument and the job can connect to the cluster. \verb|spark-itemsimilarity| is a command line job and we can start it from the mahout shell.
-
-\begin{verbatim}
-./mahout spark-itemsimilarity --input $infile --output $outfile
-\end{verbatim}
-
-The input text file has to be in the following format:
-\begin{verbatim}
-userID, action, itemID
-\end{verbatim}
-\verb|spark-itemsimilarity| will output an indicator matrix created by collecting and counting all \glspl{coocc} and calculating the \gls{llr} ratio strenght. The output will be a text file that represents the indicator matrix as sparse vectors for every item. For every item we get the similarities to all other items.
-\begin{verbatim}
-itemID1<tab>itemID2:similarityvalue<space>itemID3:similarityvalue
-\end{verbatim}
-
-In our demo application we have written a python script to fetch the data from the sqlite3 database and transform to the Spark input format.
-The co-occurence based recommender uses the user behavior log in order to compute a similarity model. 
-
-\begin{figure}
-\centering
-\begin{tikzpicture}[node distance=40mm,
-data/.style={
-rectangle,
-draw,
-thin,
-minimum height=3.5em
-},
-to/.style={->,>=stealth',shorten >=1pt,semithick,font=\footnotesize},
-]
-\node (log) [data, align=left] {User actions\\log file};
-\node (spark) [data,right of=log,align=left] {Apache Spark\\LLR job};
-\node (model) [data,right of=spark,align=left] {Similarity\\model};
-\draw[to] (log) -- (spark);
-\draw[to] (spark) -- (model);
-\end{tikzpicture}
-\caption{The {\ttfamily spark-itemsimilarity} job of Apache Spark computes the LLR similarity based on the user behavior log file.}
-\end{figure}
+\input{inputdata}
+\input{topnmath}
+\input{similarity}
 
 \subsection{Using more than one type of behavior}
 \label{sec:multimodal}
 
 Most collaborative filtering algorithm use only explicit or implicit ratings to compute similarity.
-But we can improve the performance of the recommender engine by using multiple types of user actions. In addition to likes we could use tag-associations to compute the similariy. In table \ref{tab:llr} we count co-occurence of items in a user' purchase action history. Instead of the action history we could use tags that are associated items. We count the co-occurence of items associated with a tag. This. 
+But we can improve the performance of the recommender engine by using multiple types of user actions. In addition to likes we could use tag-associations to compute the similariy. In table \ref{tbl:llr} we count co-occurence of items in a user' purchase action history. Instead of the action history we could use tags that are associated items. We count the co-occurence of items associated with a tag. This. 
 
 Suppose we compute a \gls{indicatorm} based on likes $M_l$ and one based on tag associations $M_t$. An $h_l$ is a user's history of ``likes'' and $h_t$ is the user's tag history. Then we can compute the recommendations $r$ with
 
@@ -304,16 +65,51 @@ In our demo web application we use ``likes'' and tags but virtually all user act
 Before we describe why we use a the search engine Apache Solr to deploy a recommendation engine, we give a short introduction to Apache Solr.
 
 Apache Solr is a search engine that is optimized to search large volumes of text-centric data and return results sorted by relevance. It is built on Apache Lucene, an information retrieval library \cite{grainger}. Solr stores the documents in a flat structure and we can search for terms in the documents.
-Solr returns documents sorted in descending order by a score that indicates the strength of the match of the document to the query. In a relational database a row either matches a query or it does not. That is the reason why a search engine is more suitable for our use case.
 
 The reason why we deploy a search engine in order to make recommendations is that Solr scores documents based on the presence of query terms in the document similar to a recommendations engine based on the presence of indicator.
 
-\subsection{Connection of a recommender and a search engine}
+\subsection{Why can we use a search engine to produce \gls{topn}?}
 \label{sec:relation}
 
-A common approach to users for coming up with good queries is to think of words that would likely appear in a relevant document, and to use those words as query.
+The \gls{rec} uses a search engine to produce a \gls{topn}. We can deploy a search engine in order to provide recommendations because there are similarities between the computation of top-N recommendation task and the retrieval or a ranked search result set.
+ This section explains why the deployment of a search engine is suitable for the top-N recommendation task.
 
-There are similarities between weighting of indicator scores and the mathematics that underlie text retrival engines
+A search engine enables user to search a collection of documents for specified keywords in a query.It returns an sorted set of documents that match the query. The result set is sorted by relevancy. The top documents are the most relevant to the query. It does this by calculating a similarity scorbetween each document and the query and then sorts the result by this score. The score indicates the strength of the match against the query. This is one of the main use cases where search engines shine compared to relational databases. There a row either matches a query or it does not. 
+
+One way to calculate the similarity between a query and a document is to use the vector space model.
+In the vector space model each document $d$ and the query $q$ are represented as a vectors $\vec{v}(d)$ and $\vec{v}(q)$. The vector contains an element for each term. It maps every term $t$ to a tf-idf weight. tf-idf reflects how important a term is to document in the collection (see \cite{Manning} for a detailed description). 
+The similarity score between two items is equal to the dot product.
+\begin{equation}
+  \label{eq:score}
+  \text{score}(d,q) = \vec{v}(d) \cdot \vec{v}(q)
+\end{equation}
+
+We represent the collection of document as matrix $M$. Each row of $M$ is a document vector. If we want to compute all relevancy scores the search engine would compute the matrix vector product of $M$ and $q$.
+\begin{equation}
+  \label{eq:ser}
+  r = M q
+\end{equation}
+
+This is similar to the computation for the \gls{topn} described in section \ref{sec:problem}. If we replace the query $q$ with the user's action history $h_u$ and the documents vectors  $\vec{v}(d)$with item \gls{llr} indicators the search engine will return a top-N recommendation list. All we have to do is remove the items allready known to the user.
+
+\todo{tabell einfuegen mit vergleich search engine fuer documents similarity engine fuer item}o
+
+\begin{table}
+\begin{center}
+\begin{tabular}{ll}
+ search engine & \gls{rec}\\
+ document & item\\
+ query & user's action history \\
+term & itemid \\
+\end{tabular}
+\end{center}
+\caption{Comparison of }
+\label{tbl:llr}
+\end{table}
+
+In addition 
+
+A common approach to users for coming up with good queries is to think of words that would likely appear in a relevant document, and to use those words as query.
 
 Let's say we represent the recommendations for a user as a vector $r$. The elements of $r$ are floating point number which represent preferences for all items for a user. Most collaborative filtering type recommenders compute $r$ by multiplying the given preferences of a user $h_u$ with the indicator matrix $M$ for all items. In our example $M$ contains the similarity values of the log-likelihood cooccurence.
 

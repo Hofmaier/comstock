@@ -1,0 +1,55 @@
+\subsection{How to compute the top-N recommendations list?}
+\label{sec:problem}
+This section gives a mathematical description of the top-N recommendation task and hence it describes the computations required to produce recommendations. The description refers to the \gls{rec}.
+
+Suppose we have a metric to express similarity between two items as a numerical value and the magnitude of the value determines the strength of similarity. If we compute the similarity for every item pair in a set of $n$ items, we can represent the result in a matrix $M$. $M$ is a $n \times n$ matrix. Each row and each column contains the similarities between one particular item and all other items. $M$ is symetric across the diagonal because the similarity between $a$ and $b$ must be the same as between $b$ and $a$ (commutativity). The diagonal of $M$ contains the value for maximum similarity because this value represents the comparison of an item to itself. $M$ is called the \gls{indicatorm}. Equation \ref{eq:similaritymatrix} shows an example of an \gls{indicatorm} with 4 items.
+
+\begin{equation}
+  \label{eq:similaritymatrix}
+M =\bordermatrix{~ & 1 & 2 & 3 & 4 \cr
+ 1 & 1  & 0.40 & 0.9 & 0.1 \cr
+2 & 0.40 &1  & 0.9 & 0.1 \cr
+ 3& 0.9 & 0.9 &1  & 0.63 \cr
+ 4 & 0.1 & 0.1 & 0.63 &1  \cr}
+\end{equation}
+Further we represent a user action history for each user as vector $h_l$ of length $n$. $h_l$ contains an element for every item. The user's interactions with an item are represented as binary values in $h_l$. If the there is an interaction with an item in the history the value or the corresponding element is 1. Otherwise the value is 0. For example equation \ref{eq:history} shows a user's action history for the action ``like''. He has liked item 1 and 2.
+
+\begin{equation}
+\label{eq:history}
+h_l =
+\begin{pmatrix}
+ 1 \\
+ 1 \\
+ 0 \\
+ 0 \\
+\end{pmatrix}
+\end{equation}
+
+To create a \gls{topn} for user $u$ we compute the matrix vector product of $M$ and $h_l$. The result $r$ is a vector of length $n$, that contains a value for every item. $r$ maps every item to a value that indicates how likely an item is of interest to user $u$. According to equation \ref{eq:recommendation} item 3 correspond to the best recommendation.
+
+\begin{align}
+  \label{eq:recommendation}
+r_u &= M h_u 
+&=
+\begin{pmatrix}
+  1  & 0.40 & 0.9 & 0.1 \\
+ 0.40 &1  & 0.9 & 0.1 \\
+  0.9 & 0.9 &1  & 0.63 \\
+  0.1 & 0.1 & 0.63 &1 \\  
+\end{pmatrix} 
+\begin{pmatrix}
+ 1 \\
+ 1 \\
+ 0 \\
+ 0 \\
+\end{pmatrix}
+&= 
+\begin{pmatrix}
+ 1.4 \\
+ 1.4 \\
+ 1.8 \\
+ 0.2 \\
+\end{pmatrix}
+\end{align}
+
+In order to create the complete \gls{topn} based on the vector $r$ we create a list of all item sorted by the values in $r$. Items with a high value appear first in the list. Then we remove all items from the list the user hasn't seen (the ones with zeros in $h_u$). In other words we return a ranked list of items. This list forms the \gls{topn}. In the example of equation \ref{eq:recommendation} the recommender would return item 3 followed by item 4. Item 1 and to are removed because the apear in the user's history.

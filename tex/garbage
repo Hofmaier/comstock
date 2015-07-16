@@ -199,4 +199,24 @@ The user expresses that he likes an item. The user interface provides a button t
 
 The user history does not contain explicit preference values. It only contains interactions of users and items.
  Hence we remove all items contained in the user's action history. Then sort the remaining items according to their  $r$
- 
+
+
+Co-occurence in the context of the recommender engine could be user-item interaction (like, purchase, etc) and tag-item associations is the number of same users that interact with them.
+
+
+According to \cite{Dunning93} the log-likelihood similiarity is suitable for data that only captures the interaction and no preference values between users and items. 
+
+In a relational database a row either matches a query or it does not. That is the reason why a search engine is more suitable for our use case.
+
+ of a document  to the relevancy  order by a score that indicates the strength of the match of the document to the query.
+  is to represent A search engine that uses the vector space model represent each document and the query as a vector.
+
+
+In order to retrieve a ranked relevant documents the search engine assign a similarity score   all documents  calculates the the dot product between $q$ and $d$. The cosine is a measure of similarity between to items.
+Terms with a high frequency of occurence over all documents 
+
+Search engines assign every term in a document a weight.
+
+A search engine ranks the documents matching a query. It computes a score for every matching document with respect to a query.
+
+That is the reason why a search engine is more suitable for our use case.
