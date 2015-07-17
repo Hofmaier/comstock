@@ -220,3 +220,37 @@ Search engines assign every term in a document a weight.
 A search engine ranks the documents matching a query. It computes a score for every matching document with respect to a query.
 
 That is the reason why a search engine is more suitable for our use case.
+The rows are items. The columns show which users liked which item
+
+\begin{table}
+  \centering
+\begin{center}
+\begin{tabular}{rrrrrr}
+  & 1 & 2 & 3 & 4 & 5\\
+1 & 4 & 2 & 3 & 2 & 3\\
+2 & 2 & 3 & 2 & 1 & 3\\
+3 & 3 & 2 & 3 & 2 & 3\\
+4 & 2 & 1 & 2 & 3 & 3\\
+5 & 3 & 3 & 3 & 3 & 4\\
+ &  &  &  &  & \\
+\end{tabular}
+\end{center}
+  \caption{Co-occurence matrix for item purchases}
+  \label{tab:cooccurencematrix}
+\end{table}
+\begin{table}
+  \centering
+\begin{center}
+\begin{tabular}{rrrrrr}
+  & 1 & 2 & 3 & 4 & 5\\
+1 &   & 0.40 & 0.81 & 0.63 & 0\\
+2 & 0.40 &  & 0.40 & 0.63 & 0\\
+3 & 0.81 & 0.40 &  & 0.63 & 0\\
+4 & 0.63 & 0.63 & 0.63 &  & 0\\
+5 & 0 & 0 & 0 & 0 & \\
+ &  &  &  &  & \\
+\end{tabular}
+\end{center}
+  \caption{Indicator matrix for item purchases}
+  \label{tab:indicatormatrix}
+\end{table}

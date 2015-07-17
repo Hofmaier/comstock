@@ -58,6 +58,15 @@ The design proposed by \cite{Dunning14} has the following goals:
 
 There are academic approaches that produce recommendations with a smaller error but these require complex mathematical models. The focus of this approach is not to minimize the error but to make the development and deployment of a recommender more approachable.
 
+\subsection{Used technology}
+\label{sec:tech}
+
+In order to build a small demo application recommender with a search engine we use existing technology.
+
+Apache Mahout is a top-level Apache project that provide implementations of collaborative filtering algorithms among other machine learning techniques. The development began in 2008 \cite{Owen}. It provides server Apache Spark jobs in order to process large amount of data. We used it because it's Spark support and because it's well documented.
+
+Apache Spark is a cluster computer framework. It allows user programs to load data into a cluster's memory. It is well suited to machine learning algorithms \cite{Karau}.
+
 \subsection{Overview}
 
 In order describe the practical recommender we built a small demo web application that illustrates the concepts by example.

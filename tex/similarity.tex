@@ -5,15 +5,21 @@ In the last section (\ref{sec:problem}) we use a matrix $M$ that contains simila
 
 In order to compute the similarity between two items we count the \gls{coocc} among two items with respect to a particular user action and then compute the the \gls{llr} ratio of that \gls{coocc}.
 
-\gls{coocc} in the context of a recommender system is the number of times a pair of items appear together in some user's action history. For instance, if there are 5 users who both liked items $A$ and $B$ then $A$ and $B$ co-occur 5 times. \gls{coocc} is indicates similarity. The more two items turn up togheter, the more related they probably are. We can count the \gls{coocc} of items with respect to any action or entity. For instance, we can count how many times two items are applied to the same tag or are purchased by the same users.
+\subsubsection{Co-occurence}
+\label{sec:cooccurence}
 
-\gls{llr} is a probabilistic measure of the importance of a \gls{coocc}. The \gls{llr} similarity  is the probability that two users share the same items because the items are similar and not due to chance. It finds important \gls{coocc} and filters out the coinidental. Hence it avoids that the result is skewed against popular items. Compared to the Jaccard coefficient \cite{Hartung} the log-likelihood-based similarity computes higher similarites for anomalous co-occurences than for items that occur in every user history. For a detailed explanation of the math involved see appendix and \cite{Dunning93}. 
+Co-occurence in the context of a recommender system is the number of times a pair of items appear together in some user's action history. For instance, if there are 5 users who all liked items $A$ and $B$ then $A$ and $B$ co-occur 5 times. Coocurrence indicates similarity. The more two items turn up togheter, the more related they probably are. We can count the \gls{coocc} of items with respect to any action or entity. For instance, we can count how many times two items are associated with the same tag or purchased by the same users.
+
+\subsubsection{Log-likelihood ratio}
+\label{sec:llrs}
+
+\gls{llr} is a probabilistic measure of the importance of a \gls{coocc}. The \gls{llr} similarity  is the probability that two users share the same items because the items are similar and not due to chance. It finds important \gls{coocc} and filters out the coincidental. Hence it avoids that the result is skewed against popular items \cite{Dunning93}. Compared to the Jaccard coefficient \cite{Hartung} the log-likelihood-based similarity computes higher similarites for anomalous co-occurences than for items that occur in every user history. For a detailed explanation of the math involved see appendix and \cite{Dunning93}. 
 
 According to \cite{Dunning14} using the \gls{llr} ratio of the \gls{coocc} has several advantages.
 \begin{itemize}
 \item It yields good results for data that only captures the interaction and no \glspl{preference} \cite{Dunning93}.
 \item The similarity is not skewed against popular items.
-\item We can use distributed MapReduce based algorithms to compute the \glspl{coocc}.
+\item We can use distributed MapReduce based algorithms to compute the \glspl{coocc}. Hence the computation of the \gls{llr} similarity is \gls{scalable}.
 \end{itemize}
 
 \begin{figure}
@@ -37,7 +43,14 @@ to/.style={->,>=stealth',shorten >=1pt,semithick,font=\footnotesize},
 \label{fig:llrworkflow}
 \end{figure}
 
-We describe the log-likelihood-based similarity with a small example dataset. Suppose we analyse the following web log of user purchases represented as a table (see appendix listing \ref{lst:sampledata} of raw web log). We divide the computation of the \gls{indicatorm} in three steps as shown in figure \ref{fig:llrworkflow}.
+\subsubsection{Example}
+\label{sec:llrexample}
+
+We describe the log-likelihood based similarity with a small example dataset. Suppose we analyse the user action history for the action ``like'' given in table \ref{tbl:llr1}. 
+Table \ref{tbl:llr1} shows the likes of four users for five items. The items are represented with ids 1-4 and the users with ids 101 - 104  (see appendix listing \ref{lst:sampledata} for raw web log).
+In the example dataset of table \ref{tbl:llr1} the items 1 and 2 are similar because three users liked both of them.
+
+We compute the \gls{indicatorm} in two steps as shown in figure \ref{fig:llrworkflow}.
 \begin{enumerate}
 \item Count \glspl{coocc}
 \item Compute \gls{llr} of \glspl{coocc}
@@ -55,75 +68,55 @@ We describe the log-likelihood-based similarity with a small example dataset. Su
 \end{tabular}
 \end{center}
 \caption{Example dataset. The columns represent the user interaction with an item. Items are named 1 - 4 and users 101 - 104}
-\label{tbl:llr}
+\label{tbl:llr1}
 \end{table}
 
-Table \ref{tbl:llr} shows the likes of four users for five items. The items are represented with ids 1-4 and the users with ids 101 - 104.
-In the example dataset of table \ref{tbl:llr} the items 1 and 2 are similar because they three users liked both of them.
+In order to get the similarities between all items we count the \gls{coocc} of ``\glspl{like}'' for all item pairs. This leads to the $5 \times 5$ \gls{indicatorm} $C$ shown in equation \ref{eq:coocm}. The rows and the columns are items. $C$ is a similarity comparison of every row of table \ref{tbl:llr1} to every other row.
 
-In order to get the similarities between all items we count the \gls{coocc} of ``\glspl{like}'' for all item pairs. This leads to the $5 \times 5$ \gls{indicatorm} shown in table \ref{tab:cooccurencematrix}. The row and the column are items. This matrix is a similarity comparison of every column of \ref{tbl:llr} to every other column.
+\begin{equation}
+  \label{eq:coocm}
+C =\bordermatrix{~ & 1 & 2 & 3 & 4 & 5 \cr
+1 & 4 & 2 & 3 & 2 & 3 \cr
+2 & 2 & 3 & 2 & 1 & 3 \cr
+3 & 3 & 2 & 3 & 2 & 3 \cr
+4 & 2 & 1 & 2 & 3 & 3 \cr
+5 & 3 & 3 & 3 & 3 & 4 \cr}
+\end{equation}
 
-\begin{table}
-  \centering
-\begin{center}
-\begin{tabular}{rrrrrr}
-  & 1 & 2 & 3 & 4 & 5\\
-1 & 4 & 2 & 3 & 2 & 3\\
-2 & 2 & 3 & 2 & 1 & 3\\
-3 & 3 & 2 & 3 & 2 & 3\\
-4 & 2 & 1 & 2 & 3 & 3\\
-5 & 3 & 3 & 3 & 3 & 4\\
- &  &  &  &  & \\
-\end{tabular}
-\end{center}
-  \caption{Co-occurence matrix for item purchases}
-  \label{tab:cooccurencematrix}
-\end{table}
+In the next step we compute the \gls{llr} ratio strength of the \glspl{coocc} for every item pair. This will again produce a $5 \times 5$ \gls{indicatorm}. Equation \ref{eq:coocm1} shows the \gls{indicatorm} for the sample dataset from table \ref{tbl:llr1}.
 
-In the next step we compute the \gls{llr} ratio strength of the \glspl{coocc} for every item pair. This will produce a $5 \times 5$ \gls{indicatorm}. Table \ref{tab:indicatormatrix} shows the \gls{indicatorm} for the sample dataset from table \ref{tbl:llr}
+\begin{equation}
+  \label{eq:coocm1}
+L =\bordermatrix{~ & 1 & 2 & 3 & 4 & 5 \cr
+1 &   & 0.40 & 0.81 & 0.63 & 0 \cr
+2 & 0.40 &  & 0.40 & 0.63 & 0 \cr
+3 & 0.81 & 0.40 &  & 0.63 & 0 \cr
+4 & 0.63 & 0.63 & 0.63 &  & 0 \cr
+5 & 0 & 0 & 0 & 0 & \cr
+}
+\end{equation}
 
-\begin{table}
-  \centering
-\begin{center}
-\begin{tabular}{rrrrrr}
-  & 1 & 2 & 3 & 4 & 5\\
-1 &   & 0.40 & 0.81 & 0.63 & 0\\
-2 & 0.40 &  & 0.40 & 0.63 & 0\\
-3 & 0.81 & 0.40 &  & 0.63 & 0\\
-4 & 0.63 & 0.63 & 0.63 &  & 0\\
-5 & 0 & 0 & 0 & 0 & \\
- &  &  &  &  & \\
-\end{tabular}
-\end{center}
-  \caption{Indicator matrix for item purchases}
-  \label{tab:indicatormatrix}
-\end{table}
-
-Allthoug item 5 share all users with item 1 and 3, the log-likelihood ratio is 0. Every user purchased item 5. It would not be interesting to recommend item 5 to a user because it is too obious.
+Allthoug item 5 shares all users with item 1 and 3, the log-likelihood ratio is 0 because every user purchased item 5. The goal of collaborative filtering is to show the user items he would not find by himself. Item 5 is popular and a user will probably discover it by looking up a list of items sorted by popularity (this is a form of non-personalized recommendation). Hence Item 5 is not a valuable personal recommendation because we could extract it without a recommender. For this reason the \gls{llr} is suitable similarity metric for a recommender engine.
 
 \subsubsection{Log-likelihood similarity implementation}
 \label{sec:llrimpl}
 
 Apache Mahout provides an implemenation of log-likelihood similarity with the class \verb|LogLikelihoodSimilarity|. Unfortunatly the \verb|LogLikelihoodSimilarity| is a non-distributed implementation. It would take too long to calculate the indicator matrix for a dataset with over 10 million items and we would have difficulties to load all data into the memory. 
 
-The computation of the \gls{coocc} of every item pair can be distributed by applying the MapReduce programming model as follows:
+The computation of the \gls{coocc} of every item pair can be distributed and run in parallel by applying the MapReduce programming model as follows:
 \begin{description}
 \item[Map] Determine all \glspl{coocc} for one user's history and yield a pair of items for each \gls{coocc}
-\item[Reduce] Count for each item all \glspl{coocc} and yield a vector with all items and the corresponding \gls{coocc}.
+\item[Reduce] For each item collect all corresponding item pair of the map phase and count all \glspl{coocc} and yield a vector with all items and the corresponding \gls{coocc}.
 \end{description}
 \todo{bild map reduce einfuegen}
 
 This task can run in parallel on different nodes on a cluster computer framework, such as Apache Spark. Hence the computation of the \gls{indicatorm} is \gls{scalable}.
-In order to compute the \gls{llr} similarity distributed, Apache Mahout provides the \verb|spark-itemsimilarity| job. \verb|spark-itemsimilarity| connects to a Spark cluster and computes the \gls{indicatorm} in parallel.  With the \verb|spark-itemsimilarity| job the indicator matrix can be computed in $O(n)$ \cite{Schelter}. 
-
-Apache Spark is a cluster computer framework. It allows user programs to load data into a cluster's memory. It is well suited to machine learning algorithms \cite{Karau}.
-
-To run \verb|spark-itemsimilarity| we have to deploy Apache Spark and and start it in standalone mode with the script \verb|start-master.sh|. Once startet the script will print a URL which we can pass the \verb|spark-itemsimilarity| job as ``master'' argument and the job can connect to the cluster. \verb|spark-itemsimilarity| is a command line job and we can start it from the mahout shell.
-
+In order to compute the \gls{llr} similarity distributed on a Spark cluster, Apache Mahout provides the \verb|spark-itemsimilarity| job. 
+\verb|spark-itemsimilarity| is a command line job and we can start it from the mahout shell.
 \begin{verbatim}
 ./mahout spark-itemsimilarity --input $infile --output $outfile
 \end{verbatim}
-
+The job connects to the Spark cluster instance defined by the environment variable $MASTER$ and computes the \gls{indicatorm} in parallel. With the \verb|spark-itemsimilarity| job the indicator matrix can be computed in $O(n)$ \cite{Schelter}. 
 The input text file has to be in the following format:
 \begin{verbatim}
 userID, action, itemID
