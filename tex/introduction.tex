@@ -63,7 +63,15 @@ There are academic approaches that produce recommendations with a smaller error 
 
 In order to build a small demo application recommender with a search engine we use existing technology.
 
+A large amount of functionality is provided by two technoligies.
+\begin{itemize}
+\item Apache Mahout
+\item Apache Solr
+\end{itemize}
+
 Apache Mahout is a top-level Apache project that provide implementations of collaborative filtering algorithms among other machine learning techniques. The development began in 2008 \cite{Owen}. It provides server Apache Spark jobs in order to process large amount of data. We used it because it's Spark support and because it's well documented.
+
+Apache Solr is a search engine that is optimized to search large volumes of text-centric data and return results sorted by relevance. It is built on Apache Lucene, an information retrieval library \cite{grainger}. Solr stores the documents in a flat structure and we can search for terms in the documents.
 
 Apache Spark is a cluster computer framework. It allows user programs to load data into a cluster's memory. It is well suited to machine learning algorithms \cite{Karau}.
 

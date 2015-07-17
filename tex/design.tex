@@ -48,7 +48,7 @@ The section first describes the used input data. Than we explain the process of 
 \label{sec:multimodal}
 
 Most collaborative filtering algorithm use only explicit or implicit ratings to compute similarity.
-But we can improve the performance of the recommender engine by using multiple types of user actions. In addition to likes we could use tag-associations to compute the similariy. In table \ref{tbl:llr} we count co-occurence of items in a user' purchase action history. Instead of the action history we could use tags that are associated items. We count the co-occurence of items associated with a tag. This. 
+But we can improve the performance of the recommender engine by using multiple types of user actions. In addition to likes we could use tag-associations to compute the similariy. In table \ref{tbl:llr} we count co-occurence of items in a user's like action history. Instead of the action history we could use tags that are associated items. We count the co-occurence of items associated with a tag.
 
 Suppose we compute a \gls{indicatorm} based on likes $M_l$ and one based on tag associations $M_t$. An $h_l$ is a user's history of ``likes'' and $h_t$ is the user's tag history. Then we can compute the recommendations $r$ with
 
@@ -57,16 +57,7 @@ Suppose we compute a \gls{indicatorm} based on likes $M_l$ and one based on tag 
   r = h_l M_l + h_t M_t
 \end{equation}
 
-In our demo web application we use ``likes'' and tags but virtually all user actions can be used to improve the recommendation
-
-\subsection{Apache Solr}
-\label{sec:solr}
-
-Before we describe why we use a the search engine Apache Solr to deploy a recommendation engine, we give a short introduction to Apache Solr.
-
-Apache Solr is a search engine that is optimized to search large volumes of text-centric data and return results sorted by relevance. It is built on Apache Lucene, an information retrieval library \cite{grainger}. Solr stores the documents in a flat structure and we can search for terms in the documents.
-
-The reason why we deploy a search engine in order to make recommendations is that Solr scores documents based on the presence of query terms in the document similar to a recommendations engine based on the presence of indicator.
+In our demo web application we use ``likes'' and tags but virtually all user actions can be used to improve the recommendation.
 
 \subsection{Why can we use a search engine to produce \gls{topn}?}
 \label{sec:relation}
@@ -74,7 +65,7 @@ The reason why we deploy a search engine in order to make recommendations is tha
 The \gls{rec} uses a search engine to produce a \gls{topn}. We can deploy a search engine in order to provide recommendations because there are similarities between the computation of top-N recommendation task and the retrieval or a ranked search result set.
  This section explains why the deployment of a search engine is suitable for the top-N recommendation task.
 
-A search engine enables user to search a collection of documents for specified keywords in a query.It returns an sorted set of documents that match the query. The result set is sorted by relevancy. The top documents are the most relevant to the query. It does this by calculating a similarity scorbetween each document and the query and then sorts the result by this score. The score indicates the strength of the match against the query. This is one of the main use cases where search engines shine compared to relational databases. There a row either matches a query or it does not. 
+A search engine enables user to search a collection of documents for specified keywords in a query.It returns an sorted set of documents that match the query. The result set is sorted by relevancy. The top documents are the most relevant to the query. This process is called \gls{rankedretrieval}. It does this by calculating a similarity scorbetween each document and the query and then sorts the result by this score. The score indicates the strength of the match against the query. This is one of the main use cases where search engines shine compared to relational databases. There a row either matches a query or it does not. 
 
 One way to calculate the similarity between a query and a document is to use the vector space model.
 In the vector space model each document $d$ and the query $q$ are represented as a vectors $\vec{v}(d)$ and $\vec{v}(q)$. The vector contains an element for each term. It maps every term $t$ to a tf-idf weight. tf-idf reflects how important a term is to document in the collection (see \cite{Manning} for a detailed description). 
@@ -167,9 +158,13 @@ to/.style={->,>=stealth',shorten >=1pt,semithick,font=\footnotesize},
 \end{figure}
 
 
-Another reason why we deploy a search engine is that the application is read-dominant. The recommender will query the data far more often than it will create new documents or update the indicators. Solr is optimized to for executing queries as opposed to storing data.
+\subsection{Integration}
+\label{sec:integration}
+
+\verb|updatesearchengine| will index all movies in Solr.
 
 Solr is used in the offline and the online part of the recommendation engine.
+
 The items and their corresponding similarity indicators from the Apache Spark job are stored with Apache Solr. 
 
 \subsection{Parameters}
