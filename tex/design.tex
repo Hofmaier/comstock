@@ -23,7 +23,6 @@ The recommender discussed in this article has to parts.
 \item[Generate personalized recommendations (online)] A systems formats a list of recommended items.
 \end{description}
 
-
 The process of procucing a \gls{topn} can be divided into several steps. Figure \ref{fig:topndataflow} illustrates this process.
 
 \begin{enumerate}
@@ -47,10 +46,10 @@ The section first describes the used input data. Than we explain the process of 
 \subsection{Using more than one type of behavior}
 \label{sec:multimodal}
 
-Most collaborative filtering algorithm use only explicit or implicit ratings to compute similarity.
-But we can improve the performance of the recommender engine by using multiple types of user actions. In addition to likes we could use tag-associations to compute the similariy. In table \ref{tbl:llr} we count co-occurence of items in a user's like action history. Instead of the action history we could use tags that are associated items. We count the co-occurence of items associated with a tag.
+Most collaborative filtering algorithms use only explicit or implicit ratings to compute similarity.
+But we can improve the performance of the recommender engine by using multiple types of user actions. In addition to likes we could use tag-associations to compute the similariy. In table \ref{tbl:llr} we count co-occurence of items in a user's like-action history. Instead of the action history we could use tags that are associated width items. We count the co-occurence of each items associated with a tag.
 
-Suppose we compute a \gls{indicatorm} based on likes $M_l$ and one based on tag associations $M_t$. An $h_l$ is a user's history of ``likes'' and $h_t$ is the user's tag history. Then we can compute the recommendations $r$ with
+Suppose we compute a \gls{indicatorm} based on likes $M_l$ and one based on tag associations $M_t$. An $h_l$ is a user's history of ``likes'' and $h_t$ is the user's tag history. Then we can compute the recommendation vector (see equation \ref{eq:recommendation}) $r$ with
 
 \begin{equation}
   \label{eq:multi}
@@ -62,77 +61,73 @@ In our demo web application we use ``likes'' and tags but virtually all user act
 \subsection{Why can we use a search engine to produce \gls{topn}?}
 \label{sec:relation}
 
-The \gls{rec} uses a search engine to produce a \gls{topn}. We can deploy a search engine in order to provide recommendations because there are similarities between the computation of top-N recommendation task and the retrieval or a ranked search result set.
+The \gls{rec} uses a search engine to produce a \gls{topn}. We can deploy a search engine in order to provide recommendations because there are similarities between the computation of top-N recommendation task and the retrieval of a ranked search result set.
  This section explains why the deployment of a search engine is suitable for the top-N recommendation task.
 
-A search engine enables user to search a collection of documents for specified keywords in a query.It returns an sorted set of documents that match the query. The result set is sorted by relevancy. The top documents are the most relevant to the query. This process is called \gls{rankedretrieval}. It does this by calculating a similarity scorbetween each document and the query and then sorts the result by this score. The score indicates the strength of the match against the query. This is one of the main use cases where search engines shine compared to relational databases. There a row either matches a query or it does not. 
-
-One way to calculate the similarity between a query and a document is to use the vector space model.
-In the vector space model each document $d$ and the query $q$ are represented as a vectors $\vec{v}(d)$ and $\vec{v}(q)$. The vector contains an element for each term. It maps every term $t$ to a tf-idf weight. tf-idf reflects how important a term is to document in the collection (see \cite{Manning} for a detailed description). 
+\subsubsection{Ranked retrieval}
+A search engine enables user to search a collection of documents for specified keywords in a query. It returns a sorted set of documents that match the query. The result set is sorted by relevancy. The top documents are the most relevant to the query. This process is called \gls{rankedretrieval}. It does this by calculating a similarity score between each document and the query and then sorts the result by this score. The score indicates the strength of the match against the query. This is one of the main use cases where search engines shine compared to relational databases. There a row either matches a query or it does not. 
+\subsubsection{Vector space model}
+One way to calculate the similarity between a query $q$ and a document $d$ is to use the vector space model.
+In the vector space model each document $d$ and the query $q$ are represented as vectors $\vec{v}(d)$ and $\vec{v}(q)$. The vector contains an element for each term. It maps every term $t$ of the collection to a tf-idf weight. tf-idf reflects how important a term is to document in the collection (see \cite{Manning} for a detailed description). 
 The similarity score between two items is equal to the dot product.
 \begin{equation}
   \label{eq:score}
   \text{score}(d,q) = \vec{v}(d) \cdot \vec{v}(q)
 \end{equation}
+In order to create a ranked result set for a query $q$ request the search engine computes $\text{score}(d,q)$ for all documents in the collection. We can form a matrix $C$ with the document vectors as rows. The process of scoring all document can be writen as matrix vector multiplication of $C$ and $q$. 
 
-We represent the collection of document as matrix $M$. Each row of $M$ is a document vector. If we want to compute all relevancy scores the search engine would compute the matrix vector product of $M$ and $q$.
 \begin{equation}
   \label{eq:ser}
-  r = M q
+  r = C q
 \end{equation}
-
-This is similar to the computation for the \gls{topn} described in section \ref{sec:problem}. If we replace the query $q$ with the user's action history $h_u$ and the documents vectors  $\vec{v}(d)$with item \gls{llr} indicators the search engine will return a top-N recommendation list. All we have to do is remove the items allready known to the user.
-
-\todo{tabell einfuegen mit vergleich search engine fuer documents similarity engine fuer item}o
-
-\begin{table}
-\begin{center}
-\begin{tabular}{ll}
- search engine & \gls{rec}\\
- document & item\\
- query & user's action history \\
-term & itemid \\
-\end{tabular}
-\end{center}
-\caption{Comparison of }
-\label{tbl:llr}
-\end{table}
-
-In addition 
-
-A common approach to users for coming up with good queries is to think of words that would likely appear in a relevant document, and to use those words as query.
-
-Let's say we represent the recommendations for a user as a vector $r$. The elements of $r$ are floating point number which represent preferences for all items for a user. Most collaborative filtering type recommenders compute $r$ by multiplying the given preferences of a user $h_u$ with the indicator matrix $M$ for all items. In our example $M$ contains the similarity values of the log-likelihood cooccurence.
-
-\begin{equation}
-  \label{eq:cf}
-  r = h_u M
-\end{equation}
-
-Equations \ref{eq:cf} actually means to compare the user history $h_u$ to the rows of the indicator matrix $M$. This result in a vector $r$ containing a score that indicates the strength of the match of the item to the history $h_p$. The recommender ranks the items by the score and presents them to the user. These items form the recommendations.
-
-This is exactly what the ranked retrieval feature of a search eninge does.
-The user history $h_U$ is the query. The items are the documents. And the text of the fields contain similar items.
-
-In addition we can use TF-IDF \cite{Manning} weighting to mitigate popular items.
-
-This is why we deploy Solr to build a recommender.
-
-We store all items as documents in Solr. The documents contain the metadata like (title, genre, tags, etc). In addidtion we populate a filed for every indicator with the similar item ID's discovered with the coocuccence similartiy from section \ref{sec:llr}.
+$r$ maps every document to a relevancy score.
+This is similar to the computation for the \gls{topn} $r_u = M h_u$  described in section \ref{sec:problem}. The search engine returns documents that are similar to the query $q$. The recommender returns items that are similar to the items in the user's action history $h_u$. If we can map items to documents and the user's action history to a query we can use an existing search engine for the top-N recommendation task. This is desirable because search engines like Apache Solr are optimized for ranked retrival and they are able to process big data at scale. 
+\subsubsection{How to map documents to items}
 
 \begin{lstlisting}[caption={Item metadata and similar items are stored in Solr.},label={lst:solrdoc}]
 {
-    "id": "1",
-    "title": ["Toy Story (1995)"],
-    "tags":"Pixar animation fantasy",
-    "likeindicator": "1688 1834 3893 4366 6281 33162 50872 53000 ",
-    "_version_": 1505056335358591000
+    id: 1,
+    title: Toy Story,
+    tags:Pixar animation fantasy,
+    likeindicator: 1688 1834 3893 4366 6281 33162,
+    tagindicator: 10 33 41 54 55 59 66 67 72 73 80
+    _version_: 1505056335358591000
 }
 \end{lstlisting}
 
-In order to build a recommender using a search engine we store the output of the co-occurence analysis in Solr. The search engine actually delivers the recommendations to our users.
+The goal of our mapping is that the search engine finds the most similar items to the one in the user's action history.
+The result of the search should contain a list of items. Hence we index items instead of documents.
+A document in a search engine contains fields. Fields contain arbitrary free text (zone) or metadata. 
+Instead of finding document that contain keywords we want to find items that are similar to the items in the user's recent action history. Therefore we replace the terms (words in free text) with item ids that are similar to the item represented by the document. 
 
-\subsection{Retrieve recommendation}
+Figure \ref{lst:solrdoc} shows an example entry of a movie item formated in JSON. The indicator fields \verb|likeindicator| and \verb|tagindicator| contain movie ID's of similar movies. In addition to the indicators, the entry contains metadata about the item. These fields can be used to retrieve items by metadata, such as title or genre.
+
+The search engine will use document vector with tf-idf values to compute the score. Tf-idf only accounts for the occurence of a term in a text. With the proposed mapping the term frequency of indicator ID's will be 1 or 0. In order to include the similarity metric among items described in section \ref{sec:llr} we have to weight the tf-idf values in the document vector with the \gls{llr} ratios. This is the reason why we can't use a search engine out of the box without extending it's scoring function.
+We have to replace the document vector with rows of the \gls{indicatorm}. 
+
+If we store items with their indicators ID's we can query the search engine with user's action history $h$ as a vector contaning item ID's. The search engine will transform the item ID's to the corresponding document vector. Then it will find all items that have those recent history items as indicators. The more indicator ID's the query $h$ and an item have in common the higher the similarity score. Hence we get ranked list with the most similar items on top. Table \ref{tbl:comparison} shows the mapping.
+
+\begin{table}
+\begin{center}
+\begin{tabular}{lll}
+ search engine & \gls{rec}\\ \hline
+  document & item\\ 
+ field & indicator \\
+ term & indicator id    \\
+ query & user's action history \\
+\end{tabular}
+\end{center}
+\caption{We can map document, fields, term and query to the recommender equivalents. A search engine is similar to a recommender. We use the user'action history as query to find items in the collection that have those recent history items as indicators. }
+\label{tbl:comparison}
+\end{table}
+
+In addition we can use TF-IDF \cite{Manning} weighting to mitigate popular items.
+
+
+\subsection{Integration}
+\label{sec:integration}
+
+\subsubsection{Retrieve recommendation}
 
 In order to produce recommendations we compose a Solr query from the user history. The user history is stored in the web log. The web server sends this query to Solr. Solr responds with a ranked result set. The web server then formats the response from Solr and sends a list of recommended items to the user.
 
@@ -157,15 +152,15 @@ to/.style={->,>=stealth',shorten >=1pt,semithick,font=\footnotesize},
 \caption{The web server sends this query to Solr. Solr responds with a ranked result set.}
 \end{figure}
 
-
-\subsection{Integration}
-\label{sec:integration}
-
 \verb|updatesearchengine| will index all movies in Solr.
 
 Solr is used in the offline and the online part of the recommendation engine.
 
 The items and their corresponding similarity indicators from the Apache Spark job are stored with Apache Solr. 
+
+We store all items as documents in Solr. The documents contain the metadata like (title, genre, tags, etc). In addidtion we populate a filed for every indicator with the similar item ID's discovered with the coocuccence similartiy from section \ref{sec:llr}.
+
+In order to build a recommender using a search engine we store the output of the co-occurence analysis in Solr. The search engine actually delivers the recommendations to our users.
 
 \subsection{Parameters}
 \label{sec:parameters}

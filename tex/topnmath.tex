@@ -25,7 +25,7 @@ h_l =
 \end{pmatrix}
 \end{equation}
 
-To create a \gls{topn} for user $u$ we compute the matrix vector product of $M$ and $h_l$. The result $r$ is a vector of length $n$, that contains a value for every item. $r$ maps every item to a value that indicates how likely an item is of interest to user $u$. According to equation \ref{eq:recommendation} item 3 correspond to the best recommendation.
+To create a \gls{topn} for user $u$ we compute the matrix vector product of $M$ and $h_l$. Equations \ref{eq:recommendation} actually means to compare the user history $h_u$ to the rows of the indicator matrix $M$. This result in a vector $r$ containing a score for each item that indicates the strength of the match (or similarity) of the item to the history $h_p$. The result $r$ is a vector of length $n$, that contains a score for every item. Hence $r$ maps every item to a value that indicates how likely an item is of interest to user $u$. According to equation \ref{eq:recommendation} item 3 correspond to the best recommendation.
 
 \begin{align}
   \label{eq:recommendation}
@@ -52,4 +52,4 @@ r_u &= M h_u
 \end{pmatrix}
 \end{align}
 
-In order to create the complete \gls{topn} based on the vector $r$ we create a list of all item sorted by the values in $r$. Items with a high value appear first in the list. Then we remove all items from the list the user hasn't seen (the ones with zeros in $h_u$). In other words we return a ranked list of items. This list forms the \gls{topn}. In the example of equation \ref{eq:recommendation} the recommender would return item 3 followed by item 4. Item 1 and to are removed because the apear in the user's history.
+In order to create the complete \gls{topn} based on the vector $r$ we create a list of all items sorted by thev alues in $r$. Items with a high value appear first in the list. Then we remove all items from the list the user hasn't seen (the ones with zeros in $h_u$). In other words we return a ranked list of items. This list forms the \gls{topn}. In the example of equation \ref{eq:recommendation} the recommender would return item 3 followed by item 4. Item 1 and to are removed because the apear in the user's history.
