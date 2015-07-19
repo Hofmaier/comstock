@@ -1,43 +1,48 @@
 \section{Co-occurence based multimodal recommender}
 \label{sec:design}
+\tikzset{
+  reco/.style={
+    rectangle
+  },
+}
+
 \begin{figure}
   \centering
-  \begin{tikzpicture}
-    \node (rec) at(180:2cm) {Recommender};
-    \node (hist) at(60:2cm){History};
-    \node (se) at(300:2cm){Search engine};
-    \node (user) [left of=rec,node distance=3cm]{User};
-    \draw[->, >=latex] (170:2cm) 
-    arc (170:80:2cm);
+  \begin{tikzpicture}[->, >=latex]
+    \node[reco] (rec) at(180:3cm) {Recommender};
+    \node (hist) at(60:3cm){History};
+    \node (se) at(300:3cm){Search engine};
+    \node (user) [left of=rec,node distance=5cm]{User};
+    \node(x)[align=left] at(130:3.9cm){lookup\\ user's history};
+    \node(x)[align=left] at(0:2cm){user's\\ history};
+    \node(x)[align=left] at(220:4cm){ranked \\ search result};
+    \draw[->, >=latex] (170:3cm) arc  (170:80:3cm);
+    \draw[->, >=latex] (40:3cm)  arc (40:-40:3cm);
+   \draw[->, >=latex] (270:3cm)  arc (270:190:3cm);
+   \draw[->, >=latex] (40:3cm)  arc (40:-40:3cm);
+   \path (user) edge[bend left=40] node[anchor=south,above]{request top-N list}(rec);
+   \path (rec) edge[bend left=40] node[anchor=north,below]{top-N list}(user);
   \end{tikzpicture}
   \caption{Simplified dataflow diagram}
   \label{fig:topndataflow}
 \end{figure}
 
 The recommender we discuss will use past user behavior and metadata of items to compute the similarity between all items. Hence it is a hybrid recommender.
-We use \gls{coocc} to compute the similarity of two items. Because search engine are a way of finding similar items we deploy the recommender queries a search engine in order to find similar items to the one the user already exressed some interest.
+We use user \gls{coocc} of user- and tag-iteminteractions as a similarity metric among items.
 
-The recommender discussed in this article has to parts.
-\begin{description}
-\item[Analysing User Input (offline)] In this part the user action are analised in order to compute the similarities of items. The similiarities are stored as indicators.
-\item[Generate personalized recommendations (online)] A systems formats a list of recommended items.
-\end{description}
+Because search engine are a way of finding similar documents according to a query we can use a search engine to find similar items to the ones the user already exressed some interest.
 
-The process of procucing a \gls{topn} can be divided into several steps. Figure \ref{fig:topndataflow} illustrates this process.
+The process of procucing a \gls{topn} can be divided into five steps. Figure \ref{fig:topndataflow} illustrates this process.
 
 \begin{enumerate}
 \item User requests a \gls{topn}.
 \item The recommenders looks up items that appear in the recent user history.
-\item Based on the user' action history the recommender forms a for the search engine query.
-\item The search engine return ranked list of items according to the query.
+\item The user's action history the recommender is send as a query to the search engine.
+\item The search engine returns a ranked search result set of items according to the query.
 \item The recommender removes item already known to the user and present him a \gls{topn}.
 \end{enumerate}
 
-All movies are stored as documents in a NoSQL database (we use Apache Solr). The documents contain metainformation (e.g. title, tags, genre) about the items in fields. The fields are indexed by a search engine and made searchable.
-
-In addidion the document has indicator fields. Indicator fields contain id's of that are found to be worth recommending in the co-occurence analysis.
-
-The section first describes the used input data. Than we explain the process of computing \gls{topn} and how similarity between items is measured and how the computation is implemented
+The section first describes the used input data. Than we explain the process of computing \gls{topn} and how similarity between items is measured and how the computation is implemented. Next we describe the similarities of the top-N recommender task and a \gls{rankedretrieval} and how we extend the scoring function of the search engine in order to use \gls{coocc} similaty metric.
 
 \input{inputdata}
 \input{topnmath}
@@ -58,74 +63,17 @@ Suppose we compute a \gls{indicatorm} based on likes $M_l$ and one based on tag 
 
 In our demo web application we use ``likes'' and tags but virtually all user actions can be used to improve the recommendation.
 
-\subsection{Why can we use a search engine to produce \gls{topn}?}
-\label{sec:relation}
-
-The \gls{rec} uses a search engine to produce a \gls{topn}. We can deploy a search engine in order to provide recommendations because there are similarities between the computation of top-N recommendation task and the retrieval of a ranked search result set.
- This section explains why the deployment of a search engine is suitable for the top-N recommendation task.
-
-\subsubsection{Ranked retrieval}
-A search engine enables user to search a collection of documents for specified keywords in a query. It returns a sorted set of documents that match the query. The result set is sorted by relevancy. The top documents are the most relevant to the query. This process is called \gls{rankedretrieval}. It does this by calculating a similarity score between each document and the query and then sorts the result by this score. The score indicates the strength of the match against the query. This is one of the main use cases where search engines shine compared to relational databases. There a row either matches a query or it does not. 
-\subsubsection{Vector space model}
-One way to calculate the similarity between a query $q$ and a document $d$ is to use the vector space model.
-In the vector space model each document $d$ and the query $q$ are represented as vectors $\vec{v}(d)$ and $\vec{v}(q)$. The vector contains an element for each term. It maps every term $t$ of the collection to a tf-idf weight. tf-idf reflects how important a term is to document in the collection (see \cite{Manning} for a detailed description). 
-The similarity score between two items is equal to the dot product.
-\begin{equation}
-  \label{eq:score}
-  \text{score}(d,q) = \vec{v}(d) \cdot \vec{v}(q)
-\end{equation}
-In order to create a ranked result set for a query $q$ request the search engine computes $\text{score}(d,q)$ for all documents in the collection. We can form a matrix $C$ with the document vectors as rows. The process of scoring all document can be writen as matrix vector multiplication of $C$ and $q$. 
-
-\begin{equation}
-  \label{eq:ser}
-  r = C q
-\end{equation}
-$r$ maps every document to a relevancy score.
-This is similar to the computation for the \gls{topn} $r_u = M h_u$  described in section \ref{sec:problem}. The search engine returns documents that are similar to the query $q$. The recommender returns items that are similar to the items in the user's action history $h_u$. If we can map items to documents and the user's action history to a query we can use an existing search engine for the top-N recommendation task. This is desirable because search engines like Apache Solr are optimized for ranked retrival and they are able to process big data at scale. 
-\subsubsection{How to map documents to items}
-
-\begin{lstlisting}[caption={Item metadata and similar items are stored in Solr.},label={lst:solrdoc}]
-{
-    id: 1,
-    title: Toy Story,
-    tags:Pixar animation fantasy,
-    likeindicator: 1688 1834 3893 4366 6281 33162,
-    tagindicator: 10 33 41 54 55 59 66 67 72 73 80
-    _version_: 1505056335358591000
-}
-\end{lstlisting}
-
-The goal of our mapping is that the search engine finds the most similar items to the one in the user's action history.
-The result of the search should contain a list of items. Hence we index items instead of documents.
-A document in a search engine contains fields. Fields contain arbitrary free text (zone) or metadata. 
-Instead of finding document that contain keywords we want to find items that are similar to the items in the user's recent action history. Therefore we replace the terms (words in free text) with item ids that are similar to the item represented by the document. 
-
-Figure \ref{lst:solrdoc} shows an example entry of a movie item formated in JSON. The indicator fields \verb|likeindicator| and \verb|tagindicator| contain movie ID's of similar movies. In addition to the indicators, the entry contains metadata about the item. These fields can be used to retrieve items by metadata, such as title or genre.
-
-The search engine will use document vector with tf-idf values to compute the score. Tf-idf only accounts for the occurence of a term in a text. With the proposed mapping the term frequency of indicator ID's will be 1 or 0. In order to include the similarity metric among items described in section \ref{sec:llr} we have to weight the tf-idf values in the document vector with the \gls{llr} ratios. This is the reason why we can't use a search engine out of the box without extending it's scoring function.
-We have to replace the document vector with rows of the \gls{indicatorm}. 
-
-If we store items with their indicators ID's we can query the search engine with user's action history $h$ as a vector contaning item ID's. The search engine will transform the item ID's to the corresponding document vector. Then it will find all items that have those recent history items as indicators. The more indicator ID's the query $h$ and an item have in common the higher the similarity score. Hence we get ranked list with the most similar items on top. Table \ref{tbl:comparison} shows the mapping.
-
-\begin{table}
-\begin{center}
-\begin{tabular}{lll}
- search engine & \gls{rec}\\ \hline
-  document & item\\ 
- field & indicator \\
- term & indicator id    \\
- query & user's action history \\
-\end{tabular}
-\end{center}
-\caption{We can map document, fields, term and query to the recommender equivalents. A search engine is similar to a recommender. We use the user'action history as query to find items in the collection that have those recent history items as indicators. }
-\label{tbl:comparison}
-\end{table}
-
-In addition we can use TF-IDF \cite{Manning} weighting to mitigate popular items.
-
+\input{searchengine}
 
 \subsection{Integration}
 \label{sec:integration}
+
+The recommender discussed in this report has to parts.
+\begin{description}
+\item[Analysing User Input (offline)] In this part the user action are analised in order to compute the similarities of items. The similiarities are stored as indicators.
+\item[Generate personalized recommendations (online)] A systems formats a list of recommended items.
+\end{description}
+
 
 \subsubsection{Retrieve recommendation}
 
@@ -140,8 +88,8 @@ draw,
 thin,
 minimum height=3.5em
 },
-to/.style={->,>=stealth',shorten >=1pt,semithick,font=\footnotesize},
-]
+to/.style={->,>=stealth',shorten >=1pt,semithick,font=\footnotesize},]
+
 \node (web) [data] {Web server};
 \node (log) [data,below of = web, align=left] {User actions\\log file};
 \node (browser) [data,left of=web,node distance=50mm] {Webbrowser};

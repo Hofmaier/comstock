@@ -254,3 +254,38 @@ The rows are items. The columns show which users liked which item
   \caption{Indicator matrix for item purchases}
   \label{tab:indicatormatrix}
 \end{table}
+
+One the right set of document are found it is important to order those documents based upon relevancy to ensure the best matches are on top of their search result.
+
+represent the collection of document as matrix $M$. Each row of $M$ is a document vector.
+If we want to compute all relevancy scores the search engine would compute the matrix vector product of $M$ and $q$.
+
+
+Instead of words we index items that are simil
+We view documents as sequence of terms. The search engine computes a vector
+Documents can contain serveral fields. Fields contain a sequence of terms. 
+
+ If we replace the query $q$ with the user's action history $h_u$ and the documents vectors  $\vec{v}(d)$with item \gls{llr} indicators the search engine will return a top-N recommendation list. All we have to do is remove the items allready known to the user.
+
+A common approach to users for coming up with good queries is to think of words that would likely appear in a relevant document, and to use those words as query.
+
+Let's say we represent the recommendations for a user as a vector $r$. The elements of $r$ are floating point number which represent preferences for all items for a user. Most collaborative filtering type recommenders compute $r$ by multiplying the given preferences of a user $h_u$ with the indicator matrix $M$ for all items. In our example $M$ contains the similarity values of the log-likelihood cooccurence.
+
+\begin{equation}
+  \label{eq:cf}
+  r = h_u M
+\end{equation}
+
+The recommender ranks the items by the score and presents them to the user. These items form the recommendations
+
+
+ compute the relevancy of a document $d$ that match the query keywords,
+ Equations \ref{eq:cf} actually means to compare the user history $h_u$ to the rows of the indicator matrix $M$. This result in a vector $r$ containing a score that indicates the strength of the match of the item to the history $h_p$. The recommender ranks the items by the score and presents them to the user. These items form the recommendations.
+
+
+This is exactly what the ranked retrieval feature of a search eninge does.
+The user history $h_U$ is the query. The items are the documents. And the text of the fields contain similar items.
+This is why we deploy Solr to build a recommender.
+
+   node[anchor=north,below]{recommendation}
+   to compute the similarity of two items. 
