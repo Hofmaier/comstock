@@ -47,31 +47,18 @@ The section first describes the used input data. Than we explain the process of 
 \input{inputdata}
 \input{topnmath}
 \input{similarity}
-
-\subsection{Using more than one type of behavior}
-\label{sec:multimodal}
-
-Most collaborative filtering algorithms use only explicit or implicit ratings to compute similarity.
-But we can improve the performance of the recommender engine by using multiple types of user actions. In addition to likes we could use tag-associations to compute the similariy. In table \ref{tbl:llr} we count co-occurence of items in a user's like-action history. Instead of the action history we could use tags that are associated width items. We count the co-occurence of each items associated with a tag.
-
-Suppose we compute a \gls{indicatorm} based on likes $M_l$ and one based on tag associations $M_t$. An $h_l$ is a user's history of ``likes'' and $h_t$ is the user's tag history. Then we can compute the recommendation vector (see equation \ref{eq:recommendation}) $r$ with
-
-\begin{equation}
-  \label{eq:multi}
-  r = h_l M_l + h_t M_t
-\end{equation}
-
-In our demo web application we use ``likes'' and tags but virtually all user actions can be used to improve the recommendation.
-
+\input{multimodal}
 \input{searchengine}
 
-\subsection{Integration}
+\section{Integration}
 \label{sec:integration}
+
+This section will describe the integration of the \gls{rec}. In section will describe how we integrate components described in section \ref{sec:design.}
 
 The recommender discussed in this report has to parts.
 \begin{description}
-\item[Analysing User Input (offline)] In this part the user action are analised in order to compute the similarities of items. The similiarities are stored as indicators.
-\item[Generate personalized recommendations (online)] A systems formats a list of recommended items.
+\item[Compute similarities] In this part the user action are analised in order to compute the similarities of items. The similiarities are stored as indicators in Apache Solr.
+\item[Generate personalized recommendations] A systems formats a list of recommended items.
 \end{description}
 
 
