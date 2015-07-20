@@ -288,4 +288,13 @@ The user history $h_U$ is the query. The items are the documents. And the text o
 This is why we deploy Solr to build a recommender.
 
    node[anchor=north,below]{recommendation}
-   to compute the similarity of two items. 
+   to compute the similarity of two items.
+   If we store similar items similar items we can query the search engine with item-id uas a vector contaning item ID's.
+   \begin{lstlisting}[caption={To add a payload to a term we have to delimit the payload with a pipe. .}]
+  23|0.9
+\end{lstlisting}
+
+
+All movies are stored as documents in a NoSQL database (we use Apache Solr). The documents contain metainformation (e.g. title, tags, genre) about the items in fields. The fields are indexed by a search engine and made searchable.
+
+In addidion the document has indicator fields. Indicator fields contain id's of that are found to be worth recommending in the co-occurence analysis.

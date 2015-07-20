@@ -21,7 +21,7 @@ In order to create a ranked result set for a query $q$ the search engine compute
   r = C q
 \end{equation}
 $r$ maps every document to a relevancy score.
-This is similar to the computation for the \gls{topn} $r_u = M h_u$  described in section \ref{sec:problem}. The search engine returns documents that are similar to the query $q$. The recommender returns items that are similar to the items in the user's action history $h_u$. If we can map items to documents and the user's action history to a query we can use an existing search engine for the top-N recommendation task. This is desirable because search engines like Apache Solr are optimized for ranked retrival and they are able to process big data at scale. 
+This is similar to the computation of the \gls{topn} $r_u = M h_u$  described in section \ref{sec:problem}. The search engine returns documents that are similar to the query $q$. The recommender returns items that are similar to the items in the user's action history $h_u$. If we can map items to documents and the user's action history to a query we can use an existing search engine for the top-N recommendation task. This is desirable because search engines like Apache Solr are optimized for ranked retrival and they are able to process big data at scale. 
 
 \subsubsection{How to map documents to items}
 
@@ -39,16 +39,16 @@ This is similar to the computation for the \gls{topn} $r_u = M h_u$  described i
 The goal of our mapping is that the search engine finds the most similar items to the one in the user's action history.
 The result of the search should contain a list of items. Hence we index items instead of documents.
 
-A document in a search engine contains fields. Fields contain arbitrary free text (zone) or metadata. 
-Instead of finding document that contain keywords we want to find items that are similar to the items in the user's recent action history. Therefore we replace the terms (words in free text) with item ids that are similar to the item represented by the document. 
+A document in a search engine contains fields. A field contains a sequence of terms or metadata. 
+Instead of finding document that contain the keywords of the query in a field we want to find items that are similar to the items in the user's recent action history. Therefore we replace the terms (words in free text) with item-id's that are similar to the item represented by the document. 
 
 Figure \ref{lst:solrdoc} shows an example entry of a movie item formated in JSON. The indicator fields \verb|likeindicator| and \verb|tagindicator| contain movie ID's of similar movies. In addition to the indicators, the entry contains metadata about the item. These fields can be used to retrieve items by metadata, such as title or genre.
 
-A search engine using the vector model will use document vector with tf-idf values to compute the score. Tf-idf will mitigate popular items which is desirable but but it only accounts for the occurence of a term in a text. With the proposed mapping the term frequency of indicator ID's will be 1 or 0. We want to have some way to include the \gls{llr} ratios of the \glspl{coocc} to boost items that have a high similarity. In order to include the similarity metric among items described in section \ref{sec:llr} we have to weight the tf-idf values in the document vector with the \gls{llr} ratios of the \glspl{coocc}. This is the reason why we can't use a search engine out of the box without extending it's scoring function.
+A search engine using the vector space model will use document vectors with tf-idf values to compute the score of a match. Tf-idf will mitigate popular items which is desirable but but it only accounts for the occurence of a term in a text. With the proposed mapping the term frequency of indicator ID's will be 1 or 0. We want to have some way to include the \gls{llr} ratios to boost items that have a high similarity to the item represented by the document. In order to include the similarity metric among items described in section \ref{sec:llr} we have to weight the tf-idf values in the document vector with the \gls{llr} ratios. This is the reason why we can't use a search engine out of the box without extending it's scoring function.
 We have to replace the document vector with rows of the \gls{indicatorm} $M$. 
 
 \subsubsection{User histories as queries}
-If we store items with their indicators ID's we can query the search engine with user's action history $h$ as a vector contaning item ID's. The search engine will transform the item ID's to the corresponding document vector. Then it will find all items that have those recent history items as indicators. The more indicator ID's the query $h$ and an item have in common the higher the similarity score. Hence we get ranked list with the most similar items on top. Table \ref{tbl:comparison} shows the mapping.
+We store items with metadata and the corresponding similar items as a document in the search engine. To get a \gls{topn} we query the search engine with items from the user's action history $h$. The search engine will transform the item in the query to the corresponding document vector. Then it will find all items that have those recent history items as indicators. The more items the query $h$ and an item have in common the higher the similarity score. Hence we get ranked list with the most similar items on top. Table \ref{tbl:comparison} shows the mapping.
 
 \begin{table}
 \begin{center}
@@ -68,8 +68,44 @@ If we store items with their indicators ID's we can query the search engine with
 \label{sec:solrimpl}
 We deploy the search engine Apache Solr in our demo webapplication. Simply put, Solr is a Web API for Apache Lucene, an open source information retrieval software library. 
 
-In order to use the \gls{llr} ratios of the \glspl{coocc} of items we have to extend Solr with our own 
+In order to use the precomputed \gls{llr} ratios of the \glspl{coocc} we need a way to store them per term and per document. Lucene provides this functionality with the \emph{playloads} feature. Payloads enable an application to store an arbitrary byte array for every term during indexing \cite{McCandless}.
 
-All movies are stored as documents in a NoSQL database (we use Apache Solr). The documents contain metainformation (e.g. title, tags, genre) about the items in fields. The fields are indexed by a search engine and made searchable.
+Unfortunatly the feature is only implemented in Lucence, not in Solr. But we can extend Solr to use the Java classes that deal with payloads.
 
-In addidion the document has indicator fields. Indicator fields contain id's of that are found to be worth recommending in the co-occurence analysis.
+First we need to define a new fieldtype in the schema.xml of our Solr configuration. Fields of this type contain terms with an added payload.
+To index the similarity value we define a custom fieltype that uses Lucene's DelimitedPayloadTokenFilter to extract a payload from every term. 
+
+\begin{lstlisting}[caption={Fieldtype definition for field with payload.}]
+<fieldtype name="payloads" class="solr.TextField" >
+ <analyzer>
+  <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+   <filter class="DelimitedPayloadTokenFilterFactory" />
+ </analyzer>
+</fieldtype>
+\end{lstlisting}
+The default delimiter is the pipe symbol. With this fieldtype we can add payloads to terms in document be attaching a number to the term string.
+\begin{verbatim}
+23|0.9
+\end{verbatim}
+In this example \verb|23| is an item-id and \verb|0.9| is the similiarity value to the corresponding item.
+
+After we stored the payload within the index we need a way to score a document match according the payload.
+Solr uses per default the vector space model to compute the score between a document $d$ and a query $q$. It only considers terms $t$ that appear in the query $q$. The tf-idf weight is multiplied by a boosting factor for a term $t$ \cite{grainger}.  
+\begin{equation}
+\label{eq:solrsim}
+\text{score}(q,d) = \sum_{t \in q} \text{tf-idf}(t,d) \cdot \text{boost}(t)
+\end{equation}
+
+In order to use the payload values in the ranked retrieval process we have to extend Solr with our own Query Component. 
+
+We can add a custom Query Component by implementing a \verb|QParserPlugin|. The implementation just returns the \verb|PayloadTermQuery|. \verb|PayloadTermQuery| matches all documents containing the specifed term and than applies a scoring factor based on the payload that is stored with each term.
+
+In addition we have to override the method \verb|scorePayload| of the \\ \verb|DefaultSimilarity| class. \verb|PayloadTermQuery| will call \verb|scorePayload| to determine the payload of an item and then it multiplies the td-idf weights with the corresponding payload. We have to tell Solr to use our custom Query Component and the new \verb|PayloadSimilarity| by adding the following entries to the solrconfig.xml.
+
+\begin{lstlisting}
+<similarity class="ch.hsr.solrpayload.PayloadSimilarityFactory">
+<queryParser name="payloadparser" 
+   class="ch.hsr.solrpayload.PayloadParser" />
+\end{lstlisting}
+  
+Solr will load the implementations from it's \verb|lib| directory if we package them Java jar archive.
