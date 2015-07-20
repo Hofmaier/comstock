@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="/home/lukas/Downloads/solr-4.7.2/dist/solr-core-4.7.2.jar"/>
+	<classpathentry kind="lib" path="/home/lukas/Downloads/solr-4.7.2/dist/solr-analysis-extras-4.7.2.jar"/>
+	<classpathentry kind="lib" path="/home/lukas/Downloads/solr-4.7.2/dist/solr-cell-4.7.2.jar"/>
+	<classpathentry kind="lib" path="/home/lukas/Downloads/solr-4.7.2/dist/solr-clustering-4.7.2.jar"/>
+	<classpathentry kind="lib" path="/home/lukas/Downloads/solr-4.7.2/dist/solr-dataimporthandler-4.7.2.jar"/>
+	<classpathentry kind="lib" path="/home/lukas/Downloads/solr-4.7.2/dist/solr-dataimporthandler-extras-4.7.2.jar"/>
+	<classpathentry kind="lib" path="/home/lukas/Downloads/solr-4.7.2/dist/solr-langid-4.7.2.jar"/>
+	<classpathentry kind="lib" path="/home/lukas/Downloads/solr-4.7.2/dist/solr-map-reduce-4.7.2.jar"/>
+	<classpathentry kind="lib" path="/home/lukas/Downloads/solr-4.7.2/dist/solr-morphlines-cell-4.7.2.jar"/>
+	<classpathentry kind="lib" path="/home/lukas/Downloads/solr-4.7.2/dist/solr-morphlines-core-4.7.2.jar"/>
+	<classpathentry kind="lib" path="/home/lukas/Downloads/solr-4.7.2/dist/solr-solrj-4.7.2.jar"/>
+	<classpathentry kind="lib" path="/home/lukas/Downloads/solr-4.7.2/dist/solr-test-framework-4.7.2.jar"/>
+	<classpathentry kind="lib" path="/home/lukas/Downloads/solr-4.7.2/dist/solr-uima-4.7.2.jar"/>
+	<classpathentry kind="lib" path="/home/lukas/Downloads/solr-4.7.2/dist/solr-velocity-4.7.2.jar"/>
+	<classpathentry kind="lib" path="/home/lukas/Downloads/solr-4.7.2/example/solr-webapp/webapp/WEB-INF/lib/lucene-analyzers-common-4.7.2.jar"/>
+	<classpathentry kind="lib" path="/home/lukas/Downloads/solr-4.7.2/example/solr-webapp/webapp/WEB-INF/lib/lucene-analyzers-kuromoji-4.7.2.jar"/>
+	<classpathentry kind="lib" path="/home/lukas/Downloads/solr-4.7.2/example/solr-webapp/webapp/WEB-INF/lib/lucene-analyzers-phonetic-4.7.2.jar"/>
+	<classpathentry kind="lib" path="/home/lukas/Downloads/solr-4.7.2/example/solr-webapp/webapp/WEB-INF/lib/lucene-codecs-4.7.2.jar"/>
+	<classpathentry kind="lib" path="/home/lukas/Downloads/solr-4.7.2/example/solr-webapp/webapp/WEB-INF/lib/lucene-core-4.7.2.jar"/>
+	<classpathentry kind="lib" path="/home/lukas/Downloads/solr-4.7.2/example/solr-webapp/webapp/WEB-INF/lib/lucene-expressions-4.7.2.jar"/>
+	<classpathentry kind="lib" path="/home/lukas/Downloads/solr-4.7.2/example/solr-webapp/webapp/WEB-INF/lib/lucene-grouping-4.7.2.jar"/>
+	<classpathentry kind="lib" path="/home/lukas/Downloads/solr-4.7.2/example/solr-webapp/webapp/WEB-INF/lib/lucene-highlighter-4.7.2.jar"/>
+	<classpathentry kind="lib" path="/home/lukas/Downloads/solr-4.7.2/example/solr-webapp/webapp/WEB-INF/lib/lucene-join-4.7.2.jar"/>
+	<classpathentry kind="lib" path="/home/lukas/Downloads/solr-4.7.2/example/solr-webapp/webapp/WEB-INF/lib/lucene-memory-4.7.2.jar"/>
+	<classpathentry kind="lib" path="/home/lukas/Downloads/solr-4.7.2/example/solr-webapp/webapp/WEB-INF/lib/lucene-misc-4.7.2.jar"/>
+	<classpathentry kind="lib" path="/home/lukas/Downloads/solr-4.7.2/example/solr-webapp/webapp/WEB-INF/lib/lucene-queries-4.7.2.jar"/>
+	<classpathentry kind="lib" path="/home/lukas/Downloads/solr-4.7.2/example/solr-webapp/webapp/WEB-INF/lib/lucene-queryparser-4.7.2.jar"/>
+	<classpathentry kind="lib" path="/home/lukas/Downloads/solr-4.7.2/example/solr-webapp/webapp/WEB-INF/lib/lucene-spatial-4.7.2.jar"/>
+	<classpathentry kind="lib" path="/home/lukas/Downloads/solr-4.7.2/example/solr-webapp/webapp/WEB-INF/lib/lucene-suggest-4.7.2.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

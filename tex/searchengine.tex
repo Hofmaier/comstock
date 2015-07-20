@@ -109,3 +109,5 @@ In addition we have to override the method \verb|scorePayload| of the \\ \verb|D
 \end{lstlisting}
   
 Solr will load the implementations from it's \verb|lib| directory if we package them Java jar archive.
+
+An alternative to payloads is to define a threshhold for similar items. Only add items above a threshold to the indicator fields. This approach is easer to deploy but it doesn't account for different similaries.
