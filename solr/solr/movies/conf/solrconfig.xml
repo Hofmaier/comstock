@@ -1,77 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<!--
- Licensed to the Apache Software Foundation (ASF) under one or more
- contributor license agreements.  See the NOTICE file distributed with
- this work for additional information regarding copyright ownership.
- The ASF licenses this file to You under the Apache License, Version 2.0
- (the "License"); you may not use this file except in compliance with
- the License.  You may obtain a copy of the License at
 
-     http://www.apache.org/licenses/LICENSE-2.0
-
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
--->
-
-<!-- 
-     For more details about configurations options that may appear in
-     this file, see http://wiki.apache.org/solr/SolrConfigXml. 
--->
 <config>
-  <!-- In all configuration below, a prefix of "solr." for class names
-       is an alias that causes solr to search appropriate packages,
-       including org.apache.solr.(search|update|request|core|analysis)
-
-       You may also specify a fully qualified Java classname if you
-       have your own custom plugins.
-    -->
-
-  <!-- Controls what version of Lucene various components of Solr
-       adhere to.  Generally, you want to use the latest version to
-       get all bug fixes and improvements. It is highly recommended
-       that you fully re-index after changing this setting as it can
-       affect both how text is indexed and queried.
-  -->
   <luceneMatchVersion>4.7</luceneMatchVersion>
-
-  <!-- <lib/> directives can be used to instruct Solr to load an Jars
-       identified and use them to resolve any "plugins" specified in
-       your solrconfig.xml or schema.xml (ie: Analyzers, Request
-       Handlers, etc...).
-
-       All directories and paths are resolved relative to the
-       instanceDir.
-
-       Please note that <lib/> directives are processed in the order
-       that they appear in your solrconfig.xml file, and are "stacked" 
-       on top of each other when building a ClassLoader - so if you have 
-       plugin jars with dependencies on other jars, the "lower level" 
-       dependency jars should be loaded first.
-
-       If a "./lib" directory exists in your instanceDir, all files
-       found in it are included as if you had used the following
-       syntax...
-       
-              <lib dir="./lib" />
-    -->
-
-  <!-- A 'dir' option by itself adds any files found in the directory 
-       to the classpath, this is useful for including all jars in a
-       directory.
-
-       When a 'regex' is specified in addition to a 'dir', only the
-       files in that directory which completely match the regex
-       (anchored on both ends) will be included.
-
-       If a 'dir' option (with or without a regex) is used and nothing
-       is found that matches, a warning will be logged.
-
-       The examples below can be used to load some solr-contribs along 
-       with their external dependencies.
-    -->
   <lib dir="../../../contrib/extraction/lib" regex=".*\.jar" />
   <lib dir="../../../dist/" regex="solr-cell-\d.*\.jar" />
 
@@ -84,85 +14,21 @@
   <lib dir="../../../contrib/velocity/lib" regex=".*\.jar" />
   <lib dir="../../../dist/" regex="solr-velocity-\d.*\.jar" />
 
-  <!-- an exact 'path' can be used instead of a 'dir' to specify a 
-       specific jar file.  This will cause a serious error to be logged 
-       if it can't be loaded.
-    -->
-  <!--
-     <lib path="../a-jar-that-does-not-exist.jar" /> 
-  -->
-  
-  <!-- Data Directory
-
-       Used to specify an alternate directory to hold all index data
-       other than the default ./data under the Solr home.  If
-       replication is in use, this should match the replication
-       configuration.
-    -->
   <dataDir>${solr.data.dir:}</dataDir>
 
-
-  <!-- The DirectoryFactory to use for indexes.
-       
-       solr.StandardDirectoryFactory is filesystem
-       based and tries to pick the best implementation for the current
-       JVM and platform.  solr.NRTCachingDirectoryFactory, the default,
-       wraps solr.StandardDirectoryFactory and caches small files in memory
-       for better NRT performance.
-
-       One can force a particular implementation via solr.MMapDirectoryFactory,
-       solr.NIOFSDirectoryFactory, or solr.SimpleFSDirectoryFactory.
-
-       solr.RAMDirectoryFactory is memory based, not
-       persistent, and doesn't work with replication.
-    -->
   <directoryFactory name="DirectoryFactory" 
                     class="${solr.directoryFactory:solr.NRTCachingDirectoryFactory}">
-    
-         
-    <!-- These will be used if you are using the solr.HdfsDirectoryFactory,
-         otherwise they will be ignored. If you don't plan on using hdfs,
-         you can safely remove this section. -->      
-    <!-- The root directory that collection data should be written to. -->     
-    <str name="solr.hdfs.home">${solr.hdfs.home:}</str>
-    <!-- The hadoop configuration files to use for the hdfs client. -->    
-    <str name="solr.hdfs.confdir">${solr.hdfs.confdir:}</str>
-    <!-- Enable/Disable the hdfs cache. -->    
     <str name="solr.hdfs.blockcache.enabled">${solr.hdfs.blockcache.enabled:true}</str>
     
   </directoryFactory> 
 
-  <!-- The CodecFactory for defining the format of the inverted index.
-       The default implementation is SchemaCodecFactory, which is the official Lucene
-       index format, but hooks into the schema to provide per-field customization of
-       the postings lists and per-document values in the fieldType element
-       (postingsFormat/docValuesFormat). Note that most of the alternative implementations
-       are experimental, so if you choose to customize the index format, its a good
-       idea to convert back to the official format e.g. via IndexWriter.addIndexes(IndexReader)
-       before upgrading to a newer version to avoid unnecessary reindexing.
-  -->
   <codecFactory class="solr.SchemaCodecFactory"/>
 
-  <!-- To enable dynamic schema REST APIs, use the following for <schemaFactory>:
-  
        <schemaFactory class="ManagedIndexSchemaFactory">
          <bool name="mutable">true</bool>
          <str name="managedSchemaResourceName">managed-schema</str>
        </schemaFactory>
-       
-       When ManagedIndexSchemaFactory is specified, Solr will load the schema from
-       he resource named in 'managedSchemaResourceName', rather than from schema.xml.
-       Note that the managed schema resource CANNOT be named schema.xml.  If the managed
-       schema does not exist, Solr will create it after reading schema.xml, then rename
-       'schema.xml' to 'schema.xml.bak'. 
-       
-       Do NOT hand edit the managed schema - external modifications will be ignored and
-       overwritten as a result of schema modification REST API calls.
 
-       When ManagedIndexSchemaFactory is specified with mutable = true, schema
-       modification REST API calls will be allowed; otherwise, error responses will be
-       sent back for these requests. 
-  -->
   <schemaFactory class="ClassicIndexSchemaFactory"/>
 
   <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
