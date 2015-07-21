@@ -53,11 +53,10 @@ The section first describes the used input data. Than we explain the process of 
 \section{Integration}
 \label{sec:integration}
 
-This section will describe the integration of the \gls{rec}. In section will describe how we integrate components described in section \ref{sec:design.}
+This section will describe the integration of the \gls{rec}. This section describes how we integrate components described in section \ref{sec:design}. The section is divided according the online and offline parts of the \gls{rec}.
 
-The recommender discussed in this report has to parts.
 \begin{description}
-\item[Compute similarities] In this part the user action are analised in order to compute the similarities of items. The similiarities are stored as indicators in Apache Solr.
+\item[Offline] In this part the user actions are are analised in order to compute the similarities of items. The similiarities are stored as indicators in Apache Solr. This can be done overnight. This task takes serveral minutes but the duration does not impact the user experience. 
 \item[Generate personalized recommendations] A systems formats a list of recommended items.
 \end{description}
 
