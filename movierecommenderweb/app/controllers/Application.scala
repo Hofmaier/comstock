@@ -74,6 +74,7 @@ class Application extends Controller {
   def like = Action(BodyParsers.parse.json) { request =>
     val json:JsValue = request.body
     val movieid = (json  \ "movieid").as[String]
+    val timestamp = System.currentTimeMillis() /1000
      val conn = DB.getConnection()
     try {
       val stmt = conn.createStatement
@@ -82,7 +83,7 @@ class Application extends Controller {
       val userid = "1";
       preparedstatement.setString(1, userid)
       preparedstatement.setString(2, movieid)
-      preparedstatement.setString(3,"jetzt")
+      preparedstatement.setString(3,timestamp.toString)
       preparedstatement.executeUpdate()
     } finally {
       conn.close()
