@@ -17,8 +17,7 @@ Many collaborative filtering recommender engines use excplicit user ratings to t
 \item The majority of ratings are associated with a small fraction of the most popular items \cite{Anderson}. As a result it is less likely that unknown items show up in the \gls{topn}. This behavior is undesirable because the goal of the recommender is to present items the a user would not find on his own.
 \end{itemize}
 
-
-Corresponding to \cite{Dunning14} the best choice of input data is the history of what a user actually does on a website. Hence the input data should consist of recorded \glspl{useraction} (e.g. purchase, view, like, tag).
+Corresponding to \cite{Dunning14} the best choice of input data is the collection past user actions on a website. The stored behavior of one user is called the user's \gls{history}. It shows what users actually do. Hence the input data should consist of recorded \glspl{useraction} (e.g. purchase, view, like, tag).
 
 In our demo web application we record two different user actions:
 \begin{description}

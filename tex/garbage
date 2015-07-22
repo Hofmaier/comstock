@@ -298,3 +298,20 @@ This is why we deploy Solr to build a recommender.
 All movies are stored as documents in a NoSQL database (we use Apache Solr). The documents contain metainformation (e.g. title, tags, genre) about the items in fields. The fields are indexed by a search engine and made searchable.
 
 In addidion the document has indicator fields. Indicator fields contain id's of that are found to be worth recommending in the co-occurence analysis.
+Solr is used in the offline and the online part of the recommendation engine.
+
+
+
+The items and their corresponding similarity indicators from the Apache Spark job are stored with Apache Solr. 
+
+ In addidtion we populate a filed for every indicator with the similar item ID's discovered with the coocuccence similartiy from section \ref{sec:llr}.
+
+In order to build a recommender using a search engine we store the output of the co-occurence analysis in Solr. The search engine actually delivers the recommendations to our users.
+
+\subsection{Two-parts design}
+
+The recommender described in this article is divided in two parts.
+\begin{itemize}
+\item Computation of simililarity and the update of the text search engine is done offline, ahead of time.
+\item Recommendations are generated instantly by quering the text search engine using rescents actions of the user.
+\end{itemize}

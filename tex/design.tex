@@ -50,51 +50,6 @@ The section first describes the used input data. Than we explain the process of 
 \input{multimodal}
 \input{searchengine}
 
-\section{Integration}
-\label{sec:integration}
-
-This section will describe the integration of the \gls{rec}. This section describes how we integrate components described in section \ref{sec:design}. The section is divided according the online and offline parts of the \gls{rec}.
-
-\begin{description}
-\item[Offline] In this part the user actions are are analised in order to compute the similarities of items. The similiarities are stored as indicators in Apache Solr. This can be done overnight. This task takes serveral minutes but the duration does not impact the user experience. 
-\item[Generate personalized recommendations] A systems formats a list of recommended items.
-\end{description}
-
-
-\subsubsection{Retrieve recommendation}
-
-In order to produce recommendations we compose a Solr query from the user history. The user history is stored in the web log. The web server sends this query to Solr. Solr responds with a ranked result set. The web server then formats the response from Solr and sends a list of recommended items to the user.
-
-\begin{figure}
-\centering
-\begin{tikzpicture}[node distance=20mm,
-data/.style={
-rectangle,
-draw,
-thin,
-minimum height=3.5em
-},
-to/.style={->,>=stealth',shorten >=1pt,semithick,font=\footnotesize},]
-
-\node (web) [data] {Web server};
-\node (log) [data,below of = web, align=left] {User actions\\log file};
-\node (browser) [data,left of=web,node distance=50mm] {Webbrowser};
-\node (solr) [data,right of=web,node distance=50mm] {Search engine};
-\draw[to] (web) -- (log);
-\draw[to] (browser) -- node[midway,above] {user actions} (web);
-\end{tikzpicture}
-\caption{The web server sends this query to Solr. Solr responds with a ranked result set.}
-\end{figure}
-
-\verb|updatesearchengine| will index all movies in Solr.
-
-Solr is used in the offline and the online part of the recommendation engine.
-
-The items and their corresponding similarity indicators from the Apache Spark job are stored with Apache Solr. 
-
-We store all items as documents in Solr. The documents contain the metadata like (title, genre, tags, etc). In addidtion we populate a filed for every indicator with the similar item ID's discovered with the coocuccence similartiy from section \ref{sec:llr}.
-
-In order to build a recommender using a search engine we store the output of the co-occurence analysis in Solr. The search engine actually delivers the recommendations to our users.
 
 \subsection{Parameters}
 \label{sec:parameters}
@@ -104,11 +59,3 @@ This section descripes the paratemter of the recommender discussed in this repor
 \item[similarity threshold] We have to define a threshold to separate similar items occording to the LLR similarity from the rest (e.g. 0.5).
 \item[user history to consider] We retrieve recommendations with a part of the user history. We have to define the number of log entries to consider.
 \end{description}
-
-\subsection{Two-parts design}
-
-The recommender described in this article is divided in two parts.
-\begin{itemize}
-\item Computation of simililarity and the update of the text search engine is done offline, ahead of time.
-\item Recommendations are generated instantly by quering the text search engine using rescents actions of the user.
-\end{itemize}

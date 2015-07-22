@@ -8,7 +8,7 @@ description={The recommender engine suggest $N$ specific items that are likely a
 {
 name={indicator},
 plural={indicators},
-description={Indicator are Item ID associated with a particular item. Indicators are derived from user actions. They lead to other items that are recommendable for the same action. For example if you wish a user to purchase something and you collect all users purchase interactions you can create purchase indicator for every item based on these interactions}
+description={Indicator are Item ID's associated with a particular item $i$. The indicators to $i$ are  ID's of similar items. Indicators are derived from user actions. They lead to other items that are recommendable for the same action. For example if you wish a user to purchase something and you collect all users purchase interactions you can create purchase indicator for every item based on these interactions}
 }
 
 \newglossaryentry{coocc}
@@ -90,4 +90,10 @@ description={An itembased recommender engine that uses log-likelihood ratio of c
 {
 name={ranked retrieval},
 description={Ranked retrieval is the process of sorting document by their relevance to a query. The most relevant document are listed first}
+}
+
+\newglossaryentry{history}
+{
+name={action history},
+description={A user's action history is the stored past behavior of a user an a website}
 }
