@@ -14,6 +14,7 @@
 	app.controller('MovieList', function($scope, $http){
 		var self = this;
 		$scope.movies = [];
+
 		$scope.movies = [
 		                 {
 		                     "id": "1",
@@ -36,35 +37,36 @@
 		$http.get('/movies').success(function(data){
 			$scope.movies = data;
 		});
-		
-	$scope.addTag = function(movie, tag){
-		movie.tags.push(tag);
-		
-	};
-		
-	$scope.likeClick = function(movie){
-		$scope.like = true;
-		$http.post('/like', {movieid:movie.id}).
-		success(function(data, status, headers, config) {
-			console.log("send like");
-			  });
-			$scope.userlike = "test";
-			
-		};
-		
+		$scope.likeClick = function(movie){
+			$scope.like = true;
+			$http.post('/like', {movieid:movie.id}).
+			success(function(data, status, headers, config) {
+				console.log("send like in movielistCtrl");
+				  });
+				$scope.userlike = "test";
+			};
+	
 	});
 	app.controller('Tag', function($scope){
 		$scope.tag = "";
-	})
+		$scope.addedtag = "hans";
+		$scope.addTag = function(movie, tag){
+			if(movie.tags.indexOf(tag) < 0){
+			movie.tags.push(tag);
+		}
+			console.log("add tag: " + $scope.addedtag );
+			$scope.addedtag = "";
+		};
+	});
+	
 	app.controller('Movie', function($scope, $http){
 		$scope.likeClick = function(movie){
 			$scope.like = true;
 			$http.post('/like', {movieid:movie.id}).
 			  success(function(data, status, headers, config) {
-				  console.log("send like");
+				  console.log("send like in MovieCtrl");
 			  });
 			$scope.userlike = "test";
-			
 		}
 	});
 })();

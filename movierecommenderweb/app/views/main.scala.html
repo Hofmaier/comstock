@@ -29,13 +29,13 @@
             <button class="navbar-toggle collapsed" aria-controls="navbar" aria-expanded="false" data-target="#navbar" data-toggle="collapse" type="button">
 
                 <span class="sr-only"></span>
-                <span class="icon-bar"></span>
+                <span class="icon-bar"></span> 
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
             <a class="navbar-brand" href="#">
 
-               Movie Recommender
+               Movie Recommender bl
             </a>
         </div>
         <div id="navbar" class="collapse navbar-collapse">
@@ -50,7 +50,7 @@
                 </li>
                 <li>
                     <a href="#contact">
-                        Contact
+                        Discover
                     </a>
                 </li>            
             </ul>
@@ -71,17 +71,17 @@
                 </button>
                 <div>
                
-                <form ng-submit="addTag(movie,movie.tag)" ng-controller="Tag as tag" class="form-inline">
+                <form ng-submit="addTag(movie,addedtag)" ng-controller="Tag as tag" class="form-inline">
                	 	<div class="from">
                 		<label>Add tag:</label>
-                		<input type="text" class="form-control" ng-model="movie.tag"/>  
+                		<input type="text" class="form-control" ng-model="addedtag"/>  
                 		<input type="submit" class="btn btn-default" value="Add tag"></button>
                 </div>
                 </form>
                 </div>
                 <div>
                 	<ul class="list-inline">
-                	<li ng-repeat="tag in movie.tags" class=list-group-item>
+                	<li ng-repeat="tag in movie.tags" class="list-group-item taglist">
                 	{{tag}}
                 	</li>
                 	</ul>
