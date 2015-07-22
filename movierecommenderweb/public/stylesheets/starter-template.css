@@ -13,3 +13,7 @@ body {
 .liked{
 	background-color: red;
 }
+
+.taglist{
+	margin: 5px;
+}
