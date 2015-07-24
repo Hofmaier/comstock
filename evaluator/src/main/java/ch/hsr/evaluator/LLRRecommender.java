@@ -46,7 +46,7 @@ public class LLRRecommender implements Recommender {
 		//	updateSolr();
 	}
 
-	private void updateSolr() {
+	public void updateSolr() {
 		try {
 		clearSolr();
 		DataModel likes = pref2like(dataModel);
