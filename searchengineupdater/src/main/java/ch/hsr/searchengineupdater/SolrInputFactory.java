@@ -2,6 +2,7 @@ package ch.hsr.searchengineupdater;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -19,7 +20,7 @@ import org.slf4j.LoggerFactory;
 public class SolrInputFactory {
 	Logger log = LoggerFactory.getLogger(SolrInputFactory.class);
 	String tagcsvpath = "/home/lukas/Downloads/ml-latest-small/tags.csv";
-	String moviecsvpath = "/home/lukas/Downloads/ml-latest-small/movies.csv";
+	String llrfield = "payloads";
 	
 	public List<SolrInputDocument> createSolrDocs(DataModel dm,
 			ItemSimilarity tagsim, 
@@ -40,6 +41,7 @@ public class SolrInputFactory {
 			StringBuilder simrstr = new StringBuilder();
 			StringBuilder tagsimstr = new StringBuilder();
 			StringBuilder llrstr = new StringBuilder();
+			StringBuilder llrindicatorstrbld = new StringBuilder();
 			LongPrimitiveIterator iter2 = dm.getItemIDs();
 			while (iter2.hasNext()) {
 
@@ -47,6 +49,10 @@ public class SolrInputFactory {
 				double sim = similarity.itemSimilarity(itemid, otheritemid);
 				double tagsimval = tagsim.itemSimilarity(itemid, otheritemid);
 				double llrsim = llrSimilarity.itemSimilarity(itemid, otheritemid);
+				if(!Double.isNaN(llrsim)){
+					String llrsimstr = String.format("%.1f", llrsim);
+					llrindicatorstrbld.append(otheritemid + "|" + llrsimstr + " ");
+				}
 				if (!Double.isNaN(sim) && sim > similaritythreshold) {
 					simrstr.append(" " + otheritemid);
 				}
@@ -62,6 +68,7 @@ public class SolrInputFactory {
 			doc.addField("simr", similaritemidstr);
 			doc.addField("tags", tagsimstr.toString());
 			doc.addField("llr", llrstr.toString());
+			doc.addField(llrfield, llrindicatorstrbld.toString());
 			solrdocs.add(doc);
 		}
 		log.info("solr doc created" );
@@ -70,7 +77,7 @@ public class SolrInputFactory {
 
 	public Collection<SolrInputDocument> movies() {
 		try {
-			BufferedReader br = new BufferedReader(new FileReader(moviecsvpath));
+			BufferedReader br = new BufferedReader(new FileReader(""));
 			String line;
 			DataReader datareader = new DataReader();
 			MultiMap movieId2tags = datareader.movieId2tags(tagcsvpath);
