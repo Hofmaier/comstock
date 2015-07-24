@@ -4,11 +4,11 @@
 This section describes how we integrate the components described in section \ref{sec:design}. The section is divided according the online and offline parts of the \gls{rec}.
 
 \begin{description}
-\item[Offline learning] In this part the systems uses the stored histories of user behavior to compute the \gls{llr} ratios of the \gls{coocc} among items. Then it updates all items in the in the NoSQL database/search engine Apache Solr. We use similar items as indices and store the \gls{llr} ratios from the previous step as payloads. This task takes serveral minutes but the duration does not impact the user experience hence it can be executed overnight. 
-\item[Online logging and recommendation] The online part of the system records user activities used in the similarity analisis and create personalized \gls{topn} if requested. If it receices a requerst for a recommendation list it constructs a query from the user history $h_u$. Then it uses the query to get a ranked list of items that are likely appealing to the user $u$. It removes all item's the user already knows and present the list as recommendation. In order to a  provide smooth user experience the top-N recommendation task should not take longer than a second.
+\item[Offline learning] In this part the systems uses the stored histories of user behavior to compute the \gls{llr} ratios of the \gls{coocc} among items. Then it updates all items in the in the NoSQL database/search engine Apache Solr. We use similar items as indicators and store the \gls{llr} ratios from the previous step as payloads. This task takes serveral minutes but the duration does not impact the user experience hence it can be executed overnight. 
+\item[Online logging and recommendation] The online part of the system records user activities used in the similarity analysis and creates personalized \gls{topn} if requested. If it receives a requerst for a recommendation list it constructs a query from the user history $h_u$. Then it uses the query to get a ranked list of items that are likely appealing to the user $u$. It removes all item's the user already knows and present the list as recommendation. In order to a  provide smooth user experience the top-N recommendation task should not take longer than a second.
 \end{description}
 
-To store the user's activity we used a sqlite3 database because it's easy to deploy in a development environment and we can use existing interfaces to from Java and Python to update and retrieve data. 
+To store the user's activity we used a sqlite3 database because it's easy to deploy in a development environment and we can use existing interfaces for Java and Python to update and retrieve data. 
 
 First we insert a document for every item into Solr. The documents contain the metadata like (title, genre, tags, etc). The offline learning step will only update the indicator fields for every item.
 
@@ -49,10 +49,37 @@ The computation of similarities and update of Solr involves a lot transforming d
 \subsection{Online recommendation}
 \label{sec:online}
 
-In our demo application the user interacts with a web GUI in a web brower. 
-\subsubsection{Retrieve recommendation}
+The generation of a top-N recommendation list can be divided into 4 step. The process is illustrated in figure \ref{fig:topn}.
 
-In order to produce recommendations we compose a Solr query from the user history. The user history is stored in the web log. The web server sends this query to Solr. Solr responds with a ranked result set. The web server then formats the response from Solr and sends a list of recommended items to the user.
+\begin{enumerate}
+\item User requests top-N recommendation list.
+\item Look up the user's action history $h_u$.
+\item Query the search engine.
+\item Process the search result and format a JSON response.
+\end{enumerate}
+
+These steps are implemented in the web application with a few lines of code. The the heavy lifting is done by the search engine.
+
+First the web browser requests a top-N recommendation list for user $u$. In our demo application the web server provides a REST API. A authenticated user can issue a \verb|GET| request to the path \verb|/topn| in order to get the list. 
+When the web server receives a request it looks up the action history $h_u$ for user $u$ in the user action database. $h_u$ can contain multiple types of user behavior. In our demo application the web server retrieves a list of items the user liked in the past and a list of items the user tagged. In order to retrieve all actions that belong to user $u$ the user activity is stored in a relational database.
+Then the web server forms a Solr query with the recent users actions, and sends Solr a HTTP request that contains the query as \verb|q| parameter. For instance the following string shows the \verb|q| parameter for a HTTP request that uses recent user likes and tag activity.
+\begin{verbatim}
+q=likeindicator:1688 1834 3893 AND tagindicator:10 33 41 54 55 
+\end{verbatim}
+Solr returns a raw ranked result list. 
+
+To produce a top-N recommendation list the web server uses the user history $h_u$ again to removes all item already known to the user. Then it formats the data as JSON and presents the user a top-N recommendation list. In addition we could apply business logic that adjusts which items are shown. For instance, we can promote particular items or we could remove out-of-stock items.
+
+Listing \ref{lst:topn} shows the Scala code that does the filtering and formatting.
+\verb|solrResponse| is a \verb|Iterable| that yields the ranked result set from Solr. \verb|history| is a list of all items the user liked or tagged. \verb|toJson| takes an \verb|Writes[T]| as implicit parameter. Hence we transform \verb|SolrDocument| by implementing \verb|Writes[SolrDocument]|.
+
+\begin{lstlisting}[caption={The web server removes items already known and formats the the items in JSON},label={lst:topn}]
+def itemIsKnown(x: SolrDocument) =
+      history.contains(x.getFieldValue("id").toString())
+      
+val unknownItems = solrResponse.filter {!itemIsKnown(_)}
+Ok(Json.toJson(unknownItems))
+\end{lstlisting}
 
 \begin{figure}
 \centering
@@ -63,15 +90,21 @@ draw,
 thin,
 minimum height=3.5em
 },
+to/.style={->,>=stealth',shorten >=1pt,semithick,font=\footnotesize},]
 ]
 
 \node (web) [data, minimum height=2cm] {Web server};
 \node (log) [data,above of = web,align=left,node distance=30mm] {user actions\\database};
-\node (browser) [data,left of=web,node distance=50mm,minimum height=2cm] {Webbrowser};
-\node (solr) [data,below of=web,node distance=30mm] {Apache Solr};
-\draw[->] ([yshift=1 cm]browser.east) --  ([yshift=1 cm]web.west);
-\draw[->] (web) -- (log);
+\node (browser) [data,left of=web,node distance=7 cm,minimum height=2cm] {Webbrowser};
+\node (solr) [data,below of=web,node distance=4 cm] {Apache Solr};
+\draw[to] ([yshift=0.5 cm]browser.east) -- node[midway,above]{request} node[midway,below]{top-N list} ([yshift=0.5 cm]web.west);
+\draw[to] ([yshift=-0.5 cm]web.west) -- node[midway,above]{top-N} node[midway,below]{recommenation list} ([yshift=-0.5 cm]browser.east);
+\draw[to] ([xshift=-0.5 cm]web.north) -- node[midway,left]{get $h_u$} ([xshift=-0.5 cm]log.south);
+\draw[to] ([xshift=0.5 cm]log.south) -- node[midway,right]{$h_u$}([xshift=0.5 cm]web.north);
+\draw[to] ([xshift=0.5 cm]web.south) -- node[midway,right]{$h_u$ as query}([xshift=0.5 cm]solr.north);
+\draw[to] ([xshift=-0.5 cm]solr.north) -- node[midway,left,align=left]{ranked list\\of similar items } ([xshift=-0.5 cm]web.south);
 \end{tikzpicture}
-\caption{The web server sends this query to Solr. Solr responds with a ranked result set.}
+\caption{To produce a top-N recommendation list the web browser requests a top-N recommendation list for user $u$. The webserver looks up the action history $h_u$ for user $u$ in the user action database. Then the webserver forms a Solr query with the recent users actions and sends it to Solr. Solr returns a raw ranked result list to the web server. The webserver removes all item already known to the user formats the data to JSON and presents the user a top-N recommendation list. }
+\label{fig:topn}
 \end{figure}
 %-- node[midway,above] {post user actions}

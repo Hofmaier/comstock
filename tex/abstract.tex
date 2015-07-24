@@ -1,13 +1,14 @@
 \begin{abstract}
-Building a recommendation engine can be a daunting task. Understanding all possible techniques and choosing the most suitable for the job at hand presupposes that you have a strong mathematical background. To make matters worse the options of algorithms is constantly changing as researchers coming up with new ones. Having said that not all companies can afford to employ an army of data scientist and mathematicens to build a recommender system. They a have to trade-off the development the accuracy of recommender against the development costs. 
+Building a recommendation engine can be a difficult and expensive task. Understanding all possible techniques and choosing the most suitable for the job at hand presupposes that you have a strong mathematical background. To make matters worse there are a lot different algorithms and strategies and researchers are constantly coming up with new ones. Having said that not all companies can afford to employ an army of data scientist and mathematicens to build a recommender system. They a have to trade-off the accuracy of recommender against the development costs. 
 
-This article describes a simple pratical approach. The discussed recommender exploits existing, proved technologies. 
+This report describes a simple pratical approach to build a recommender system. The discussed recommender exploits the existing, proved technology of the search engine Apache Solr. It collects data about the behavior of users. Based on the past user activity it computes similarities among items and loads them into Solr. 
 
-The model is computed with Apache Spark. The list of recommendation is served by the modern scalable search engine Apache Solr.
+Co-occurence allows us to compute significant indicators of what should be recommended.
+The report will discuss the similarities between the weighting of indicator scores of a this model and the process of ranked retrieval.
 
-The behavior of users provide data to predict the relevance of recommendations to individual users. The recommender engine discussed in this article has a two part design.
-Co-occurence can be computed at scale with Apache Mahout's \verb|spark-itemsimilarity| job.
-Recommendations are query results of the search engine Apache Solr.
+It uses the \gls{llr} ratio of co-occurences of several action types (e.g. purchase, view) as similarity metric. Co-occurence can be computed at scale with Apache Mahout's \verb|spark-itemsimilarity| job. 
 
-In this report we evaluate the accuracy of the descibed recommender throug precisoin and recall.
+In order to produce a list of recommendable items for a user, it uses his history of recent actions to query Solr for similar items. The approach provides a flexible and scalable way to produce recommendation in real time without to need to hire a team of datascientist. 
+
+The evaluation of the described approach shows that the accuracy of the top-N recommendation task matches the accuracy of a sophiticated itembased algorithm.
 \end{abstract}

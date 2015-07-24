@@ -1,62 +1,114 @@
 \section{Introduction}
 \label{sec:intro}
 
-A Recommender systems helps consumers to discover unknown article from an overwhelimg set of choices by suggesting them a list of items that are likely to be appealing to them. The recommended item should match the user's personal taste.
-Recommender systems have become very common in recent years. 
-For instance, they help users of a on-demand movie provider to find movies they might like. Without a recommender the user would have to choose among 100000 titles manually. Because it is not possible for a user to look at every movie separtly in order to decide if he likes it the provider infers the users preferences and present him a list of movies he might like. This list is referred as \gls{topn}. If a user has purchased the movies "Terminator 2" and "Transformers" the recommender engine will present the act him a list of other similar action movies (e.g. Matrix, Iron Man).
-E-commerce sites that deploy a recommender engine can have a increase in sales of 8 - 13 percent \footnote{http://www.practicalecommerce.com/articles/1942-10-Questions-on-Product-Recommendations}.
+A recommender systems helps consumers to discover unknown article from an overwhelimg set of choices by suggesting them a list of items that are likely to be appealing to them. The recommended items should match the user's personal taste.
 
-\subsection{Recommender strategies}
+For instance, they help users of a on-demand movie provider to find previously unknown and interesting movies. Such a provider may offer 100000 different titles. It is not feasable for a user to check every movie separatly in order to decide if he likes it or not. A recommender engine supports users by presenting them a list of movie recommendations. It predicts the user's preference for each movie and shows him a list of movies with the highest predicted score. The list of recommendation is referred to as \gls{topn}. For example, if a user has purchased the movies "Terminator 2" and "Transformers" the recommender engine should present him a list of other similar action movies (e.g. Matrix, Iron Man). 
+ 
+Recommender systems have become very common in recent years. E-commerce sites that deploy a recommender engine can have a increase in sales of 8 - 13 percent \footnote{http://www.practicalecommerce.com/articles/1942-10-Questions-on-Product-Recommendations}.
+
+\subsection{Overview of recommender strategies}
 \label{sec:strategies}
 
-There are different strategies to recommend a user new items \cite{jannach11}.
+A trivial solution to the recommender problem would be to sort all items by their popularity or average rating in descending order and then suggesting the user the top $N$ items of that sorted list. Recommender system based on this approach are called non-personalized. Non-personalized \glspl{topn} do not involve computationaly expensiv procedures and are easy to implement but they suggest all users the same \gls{topn}. The web site www.imdb.com is an example for a non-personalized recommender. It shows the user a list of movies sorted by the average rating score.
+ The recommender described in this report is a personalized recommender that creates an indiviudual list of recommendation for every user.
+
+There are different strategies to create personalized \glspl{topn} \cite{jannach11}. 
 \begin{description}
 \item[Collaborative Filtering] This strategy is only based on past user behavior. Such behavior include explicit user ratings or other user activities like purchases, likes and click. For example, a recommender engine based on collaborativ filtering uses the ratings of all users to compute the similarity between all items. 
 It requires no domain knowledge. Recommender engines based on collaborative filtering do not care what the items are and what attributes they have. This can be an advantage because the same technique can be applied to different domains and different types of items. 
 
 User preferences will change over time. Another advandage is that collaborative filtering will update the model automaticaly as it's exposed to new user histories. The systems learns.
 
-There are several categories of collaborative filtering algorithms:
+Further collaborative filtering algorithms can divided in two different approaches.
 \begin{description}
-\item[Non-personalized] Non-personalized recommender engines suggest all users the same \gls{topn}. For instance, a non-personalized recommender presents all users an ordered list of items. Items with the largest number of ratings are shown first.
-\item[Neighborhood based] Neighborhood models are based on the similartiy among users and items. For instance, two items are similar because they have similar ratings of the same users. In order to predict a unknown preference for an item $i$ the recommender computes the nearest neigbors of $i$ and considers the users past ratings for the similar items. This approach was used by Amazon.com according to \cite{Linden}. Neighorhood models can be further divided by their similarity metric (e.g. cosine, log-likelihood ratio).
-\item[Latent factor approach] Latent factor approaches model users and items as vectors. The rating of a user on an item is predicted by computing the inner product between the related latent factor vectors. The recommender problem is reduced to the optimization problem of finding the best vectors.
+\item[Neighborhood based] Neighborhood models are based on the similartiy among users or items. For instance, two items are similar because they have similar ratings of the same users. The set of items that are similar to a particular item $i$ is called the neighborhood of $i$. In order to predict a unknown preference for an item $i$ the recommender computes the nearest neigbors of $i$ and considers the users past ratings for the similar items. This approach was used by Amazon.com according to \cite{Linden}. Neighorhood models can be further divided by their similarity metric (e.g. cosine, log-likelihood ratio).
+\item[Latent factor approach] Latent factor approaches model users and items as vectors. The rating of a user on an item is predicted by computing the inner product between the related latent factor vectors. The recommender problem is reduced to the optimization problem of finding the best vectors with respect to a training set.
 \end{description}
-\item[Content based filterting] Content-based recommendation techniques use attributes of the items in order to predict preferences of users. For example, a movie can be described by \glspl{tag}. A user profile indicates the type of items a user likes. These algorithms recommend items that are similar to the user profile. The profile could be built from users past actions.
+\item[\gls{content} filterting] \gls{content} recommendation techniques use attributes of the items in order to predict preferences of users. For example, a movie can be described by \glspl{tag}. A user profile indicates the type of items a user likes. These algorithms recommend items that are similar to the user profile. The profile could be built from users past actions.
 \end{description}
 
-\todo{diagram mit aufteilung machen}
+\tikzset{
+  basic/.style  = {draw, text width=2cm, drop shadow, font=\sffamily, rectangle},
+  root/.style   = {basic, rounded corners=2pt, thin, align=center,
+                   fill=green!30},
+  level 2/.style = {basic, rounded corners=6pt, thin,align=center, fill=green!60,
+                   text width=8em, edge from parent/.style={->,draw,color=black},>=latex},
+  level 3/.style = {basic, thin, align=left, fill=pink!60, text width=8.5em}
+}
+\begin{figure}
+  \centering
+\begin{tikzpicture}[
+  level 1/.style={sibling distance=40mm},
+  edge from parent/.style={->,draw},
+  >=latex]
 
-The recommender presented in this report is a combination of collaborative filtering and content-based filtering. In order to compute similarities among items its uses both; past user actions and \glspl{tag} associated with items. 
+% root of the the initial tree, level 1
+\node[root] {Recommender strategy}
+% The first level, as children of the initial tree
+  child {node[root] (c1) {Non-personalized}}
+  child {node[root] (c2) {personalized}
+    child {node[level 2] (c21) {Collaborative filtering}
+      child {node[level 2] (c2111) {Neighborhood based}}
+      child {node[level 2] (c2112) {Latent factor approach}}}
+    child {node[level 2] (c22) {\gls{content} filtering}}};
+  
+% The second level, relatively positioned nodes
+\begin{scope}[every node/.style={level 3}]
+
+\node [below of = c2111, xshift=15pt] (c211) {Pearson Correlation};
+\node [below of = c211] (c212) {Cosine similarity};
+\node [below of = c212] (c213) {LLR ratio};
+
+\node [below of = c2112, xshift=15pt] (c21121) {Gradient descent};
+\node [below of = c21121] (c21122) {Least Square};
+
+\end{scope}
+
+% lines from each level 1 node to every one of its "children"
+
+\foreach \value in {1,...,3}
+  \draw[->] (c2111.195) |- (c21\value.west);
+
+\foreach \value in {1,...,2}
+  \draw[->] (c2112.195) |- (c2112\value.west);
+
+\end{tikzpicture}
+    \caption{Overview of some recommender strategies}
+\label{fig:overview}
+\end{figure}
+
+This report describes a personalized recommender that uses a combination of collaborative filtering and content-based filtering. In order to compute similarities among items it uses both; past user actions and \glspl{tag} associated with items. Hence it is a hybrid recommender system.
 
 \subsection{Why is it difficult to build a recommender engine?}
 
-There are several challenges in building a recommender engine.
+To make a rationally choice which strategy to use for the job at hand is difficult and requires a strong mathematical background. According to  \cite{Dunning14} the process of designing an advanced and accurate recommender engine requires a team of highly trained engineer and data scientist. The process requires to try a huge collection of algorithms at each problem and selecting the algoritm that gives the best result. This is too expensive for small companies. Apart from choosing the strategy there are several other challenges in building a recommender engine.
 
 \begin{itemize}
-\item When dealing with huge datasets, the calculation of the similarties or the latent factor vector is computationaly expensive. Either a large amount of computation power is necessary or the compution of a \gls{topn} takes too long.
-\item Many algorithms relies on explicit user ratings. User invited to rate items on a scale from 1 to 5. Only a small subset of users rate a small subset of items. This leads to very few ratings that and these ratings represents only users who like to rate.
-\item According to  \cite{Dunning14} the process of designing an advanced and accurate recommender engine requires a team of highly trained engineer and data scientist. The process requires to try a huge collection of algorithms at each problem and selecting the algoritm that gives the best result. This is too expensive for small companies. An alternative is to use products with drag-and-drop approaches. These products automaticaly select the right algorithms. They aren't very accurate and a the user has to spend most of the time putting the data into the right format.
+\item Collaborative filtering algorithms are based on collecting a large amount of past user preference data. Most techniques use explicit user ratings. For instance, users are invited to rate items on a scale from 1 to 5. Only a small subset of users rate a small subset of items. This leads to very few ratings that and these ratings represents only users who like to rate.
+
+\item When dealing with huge datasets, the calculation of the similarties or the latent factor vector is computationaly expensive. Either a large amount of computation power is necessary or the computation of a \gls{topn} takes too long.
 \end{itemize}
 
-\subsection{The design goals a practical recommender}
+\subsection{The design goals of a practical recommender}
 \label{sec:practical}
 
 In order make the development of a recommender engine easier and cost-effective \cite{Dunning14} proposes a simplified, practical approach that provides profitable results and facilitate the processing of large-scale datesets. 
 
-The described recommender does not predict a rating value. It suggests the user a list of items that are likely to be of interest to him. This list is called a \gls{topn}.
-
 The design proposed by \cite{Dunning14} has the following goals:
 \begin{itemize}
 \item A small-scale development teams can build a recommender engine.
-\item To build the model use algorithms that can be computed at scale with distributed computation framework, such as Apache Hadoop or Apache Spark. We compute \gls{coocc} with Apache Spark. The system is \gls{scalable} for big data.
+\item To build the model the systems uses algorithms that can be computed at scale with distributed computation framework, such as Apache Hadoop or Apache Spark. 
 \item Use the search capabilities of a existing search engine, such as Apache Solr, to produce the \gls{topn}. The search engine indexes items represented as documents instead of text documents. The fields of these documents indicate similarity to other items indicators The query is composed of the users past actions that we want to recommend. The depoyment of a search engine saves development costs. In addition it is easier to scale the system. Producing a \gls{topn} with an neighborhood based collaborative filtering algorithm is similar to process a document query in a text retrieval system. 
 \item The top-N recommender task should be fast. Recommendations are generated instantly and online by quering the text search engine using rescents actions of the user as query. Computation of simililarity and the update of the text search engine is done offline, ahead of time.
 \item The recommender engine takes user behavior instead of explicit user ratingsas input. Because only a small subset of users are willing to rate items and user behavior is the best clue to what they want the input data should be collected user behavior, like clicking or purchasing. User behavior interaction are only associations between a user and an item and there is no notion of strength represented as number. This associations are Boolean preferences. It exist or it doesn't exist. 
 \item Several types (e.g. clicks, views, purchases) of user actions are used to improve recommendations and it is possible to extend the recommender with additional \glspl{indicator}. Many existing collaborativ filtering algorithms use only one user activity to model preference \cite{ferrel}. In addition metadata, like tags, are used to improve the accuracy. The recommender combines collaborative filtering and content-based filtering(hybrid approach). A recommender that uses a variety of user activities is called a \gls{multimodal} recommender. 
 \end{itemize}
 
-There are academic approaches that produce recommendations with a smaller error but these require complex mathematical models. The focus of this approach is not to minimize the error but to make the development and deployment of a recommender more approachable.
+To archieve these goals \cite{Dunning14} proposes to use compute \gls{coocc} as simility indicator and to deploy a search engine to produce recommendation.
+
+There are academic approaches that produce recommendations with a smaller error but these require complex mathematical models. The focus of this approach is not to minimize the error but to make the development and deployment of a recommender more approachable. Another difference is that the described recommender does not predict a rating value for every item for every user. Instead it suggests the user a \gls{topn}.
+
 
 \subsection{Used technology}
 \label{sec:tech}

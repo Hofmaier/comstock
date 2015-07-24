@@ -315,3 +315,16 @@ The recommender described in this article is divided in two parts.
 \item Computation of simililarity and the update of the text search engine is done offline, ahead of time.
 \item Recommendations are generated instantly by quering the text search engine using rescents actions of the user.
 \end{itemize}
+In our demo application the user interacts with a web GUI in a web brower. 
+\subsubsection{Retrieve recommendation}
+
+In order to produce recommendations we compose a Solr query from the user history. The user history is stored in the web log. The web server sends this query to Solr. Solr responds with a ranked result set. The web server then formats the response from Solr and sends a list of recommended items to the user.
+
+The model is computed with Apache Spark. The list of recommendation is served by the modern scalable search engine Apache Solr.
+
+The behavior of users provide data to predict the relevance of recommendations to individual users. The recommender engine discussed in this article has a two part design.
+Co-occurence can be computed at scale with Apache Mahout's \verb|spark-itemsimilarity| job.
+Recommendations are query results of the search engine Apache Solr.
+
+Without a recommender the user would have to choose among 100000 titles manually.
+ The system is \gls{scalable} for big data
