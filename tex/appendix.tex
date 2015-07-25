@@ -107,9 +107,11 @@ To start the Webapplication run:
 \begin{verbatim}
 sbt build 
 \end{verbatim}
-
+This assumes that the scala build tool (sbt) is installed.
 \subsection{Apache Spark}
 \label{sec:spark}
+Apache Spark is a cluster computer framework. It allows user programs to load data into a cluster's memory. It is well suited to machine learning algorithms \cite{Karau}.
+
 Apache Spark is a parallel execution engine.
 \verb|spark-rowsimilarity| is a script that comes with spark. It takes as input a text file representation of a matrix of sparse vectors. It finds similar rows. The input is in text-delimited form where there are three delimiters used. By default it reads (rowID<tab>columnID1:strength1<space>columnID2:strength2...) The job only supports LLR similarity. This job only supports LLR similarity.
 The input has the following format:
@@ -168,13 +170,3 @@ itemid, userid, timestamp
 5,103,980731417
 5,104,980731208  
 \end{lstlisting}
-
-\section{Case Study: artoffer.ch}
-\label{sec:artoffer}
-
-The following action are used as indicators
-\begin{itemize}
-\item When a user visits the page of a item. (boolean)
-\item When a user likes an item.
-\item Tags
-\end{itemize}

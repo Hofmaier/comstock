@@ -328,3 +328,12 @@ Recommendations are query results of the search engine Apache Solr.
 
 Without a recommender the user would have to choose among 100000 titles manually.
  The system is \gls{scalable} for big data
+
+of a existing search engine, such as Apache Solr, to produce the \gls{topn}.
+
+There are similarities between the compution of a \gls{topn} and a \gls{rankedretrieval}.
+
+ to use compute \gls{coocc} as simility indicator and to deploy a search engine to produce recommendation.
+  The development began in 2008
+
+Section \ref{sec:design} will describe how different type of interactions is used as input data to train the recommender.

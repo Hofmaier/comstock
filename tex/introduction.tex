@@ -39,7 +39,7 @@ Further collaborative filtering algorithms can divided in two different approach
 \begin{figure}
   \centering
 \begin{tikzpicture}[
-  level 1/.style={sibling distance=40mm},
+  level 1/.style={sibling distance=50mm},
   edge from parent/.style={->,draw},
   >=latex]
 
@@ -98,14 +98,31 @@ In order make the development of a recommender engine easier and cost-effective 
 The design proposed by \cite{Dunning14} has the following goals:
 \begin{itemize}
 \item A small-scale development teams can build a recommender engine.
-\item To build the model the systems uses algorithms that can be computed at scale with distributed computation framework, such as Apache Hadoop or Apache Spark. 
-\item Use the search capabilities of a existing search engine, such as Apache Solr, to produce the \gls{topn}. The search engine indexes items represented as documents instead of text documents. The fields of these documents indicate similarity to other items indicators The query is composed of the users past actions that we want to recommend. The depoyment of a search engine saves development costs. In addition it is easier to scale the system. Producing a \gls{topn} with an neighborhood based collaborative filtering algorithm is similar to process a document query in a text retrieval system. 
+\item To build the model the systems uses algorithms that can be computed at scale with a distributed computation framework, such as Apache Hadoop or Apache Spark. 
 \item The top-N recommender task should be fast. Recommendations are generated instantly and online by quering the text search engine using rescents actions of the user as query. Computation of simililarity and the update of the text search engine is done offline, ahead of time.
-\item The recommender engine takes user behavior instead of explicit user ratingsas input. Because only a small subset of users are willing to rate items and user behavior is the best clue to what they want the input data should be collected user behavior, like clicking or purchasing. User behavior interaction are only associations between a user and an item and there is no notion of strength represented as number. This associations are Boolean preferences. It exist or it doesn't exist. 
-\item Several types (e.g. clicks, views, purchases) of user actions are used to improve recommendations and it is possible to extend the recommender with additional \glspl{indicator}. Many existing collaborativ filtering algorithms use only one user activity to model preference \cite{ferrel}. In addition metadata, like tags, are used to improve the accuracy. The recommender combines collaborative filtering and content-based filtering(hybrid approach). A recommender that uses a variety of user activities is called a \gls{multimodal} recommender. 
+\item Use input data that reveals what user want to do. The quality of a recommender depends on the input data that is used to build the model (train the recommender). 
+\item Several types (e.g. clicks, views, purchases) of user actions are used to improve recommendations and it is possible to extend the recommender with additional \glspl{indicator}. Many existing collaborativ filtering algorithms use only one user activity to model preference \cite{ferrel}. In addition metadata, like \glspl{tag}, are used to improve the accuracy. A recommender that uses a variety of user activities is called a \gls{multimodal} recommender. 
 \end{itemize}
 
-To archieve these goals \cite{Dunning14} proposes to use compute \gls{coocc} as simility indicator and to deploy a search engine to produce recommendation.
+To archieve these goals \cite{Dunning14} makes the following suggestions.
+
+\begin{itemize}
+\item The recommender engine takes user behavior instead of explicit user ratings as input. Because only a small subset of users are willing to rate items and user behavior is the best clue to what they want the input data should be collected user behavior, like clicking or purchasing.
+
+\item Use \gls{coocc} as an \gls{indicator} for similarity. Co-occurence counts how many times two items appear together in user histories. Among others there are two reason to use \gls{coocc}. 
+
+\begin{itemize}
+  \item User behavior interaction are only associations between a user and an item and there is no notion of the association's strength represented as number. This associations are Boolean preferences. It exist or it doesn't exist. Co-occurence is suitable for Boolean preferences because it does not account for a strength of the interaction. In addition it can be used to analyse every type of interaction. For instance, we can also count \gls{coocc} of items associated with tags.
+  \item Co-occurence can be computed using the \gls{mapreduce} programming model. Hence the computaion of the model can be distributed.
+\end{itemize}
+
+\item Use a text retrieval engine to produce the \gls{topn}. Producing a \gls{topn} with an neighborhood based collaborative filtering algorithm is similar to process a document query in a text retrieval system. The search engine indexes items represented as documents instead of text documents. The fields of these documents indicate similarity to other items. The query is composed of a user's past actions which we want to recommend. For instance, if we want to recommend items which the user can purchase then we uses his purchase history. 
+
+It is possible to index several field as indicator. Hence we can use many types of user action to improve recommendation. For instance we can index a field that indicates similarity with respect to purchases and one field that indicate similarity with respect to \glspl{tag}. In addition we can enhance the index with metadata about the item. The recommender combines collaborative filtering and content-based filtering (hybrid approach).
+
+We exploit the search capalities of an existing text retrieval engine, such as Apache Solr. This saves development costs. In addition the system is \gls{scalable} for big data because Solr is optimized to search large volumes of data.
+
+\end{itemize}
 
 There are academic approaches that produce recommendations with a smaller error but these require complex mathematical models. The focus of this approach is not to minimize the error but to make the development and deployment of a recommender more approachable. Another difference is that the described recommender does not predict a rating value for every item for every user. Instead it suggests the user a \gls{topn}.
 
@@ -113,26 +130,24 @@ There are academic approaches that produce recommendations with a smaller error 
 \subsection{Used technology}
 \label{sec:tech}
 
-In order to build a small demo application recommender with a search engine we use existing technology.
+We build a small demo web application that implements \gls{rec} with a search engine that illustrates the concepts by example. Users can browse a movie database. They can express their preference with a like button associated with every movie. In addition they can tag movies. Users can click on the discover link and the web application will present them a list of recommended movies. For the recommender engine part use two existing technologies that provide a large amount of functionality.
 
-A large amount of functionality is provided by two technoligies.
 \begin{itemize}
 \item Apache Mahout
 \item Apache Solr
 \end{itemize}
 
-Apache Mahout is a top-level Apache project that provide implementations of collaborative filtering algorithms among other machine learning techniques. The development began in 2008 \cite{Owen}. It provides server Apache Spark jobs in order to process large amount of data. We used it because it's Spark support and because it's well documented.
+Apache Mahout is a top-level Apache project that exists since 2008. Among other machine learning teechniques it implements a number collaborative filtering algorithms. It is also \gls{scalable}. Some algorithms run on top of Apache Spark or Apache Hadoop in order to process large amount of data\cite{Owen}. We used it because it provides a job to compute the \gls{llr} ratios of \gls{coocc} and because it's well documented.
 
 Apache Solr is a search engine that is optimized to search large volumes of text-centric data and return results sorted by relevance. It is built on Apache Lucene, an information retrieval library \cite{grainger}. Solr stores the documents in a flat structure and we can search for terms in the documents.
 
-Apache Spark is a cluster computer framework. It allows user programs to load data into a cluster's memory. It is well suited to machine learning algorithms \cite{Karau}.
-
 \subsection{Overview}
+The report is split into three parts.
+In section \ref{sec:design} we present the core concepts of the co-occurence based recommender. First we describe the used input data. Then we explain the process of computing a \gls{topn} and the \gls{coocc} based similiarity metric. In the next section we describe the similarties of a text-retrieval engine to a recommender and how we map items to text documents.
 
-In order describe the practical recommender we built a small demo web application that illustrates the concepts by example.
+In section \ref{sec:integration} we show how to connect the building blocks described in the previous sections.
 
-Section \ref{sec:design} will describe the design of the co-occurence based recommender. The similiarity metric log-likelihood ratio is described and a short introduction for the search engine Apache Solr is given.
-
-Section \ref{sec:design} will describe how different type of interactions is used as input data to train the recommender.
-
-In section \ref{sec:evaluation} we evaluate the accuracy of the co-occurence recommender. We describe the performance metrics \gls{precision} and \gls{recall} (section \ref{sec:precision}). Then we describe the evaluation methodology (section \ref{sec:methodology}). We compare the performance of the \gls{coocc} recommender to several baseline algorithms (section \ref{sec:baseline}). As a evaluation test set use the rating and tag activity of the MovieLens data set (section \ref{sec:dataset}). In section \ref{sec:results} we present the results.
+In section \ref{sec:evaluation} we evaluate the accuracy of the \gls{rec}. We describe appropriate performance metrics, \gls{precision} and \gls{recall}, for the top-N recommendations task (section \ref{sec:precision}). 
+Then we explain the evaluation methodology (section \ref{sec:methodology}) and the baseline algorithms (section \ref{sec:baseline}). 
+We use the rating and tag activity data of the MovieLens data set (section \ref{sec:dataset}) as a evaluation test set. 
+Finally we present the results of the performance evaluation. 
