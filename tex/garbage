@@ -337,3 +337,5 @@ There are similarities between the compution of a \gls{topn} and a \gls{rankedre
   The development began in 2008
 
 Section \ref{sec:design} will describe how different type of interactions is used as input data to train the recommender.
+  provides a flexible and scalable way to produce recommendation in real time without to need to hire a team of datascientist. 
+The discussed recommender exploits the existing and proved technology of the search engine Apache Solr and the machine learning library Apache Mahout to save development costs. It collects data about the behavior of users. Based on the past user activity it computes similarities among items and loads them into Solr. 
