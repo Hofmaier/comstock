@@ -104,7 +104,7 @@ to/.style={->,>=stealth',shorten >=1pt,semithick,font=\footnotesize},]
 \draw[to] ([xshift=0.5 cm]web.south) -- node[midway,right]{$h_u$ as query}([xshift=0.5 cm]solr.north);
 \draw[to] ([xshift=-0.5 cm]solr.north) -- node[midway,left,align=left]{ranked list\\of similar items } ([xshift=-0.5 cm]web.south);
 \end{tikzpicture}
-\caption{To produce a top-N recommendation list the web browser requests a top-N recommendation list for user $u$. The webserver looks up the action history $h_u$ for user $u$ in the user action database. Then the webserver forms a Solr query with the recent users actions and sends it to Solr. Solr returns a raw ranked result list to the web server. The webserver removes all item already known to the user formats the data to JSON and presents the user a top-N recommendation list. }
+\caption{To produce a top-N recommendation list we have to integrate a webapplication with the user action database and Apache Solr.}
 \label{fig:topn}
 \end{figure}
 %-- node[midway,above] {post user actions}

@@ -1,7 +1,7 @@
 \section{Evaluation}
 \label{sec:evaluation}
 
-This section describes the evaluation process and presents the results of the evaluation. In order to run the evaluation we created a small Java project called \verb|evaluator|. It contains the classes to evaluate the performance of the recommender discussed in this report and the Top Popular recommender (see section \ref{sec:baseline}).
+This section describes the evaluation process and presents the results of the evaluation. In order to run the evaluation we created a small Java project called \verb|evaluator|. It contains the classes to evaluate the performance of the recommender discussed in this report and the Top Popular recommender (see section \ref{sec:baseline}). We use the MovieLens data set as training and test data set. Note that this data set contains preference values.
 
 Evaluation is important because:
 \begin{itemize}
@@ -10,13 +10,17 @@ Evaluation is important because:
   \item Evaluation allows us to adjust the parameters in order to get better results.
 \end{itemize}
 
-Most commonly accepted evaluation measure for recommender systems is the Mean Average Error or Root Mean Squared Error of the predicted ratings and the actual one \cite{Ricci}.
+\subsection{How to measure the performance of the \gls{topnt}?}
 
-The recommender engine discussed in this article does not estimate preference values in order to produce recommendations. It presents a ordered list of $N$ recommendations. The list is ordered from best to worst recommendation. It produces a \glspl{topn}. The recommenders classifies recommendable items. If we look at the recommender problem as a classification problem we can make use of precision and recall. Precision and Recall are two information retrieval concepts. We provide a brief summary here to each of these meaesures.
+Most commonly accepted evaluation measure for recommender systems is the Mean Average Error or Root \gls{mae} of the predicted ratings and the actual one \cite{Ricci}\cite{jannach11}.
+As decribed in section \ref{sec:problem} the \gls{rec} does not estimate preference values. It produces a \glspl{topn}. Hence we can not use \gls{mae} as a performance metric. 
+
+We can look at the recommender problem as a classification problem. The recommender engine assigns every item into the category of recommendable items or unimported items.
+If we look at the recommender problem as a classification problem we can make use of precision and recall to evaluate the performance. Precision and \gls{recall} are two \gls{ir} concepts \cite{Manning}. We provide a brief summary here to each of these measures.
 
 Precision and recall depend on the following measures.
 \begin{description}
-\item[True positive (TP)] Number of items classified as recommendable or relevant that is truly of interest to the user.
+\item[True positive (TP)] Number of items classified as recommendable or relevant that are truly of interest to the user. 
 \item[True negatives (TN)] Number of instances not contained in the recommendation list (classified as irrelevant) and that in fact are not of interest to the user.
 \item[False positives (FP)] Number of instances recommended but are not relevant to the user.
 \item[False negatives (FN)] Number of instances not shown in the recommendation list but that in fact are relevant to the user.
@@ -55,9 +59,9 @@ box/.style={draw,rectangle,minimum size=3cm,text width=2.5cm,align=left}]
 \label{fig:confusionmatrix}
 \end{figure}
 
-Figure \ref{fig:confusionmatrix} visualizes the measures used for precision and recall. This table is called confusion matrix or contingency table. 
+Figure \ref{fig:confusionmatrix} visualizes the measures used for precision and recall. This table is called confusion matrix or contingency table \cite{Manning}. 
 
-\subsection{Precision and Recall}
+\subsubsection{Precision and Recall}
 \label{sec:precision}
 
 \begin{description}
@@ -93,11 +97,12 @@ Note that recall should not used without precision. We could build a recommender
 \label{sec:irimpl}
 
 Listing \ref{lst:irstats} shows the implementation of precision and recall. 
-The variable \verb|rec| contains an object of type \verb|Recommender|. \verb|Recommender| provides the method \verb|recommend|. \verb|recommend| takes the ID of th active user and the size $N$ of the top-N list as parameters. The argument |verb|topNsize| corresponds to $TP+FP$. It returns a top-N list for the active user. 
+The variable \verb|rec| contains an object of type \verb|Recommender|. \verb|Recommender| provides the method \verb|recommend|. \verb|recommend| takes the ID of the active user and the size $N$ of the top-N list as parameters. The argument \verb|topNsize| corresponds to $TP+FP$. It returns a top-N list for the active user. 
 
 The variable \verb|relevantItemIDs| contains a list with relevant items for the active user.
 
 We count how many items in the top-N list are also in the list \verb|relevantItems| and assign the result in \verb|relevantItemsRetrieved|. \verb|relevantItemsRetrieved| corresponds to the $TP$ value. In order or compute precision or recall we divide \verb|relevantItemsRetrieved| by \verb|topNsize| or the size of the collection\\ \verb|relevantItems|.
+
 
 \begin{lstlisting}[caption=Implementation of precision and recall,label=lst:irstats]
 double precision = 0;
@@ -105,7 +110,7 @@ double recall = 0;
 int relevantItemsRetrieved = 0;
 
 List<RecommendedItem> recItems = rec.recommend(userID, topNsize);
-   for (RecommendedItem recItem : reItems) {
+   for (RecommendedItem recItem : recItems) {
 	if (relevantItem.contains(recItem.getItemID())){
 			relevantItemsRetrieved++;
 	}
@@ -120,34 +125,36 @@ recall =  relevantItemsRetrieved / (double) relevantItems.size());
 		      
 \end{lstlisting}
 
-\subsubsection{Testing Methodology}
+\subsection{Testing Methodology}
 \label{sec:methodology}
+The definitions \ref{eq:precision} and \ref{eq:recall} of precision in recall rely on the number of relevant items.
+If we want to evaluate a recommender with \gls{precision} and \gls{recall}, we have to define, what is a relevant item for the active user. 
 
-If we want to evaluate a recommender, we have to define, what is a relevant item for the active user. For the user a relevant item is one that he does not know and he would like (or purchase). Those items are unknown at the time of the recommendation. Relevancy depends on the goal of the recommender. For example, an item is relevant if the user would give it a high rating or if he would purchase the item.
+Relevancy depends on the goal of the recommender. For example, an item is relevant if the user would give it a high rating or if he would purchase the item but he is not aware of it.
+Those items are unknown at the time of the recommendation. 
 
-Unfortunatly we do not know how a user likes some new item in the future.
-But we can simulate the prefencences of the future by setting aside a small part of the real data set as test data. We split the collected input data into as follows:
+Unfortunatly we do not know if a user likes some new item in the future.
+But we can simulate the prefencences of the future by setting aside a small part of the real data set as test data.
 
-
-We get the all ratings of user $u$. We sort these rating according the rating value. Then we select the top $N$ items $T$ that are greater then a given threshhold $t$ from the sorted list. Items in $T$ have a high rating and we assume they are relevant to the user $u$. Items in $T$ form the set $TP + FN$ (see figure \ref{fig:confusionmatrix}.
-
+In order to separate the test data set from the training data set we get all ratings of user $u$. We sort these rating according the rating value. Then we select the top $N$ items $T$ that are greater then a given threshhold $t$ from the sorted list. Items in $T$ have a high rating and we assume they are relevant to the user $u$. Items in $T$ form the set $TP + FN$ (see figure \ref{fig:confusionmatrix}). 
 The threshhold prevents us from adding items with a low rating to $T$. If a user rates three items with the rating 5.0, 1.0 and 1.0 the evaluation algorithm would add the items with the bad rating 1.0 to $T$. Hence the items with bad rating 1.0 lead to lower recall measures. 
+If there are no numerical rating values but only Boolean values we have to select $N$ items at random.
 
 All ratings in $T$ are removed from the overall input set. The remaining preferences form the training data set $M$. In order to measure precision and recall we first train the recommender with the data in $M$. For instance, if we evaluate a co-occurence based recommender we compute indicator matrix from section \ref{sec:llr} with this set.
 
-We use the trained recommender to form the top-N recommendation list. 
+We use the trained recommender to form the \gls{topn} for user $u$. This list corresponds to the set $TP + FP$ in the confusionmatrix.
 
-We check how many items are contained in the top-N list that are in $T$. These items are the set $TP$ (see figure \ref{fig:confusionmatrix}. 
+We check how many items are contained in the top-N list that are in $T$. These items are the set $TP$ (see figure \ref{fig:confusionmatrix}). 
 
-For example, if $N$ is 5 this would mean precision and recall are evaluated by removing the top 5 preferences for a user and then finding the percentage of those 5 items included in the top-N recommendation list for that user. 
+For example, if $N$ is 5 this would mean \gls{precision} and \gls{recall} are evaluated by removing the top 5 preferences for a user and then finding the percentage of those 5 items included in the top-N recommendation list for that user. 
 
 In short the evaluatuation process for a single user $u$ can be devided into several steps:
 \begin{enumerate}
-\item Retrieve relevant items $T$ for user $u$.
+\item Retrieve relevant items $T$ for user $u$ ($TP+FN$).
 \item Build the training set $M$ by removing the corresponding preferences from input data set.
-\item Train the recommender eninge with $M$.
-\item Form a top-N recommendation list for $u$.
-\item Count the number of items that appear in the top-N list.
+\item Train the recommender engine with $M$.
+\item Form a \gls{topn} for $u$ ($TP+FP$).
+\item Count the number of items that appear in the top-N list and in $T$ ($TP$).
 \item Compute precision and recall based on $TP$, $FP$ and $FN$.
 \end{enumerate}
 
@@ -160,13 +167,11 @@ The evaluation process has the following parameters:
 \subsection{Baseline algorithms}
 \label{sec:baseline}
 
-In order to get a feel what values of precision an recall to excpect and to determine the performance of the search engine based, multimodal recommender compare it with three base line algorithms.we measured an itembased recommender and random generated recommendations list. This section gives a brief description of item based recommenders.
+In order to get a feel what values of precision an recall to excpect and to determine the performance of the search engine based, multimodal recommender we compare it with three base line algorithms. 
 
-\begin{itemize}
-\item Random generated \gls{topn}
-\item Top popular items
-\item Itembased with cosine similarity
-\end{itemize}
+\begin{description}
+\item[Random] The recommender randomly recommends $N$ items to the user. This algorithms serves just as baseline for the more complex algorithms.
+\item[Top popular]  It creates a list of items ordered by the numbers of ratings for a specific item. Top Popular is a non-personalized recommender because it presents the same list of items to any user \cite{Cremonesi}. Listing \ref{lst:toppop} shows the implementation of the the Top Popular algorithm. 
 
 \begin{lstlisting}[label=lst:toppop, caption={Implementation of top popular recommender}]
 Map<Long, Integer> item2pop = new HashMap<Long, Integer>();
@@ -188,83 +193,48 @@ Collections.sort(itemidcounter, new RecommenderItemComparator());
 return popitems
 \end{lstlisting}
 
-\begin{description}
-\item[Random] The recommender randomly recommends $N$ items to the user. This algorithms serves just as baseline for the more complex algorithms.
-\item[Top popular]  It creates a list of items ordered by the numbers of ratings for a specific item. Top Popular is a non-personalized recommender because it presents the same list of items to any user \cite{Cremonesi}. Listing \ref{lst:toppop} shows the implementation of the the Top Popular algorithm. 
-\item[Itembased with cosine similarity] 
-\end{description} Itembased algorithms is a model-based, collaborative filtering algorithm. It computes the simililarities between all items and predicts user prefences for a user by based his ratings. We use the cosine similarity \cite{ekstrand11} to measure the similarity between two items. The itembased algorithm selects $k$ neirest neighbors $N$ of $i$. It then weights every item in $N$ with the similarity $sim(i,i')$ and compute the sum of that. The predicted rating $r_{u,i}$ for user $u$ and item $i$ is the normalized value of the sum \cite{jannach11}:
+\item[Item-based with cosine similarity]  \Gls{itembased} collaborativ filtering is a model-based, collaborative filtering algorithm. It computes the simililarities between all items and predicts user prefences by based one existing ratings. We use the cosine similarity \cite{ekstrand11} to measure the similarity between two items. The \gls{itembased} algorithm selects $k$ neirest neighbors $N$ of $i$. It then weights the ratings of the active user $u$ for each item $i'$ in $N$ with the similarity $sim(i,i')$ and compute the sum of that. The predicted rating $r_{u,i}$ for user $u$ and item $i$ is the normalized value of the sum \cite{jannach11}:
 
+\end{description}
 \begin{equation}
   \label{eq:computeprediction}
-  r_{u,i} = \frac{\sum_{u' \in N}{sim(u,u') r_{u',i}}}{\sum_{u' \in N}{|s(u,u')|}}
+  r_{u,i} = \frac{\sum_{i' \in N}{sim(i,i') r_{u,i}}}{\sum_{i' \in N}{|s(i,i')|}}
 \end{equation}
 
-We use Mahouts implementation of an item based recommender. Mahout provides the \verb|GenericItemBasedRecommender| class with an implementation of an item based recommender. To compute the similiarty we use \verb|UncenteredCosineSimilarity|.
+We use Mahouts implementation of an \gls{itembased} recommender. Mahout provides the \verb|GenericItemBasedRecommender| class with an implementation of an \gls{itembased} recommender. To compute the similiarty we use \verb|UncenteredCosineSimilarity|.
 
 \subsection{Dataset}
 \label{sec:dataset}
 
-This dataset used in this project contains ratings and tagging activity from MovieLens, a movie recommendation service \cite{movielensdata}.
+The testing methodology of section \ref{sec:methodology} requires an existing data set. We used ratings and tagging activity from MovieLens, a movie recommendation service \cite{movielensdata}.
 MovieLens data sets were collected by the GroupLens Research Project at the University of Minnesota. The data was collected through the MovieLens web site (movielens.umn.edu) during the seven-month period from September 19th, 1997 through April 22nd, 1998 \cite{movielensdata}.
 
 This data set consists of:
 \begin{itemize}
-\item 100,000 ratings. The ratings are scores from 1 to 5. A rating is made by one user to one movie at a specific time. Each line of this file after the header row represents one rating of one movie by one user, and has the following format:
-\begin{verbatim}
-userId,movieId,rating,timestamp.
-\end{verbatim}
-The co-occurence based recommender takes user actions as an input. Before we compute the indicator matrix we transform the rating file to an user action file. All ratings with a score above 4 are considered as likes.
-\item 943 users. Each user has rated at least 20 movies
-\item 1682 movies. Movies are categorized in genres. A movie has an ID, a title, and a list of associated genres. The \verb|movies.csv| file has the following format:
-\begin{verbatim}
-7,Sabrina (1995),Comedy|Romance
-\end{verbatim}
-\item 2488 tag appliciations. A tag is applied by one user to one movie at a specific time. Tags are user-generated metadata about movies. Each tag is typically a single word or short phrase. The meaning, value, and purpose of a particular tag is determined by each user. All tags are contained in the file $tags.csv$. Each line of this file after the header row represents one tag applied to one movie by one user, and has the following format:
-\begin{verbatim}
-userId,movieId,tag,timestamp
-\end{verbatim}
-\end{itemize}
+\item 100,000 ratings. The ratings are scores from 1 to 5. A rating is made by one user to one movie at a specific time. 
 
-Time in the ratings and tags dataset is formatted as timestamps that represends seconds since midnight Coordinated Universal Time (UTC) of January 1, 1970.
+\item 943 users. Each user has rated at least 20 movies
+\item 1682 movies. Movies are categorized in genres. A movie has an ID, a title, and a list of associated genres. 
+\item 2488 \gls{tag} appliciations. A \gls{tag} is applied by one user to one movie at a specific time. Tags are user-generated metadata about movies. Each tag is typically a single word or short phrase. The meaning, value, and purpose of a particular tag is determined by each user.
+\end{itemize}
  
 We choose this dataset due to several reasons:
 \begin{itemize}
-\item It contains ratings and tagging activity. Hence we can use two indicators for the multimodal co-occurence, based recommender.
-\item In order to apply the evaluation process described in section \ref{sec:methodology} we need rating scores to select the top $N$ ratings.
-\item The movielens data set fulfills this requirement. It is common to evaluate a recommender engine with it. Hence it is easier to compare the results with other evaluations. 
+\item It contains ratings and tagging activity. Hence we can use two indicators for the multimodal co-occurence based recommender.
+\item As described in section \ref{sec:methodology} we need numerical rating scores to select the top $N$ ratings of a user in order to form a test set. 
+\item  It is common to evaluate a recommender engine with it. Hence it is easier to compare the results with other recommender engines. 
 \end{itemize}
 
-The co-occurence based recommender takes Boolean preferences as input. In order to simulate likes we generated a new data set based on the MovieLens data set. We select all preferences with a score  equal or avove 4.0. This dataset represents user actions that indicates that the user likes the item.
-
-\begin{lstlisting}[caption={To simulate the user action ``like'' we extract all ratings equal or above a score of 4.0 and use the result as training set},label={lst:pref2like}]
- public GenericBooleanPrefDataModel pref2like(DataModel dataModel,
-	float threshold) {
-	try {
-	FastByIDMap<FastIDSet> userlikes = new FastByIDMap<FastIDSet>(
-					dataModel.getNumUsers());
-	LongPrimitiveIterator iter = dataModel.getUserIDs();
-	while (iter.hasNext()) {
-          long userid = iter.nextLong();
-          PreferenceArray prefs = dataModel
-		.getPreferencesFromUser(userid);
-          FastIDSet ids = new FastIDSet(prefs.length());
-          for (Preference p : prefs) {
-		if (p.getValue() >= threshold) {
-                  ids.add(p.getItemID());
-			}
-		}
-	userlikes.put(userid, ids);
-	}
-    return new GenericBooleanPrefDataModel(userlikes);
-\end{lstlisting}
+The co-occurence based recommender takes user actions as Boolean values as an input. The MovieLens data set contains preferences with a numerical rating score. 
+In order to simulate the user action ``like'' as described in section \ref{sec:inputdata} we generate a new data set based on the MovieLens data set. We select all preferences with a score equal or above 4.0. These \glspl{preference} indicate that the user likes the item hence we consider them as likes.
 
 \subsection{Evaluationresults}
 \label{sec:results}
-The co-occurence based recommender for the MovieLens data uses three \glspl{indicator}.
+To compare the \gls{rec} with the baseline algorithms (described in section \ref{sec:baseline}) we use three \glspl{indicator}.
 
 \begin{description}
-\item[Co-occurence user likes] A described in section \ref{sec:dataset} we generated a user action history with ``like'' actions. We calculate the log-likelihood strengths between all items and use the last interactions as query.
-\item[User ratings] We use the preference values to calculate the log-likelihood similarity between all items.
+\item[Co-occurence user likes] As described in section \ref{sec:dataset} we generate a user action history with ``like'' actions. We calculate the \gls{llr} strengths between all items and use the rrecent likes in the user's history as query.
+\item[User ratings] We use the \gls{coocc} based similiarity metric descibed in section \ref{sec:}the preference values to calculate the  similarity between all items.
 \item[Tags] We use the tags associated with an item to compute a tag \gls{indicator} matrix. We use the tags associated with the user to create a query.
 \end{description}
 

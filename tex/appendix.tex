@@ -14,6 +14,32 @@ The following software was used to build the evaluator, the search engine update
 \item python 2.7.9. Python is used to transform the date from sqlite3 to the input format of Apache Spark.
 \end{itemize}
 
+\section{Source code listings}
+\label{sec:listings}
+
+\begin{lstlisting}[caption={To simulate the user action ``like'' we extract all ratings equal or above a score of 4.0 and use the result as training set},label={lst:pref2like}]
+ public GenericBooleanPrefDataModel pref2like(DataModel dataModel,
+	float threshold) {
+	try {
+	FastByIDMap<FastIDSet> userlikes = new FastByIDMap<FastIDSet>(
+					dataModel.getNumUsers());
+	LongPrimitiveIterator iter = dataModel.getUserIDs();
+	while (iter.hasNext()) {
+          long userid = iter.nextLong();
+          PreferenceArray prefs = dataModel
+		.getPreferencesFromUser(userid);
+          FastIDSet ids = new FastIDSet(prefs.length());
+          for (Preference p : prefs) {
+		if (p.getValue() >= threshold) {
+                  ids.add(p.getItemID());
+			}
+		}
+	userlikes.put(userid, ids);
+	}
+    return new GenericBooleanPrefDataModel(userlikes);
+\end{lstlisting}
+
+
 \section{Apache Solr}
 \label{sec:solr}
 Before we describe why we use a the search engine Apache Solr to deploy a recommendation engine, we give a short introduction to Apache Solr.
@@ -170,3 +196,12 @@ itemid, userid, timestamp
 5,103,980731417
 5,104,980731208  
 \end{lstlisting}
+
+\section{Parameters}
+\label{sec:parameters}
+
+This section descripes the paratemter of the recommender discussed in this report.
+\begin{description}
+\item[similarity threshold] We have to define a threshold to separate similar items occording to the LLR similarity from the rest (e.g. 0.5).
+\item[user history to consider] We retrieve recommendations with a part of the user history. We have to define the number of log entries to consider.
+\end{description}

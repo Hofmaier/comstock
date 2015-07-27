@@ -52,4 +52,4 @@ r_u &= M h_u
 \end{pmatrix}
 \end{align}
 
-In order to create the complete \gls{topn} based on the vector $r$ we create a list of all items sorted by thev alues in $r$. Items with a high value appear first in the list. Then we remove all items from the list the user hasn't seen (the ones with zeros in $h_u$). In other words we return a ranked list of items. This list forms the \gls{topn}. In the example of equation \ref{eq:recommendation} the recommender would return item 3 followed by item 4. Item 1 and to are removed because the apear in the user's history.
+In order to create the complete \gls{topn} based on the vector $r$ we create a list of all items sorted by thev alues in $r$. Items with a high value appear first in the list. Then we remove all items from the list the user has already seen (the ones with 1's in $h_u$). In other words we return a ranked list of items. This list forms the \gls{topn}. In the example of equation \ref{eq:recommendation} the recommender would return item 3 followed by item 4. Item 1 and to are removed because the apear in the user's history.

@@ -1,61 +1,58 @@
-\section{Co-occurence based multimodal recommender}
+\section{Core concepts of the \gls{rec}}
 \label{sec:design}
+
+In order to set a context we will first give a broad overview of how the discussed recommender executes top-N recommendation task.
+The conceptual process of procucing a \gls{topn} can be divided into five steps. Figure \ref{fig:topndataflow} illustrates this simplified view.
+
+\begin{enumerate}
+\item A user requests a \gls{topn}.
+\item The recommender looks up items that appear in the recent user history. The history contains multiple types of past user actions.
+\item A query composed of user's action history is sent to the search engine.
+\item The search engine returns a ranked search result set of items according to the query. Because a \gls{rankedretrieval} is a way of finding similar documents according to a query we can use \gls{rankedretrieval} to find similar items to the ones the user already exressed some interest.
+ We uses similarity indicators based on \gls{coocc} to score every items that matches the query.
+\item The recommender removes item already known to the user and present him a \gls{topn}.
+\end{enumerate}
+
 \tikzset{
   reco/.style={
-    rectangle
+    draw, text width=3cm,drop shadow,font=\sffamily, rectangle,rounded corners=2pt,thin,
+    align=center,fill=green!30
   },
+hist/.style={reco, fill=blue!30
+},
+se/.style={reco, fill=red!30
+}
 }
 
 \begin{figure}
   \centering
   \begin{tikzpicture}[->, >=latex]
     \node[reco] (rec) at(180:3cm) {Recommender};
-    \node (hist) at(60:3cm){History};
-    \node (se) at(300:3cm){Search engine};
+    \node[hist] (hist) at(60:3cm){History};
+    \node[se] (se) at(300:3cm){Search engine};
     \node (user) [left of=rec,node distance=5cm]{User};
-    \node(x)[align=left] at(130:3.9cm){lookup\\ user's history};
-    \node(x)[align=left] at(0:2cm){user's\\ history};
-    \node(x)[align=left] at(220:4cm){ranked \\ search result};
-    \draw[->, >=latex] (170:3cm) arc  (170:80:3cm);
+    \node(x)[align=left] at(120:1.7cm){2. lookup\\ user's history};
+    \node(x)[align=left] at(0:2cm){3. user's\\ history};
+    \node(x)[align=left] at(220:4cm){4. ranked \\ search result};
+    \draw[->, >=latex] (170:3cm) arc  (170:100:3cm);
     \draw[->, >=latex] (40:3cm)  arc (40:-40:3cm);
-   \draw[->, >=latex] (270:3cm)  arc (270:190:3cm);
+   \draw[->, >=latex] (250:3cm)  arc (250:190:3cm);
    \draw[->, >=latex] (40:3cm)  arc (40:-40:3cm);
-   \path (user) edge[bend left=40] node[anchor=south,above]{request top-N list}(rec);
-   \path (rec) edge[bend left=40] node[anchor=north,below]{top-N list}(user);
+   \path (user) edge[bend left=40] node[anchor=south,above] {1. request top-N list}(rec);
+   \path (rec) edge[bend left=40] node[anchor=north,below]{5. top-N list}(user);
   \end{tikzpicture}
-  \caption{Simplified dataflow diagram}
+  \caption{The process of procucing top-N recommendations list a can be divided into five steps}
   \label{fig:topndataflow}
 \end{figure}
 
-The recommender we discuss will use past user behavior and metadata of items to compute the similarity between all items. Hence it is a hybrid recommender.
-We use user \gls{coocc} of user- and tag-iteminteractions as a similarity metric among items.
-
-Because search engine are a way of finding similar documents according to a query we can use a search engine to find similar items to the ones the user already exressed some interest.
-
-The process of procucing a \gls{topn} can be divided into five steps. Figure \ref{fig:topndataflow} illustrates this process.
-
-\begin{enumerate}
-\item User requests a \gls{topn}.
-\item The recommenders looks up items that appear in the recent user history.
-\item The user's action history the recommender is send as a query to the search engine.
-\item The search engine returns a ranked search result set of items according to the query.
-\item The recommender removes item already known to the user and present him a \gls{topn}.
-\end{enumerate}
-
-The section first describes the used input data. Than we explain the process of computing \gls{topn} and how similarity between items is measured and how the computation is implemented. Next we describe the similarities of the top-N recommender task and a \gls{rankedretrieval} and how we extend the scoring function of the search engine in order to use \gls{coocc} similaty metric.
+In this section we deal mainly with the step 4, the scoring of items with respect to a user's history.
+A recommender needs some data in order to build a model, also called training data. 
+First we describe the kind of training data used by the \gls{rec}. 
+Then we explain how the \gls{topnt} works in theory and why we use the \gls{llr} ratio of \glspl{coocc} as a similariy metric.
+Next we describe the similarities of the top-N recommender task and a \gls{rankedretrieval} and how we extend the scoring function depending on the precomputed similarity strength among items. 
 
 \input{inputdata}
 \input{topnmath}
 \input{similarity}
 \input{multimodal}
 \input{searchengine}
-
-
-\subsection{Parameters}
-\label{sec:parameters}
-
-This section descripes the paratemter of the recommender discussed in this report.
-\begin{description}
-\item[similarity threshold] We have to define a threshold to separate similar items occording to the LLR similarity from the rest (e.g. 0.5).
-\item[user history to consider] We retrieve recommendations with a part of the user history. We have to define the number of log entries to consider.
-\end{description}

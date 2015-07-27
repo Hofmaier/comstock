@@ -338,4 +338,61 @@ There are similarities between the compution of a \gls{topn} and a \gls{rankedre
 
 Section \ref{sec:design} will describe how different type of interactions is used as input data to train the recommender.
   provides a flexible and scalable way to produce recommendation in real time without to need to hire a team of datascientist. 
-The discussed recommender exploits the existing and proved technology of the search engine Apache Solr and the machine learning library Apache Mahout to save development costs. It collects data about the behavior of users. Based on the past user activity it computes similarities among items and loads them into Solr. 
+The discussed recommender exploits the existing and proved technology of the search engine Apache Solr and the machine learning library Apache Mahout to save development costs. It collects data about the behavior of users. Based on the past user activity it computes similarities among items and loads them into Solr.
+
+We in order deploy it in a recommender system as illustrated by figure \ref{fig:topndataflow}.
+
+
+The section first describes the used input data. Than we explain the process of computing \gls{topn} and how similarity between items is measured and how the computation is implemented. 
+
+The recommender we discuss will use past user behavior and metadata of items to compute the similarity between all items. Hence it is a hybrid recommender.
+We use user \gls{coocc} of user- and tag-iteminteractions as a similarity metric among items.
+
+
+The \gls{rec} suggests items that are similar to the ones the user already liked in the past. In order to build a model for similarity we need to train the recommender with some data about the items.
+This section will descibe the type of input data we use  in our demo application. The report will refer to this type of input data. 
+
+The recommender engine discussed in this article does not estimate preference values in order to produce recommendations. It presents a ordered list of $N$ recommendations. The list is ordered from best to worst recommendation.
+
+\caption{To produce a top-N recommendation list the web browser requests a top-N recommendation list for user $u$. The webserver looks up the action history $h_u$ for user $u$ in the user action database. Then the webserver forms a Solr query with the recent users actions and sends it to Solr. Solr returns a raw ranked result list to the web server. The webserver removes all item already known to the user formats the data to JSON and presents the user a top-N recommendation list. }
+
+\lstset{
+  basicstyle=\footnotesize\ttfamily,        % the size of the fonts that are used for the code
+  breakatwhitespace=false,         % sets if automatic breaks should only happen at whitespace
+  breaklines=true,                 % sets automatic line breaking
+  captionpos=b,                    % sets the caption-position to bottom
+  extendedchars=true,              % lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
+  frame=single,                    % adds a frame around the code
+  language=Java,                 % the language of the code
+  keywordstyle=\bf,
+  showspaces=false,                % show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
+  showstringspaces=false,          % underline spaces within strings only
+  showtabs=false,                  % show tabs within strings adding particular underscores
+  tabsize=2                       % sets default tabsize to 2 spaces
+}
+For the user a relevant item is one that he does not know and he would like (or purchase).
+
+We measured an itembased recommender and random generated recommendations list. This section gives a brief description of item based recommenders.
+
+
+\begin{itemize}
+\item Random generated \gls{topn}
+\item Top popular items
+\item Itembased with cosine similarity
+\end{itemize}
+Each line of the csv file represents one rating of one movie by one user, and has the following format:
+\begin{verbatim}
+userId,movieId,rating,timestamp.
+\end{verbatim}
+The \verb|movies.csv| file has the following format:
+\begin{verbatim}
+7,Sabrina (1995),Comedy|Romance
+\end{verbatim}
+ All tags are contained in the file $tags.csv$. Each line of this file after the header row represents one tag applied to one movie by one user, and has the following format:
+\begin{verbatim}
+userId,movieId,tag,timestamp
+\end{verbatim}
+\end{itemize}
+Time in the ratings and tags dataset is formatted as timestamps that represends seconds since midnight Coordinated Universal Time (UTC) of January 1, 1970.
+ Before we compute the indicator matrix we transform the rating file to an user action file. All ratings with a score above 4 are considered as likes.
+The co-occurence based recommender takes Boolean preferences as input. 
