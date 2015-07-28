@@ -35,7 +35,7 @@ box/.style={draw,rectangle,minimum size=3cm,text width=2.5cm,align=left}]
 \node (tpos) [box,
     label=left:Relevant items,
     label=above:,
-    ] {relevant \\ recommendations \\ (TP)};
+    ] {relevant \\and\\recommended \\ (TP)};
 &
 \node (fneg) [box,
     label=above:,
@@ -225,22 +225,23 @@ We choose this dataset due to several reasons:
 \item  It is common to evaluate a recommender engine with it. Hence it is easier to compare the results with other recommender engines. 
 \end{itemize}
 
+
+\subsubsection{Simulating user action "like"}
+
 The co-occurence based recommender takes user actions as Boolean values as an input. The MovieLens data set contains preferences with a numerical rating score. 
 In order to simulate the user action ``like'' as described in section \ref{sec:inputdata} we generate a new data set based on the MovieLens data set. We select all preferences with a score equal or above 4.0. These \glspl{preference} indicate that the user likes the item hence we consider them as likes.
 
 \subsection{Evaluationresults}
 \label{sec:results}
-To compare the \gls{rec} with the baseline algorithms (described in section \ref{sec:baseline}) we use three \glspl{indicator}.
+To compare the performance of \glspl{rec} with variable number of \glspl{indicator} and therefore measure the impact of an additional indicator we evaluated three different recommenders. 
 
 \begin{description}
-\item[Co-occurence user likes] As described in section \ref{sec:dataset} we generate a user action history with ``like'' actions. We calculate the \gls{llr} strengths between all items and use the rrecent likes in the user's history as query.
-\item[User ratings] We use the \gls{coocc} based similiarity metric descibed in section \ref{sec:}the preference values to calculate the  similarity between all items.
-\item[Tags] We use the tags associated with an item to compute a tag \gls{indicator} matrix. We use the tags associated with the user to create a query.
+\item[\Gls{coocc} user likes] It only considers \gls{coocc} of the user's action \gls{like} as described by equation \ref{eq:recommendation} (section \ref{sec:problem}).
+\item[\Gls{coocc} of likes and tags] In addition to likes we use tag-associations to compute the similariy as described by equation \ref{eq:multi}. We use the tags associated with an item to compute a tag \gls{indicator} matrix and store these indicator in a separate field in Solr. We add tags that are associated with the \gls{au} to the query.
+\item[\Gls{coocc} of likes, tags and user ratings] We use the \gls{coocc} based similiarity metric descibed in section \ref{sec:llr} to compute similarity based on all preferences from the MovieLens data set. We can count \gls{coocc} of preferences between items and ignore the score value. To query this \gls{indicator} field we use the user's recent like.
 \end{description}
 
-We created three recommenders. We measure precision and recall first with the recommender ``1.indicator'' that only considers co-occurence of user likes. Then we add the indicator ``user ratings'' to the multimodal recommender ``2 indicators'' and then we use all 3 indicators to retieve a \gls{topn} (``3. indicators''). 
-
-We measure precision and recall at $N=10$. Hence we retrieve a list of 10 items. Relevant items are the 5 best rated items above a threshold of $\mu + \sigma$ all user ratings.
+We measure precision and recall at $N=10$ for all three recommenders and the basealgorithms. Hence we retrieve a list of 10 items. Relevant items are the 10 best rated items above the threshold. For every user we compute his average rating value $\mu$ and the standard deviation $\sigma$. We set the threshold to $\mu + \sigma$.
 
 \pgfplotsset{width=7cm}
 \begin{figure}
@@ -259,18 +260,20 @@ ytick=data,
 x tick label style={/pgf/number format/fixed}
 ]
 
-\addplot coordinates {(0.00035,random) (0.0626,toppopular) (0.0864,itembased) (0.0524,1 indicator) (0.077,2 indicators) (0.0804,3 indicators)};
-\addplot coordinates {(0.00054,random) (0.0636,toppopular) (0.0874,itembased) (0.0447,1 indicator) (0.072,2 indicators) (0.078,3 indicators)};
+\addplot coordinates {(0.00035,random) (0.0626,toppopular) (0.0864,itembased) (0.0524,1 indicator) (0.0804,2 indicators) (0.0844,3 indicators)};
+\addplot coordinates {(0.00054,random) (0.0636,toppopular) (0.0874,itembased) (0.0547,1 indicator) (0.0818,2 indicators) (0.086,3 indicators)};
 \legend{Precision, Recall};
 \end{axis}
 \end{tikzpicture} 
-\caption{Precision comparison of recommender algorithsm, random generated recommendations, Top Popular and itembased with precision at 10 and $N$ = 10 (number of recommended items)}
+\caption{Precision and recall comparison of the recommender algorithms, random generated recommendations, Top Popular, itembased  and three \glspl{rec} with a variable number of indicators with precision at 10 and $N$ = 10 (number of recommended items)}
   \label{fig:precisionrecallvalues}
 \end{figure}
 
-Figure \ref{fig:precisionrecallvalues} shows the comparison of \gls{coocc} based recommender with one, two and three indicators with the baseline algorithms from section \ref{sec:baseline}.
-The multimodal co-coccurence  achieves an average precision and recall of 8 and 7.8 percent. This seems low. The recommender rarely recommends an item that the user liked explicitly. On the other hand we do not know if the recommended items are appealing to the user if he never rated them.
+Figure \ref{fig:precisionrecallvalues} shows the comparison of \glspl{rec} with one, two and three indicators with the baseline algorithms from section \ref{sec:baseline}.
+The multimodal \gls{rec} with all indicators achieves an average precision and recall of 8.6 and 8.4 percent. This seems low. The recommender rarely recommends an item that the user liked explicitly. On the other hand we do not know if the recommended items are appealing to the user if he never rated them.
 
-The evaluation shows that the quality of the recommender increases when we take more indicators into account. If we use just the user action ``like'' precision and recall are 5.2 and 4.5 percent. If we use user ratings and tags as indicator precision and recall are  8 and 7.8 percent. That an increase of 53 and 73 percent.
+The evaluation shows that the quality of the recommender increases when we take more indicators into account. If we use just the user action ``like'' precision and recall are 5.2 and 4.5 percent. If we use the user action like and \glspl{tag} as indicator precision and recall are  8.1 and 8 percent. That is an increase of 55 and 85 percent.
 
-Compared to the baseline algorithms the \gls{coocc} based recommender achieves the second best results. It performs better than the non-personalized TopPopular algorithm and slightly worse than the itembased algorithm. The reason for this is the lack of a relevancy score for the similarities. The itembased algorithms considers the similirity value. The search engine does not have this information. Either a item id is part of a indicator field or not. This circumstance could be improved by using payloads in Solr. Another interesting fact is that the non-personalized algorithm almost match the quality of the more sophisticated approaches. Compared to randomly generated recommendations the \gls{coocc} improves the quality with a factor of about 250.
+Compared to the baseline algorithms the \gls{coocc} based recommender with three indicator achieves the best results. It performs slightliy better than the \gls{itembased} algorithm. The reason for this is that the \gls{rec} has access to more information than the \gls{itembased} algrithm that only uses prefences and no tags.
+
+Another interesting fact is that the non-personalized algorithm almost match the quality of the more sophisticated approaches. Compared to randomly generated recommendations the \gls{coocc} improves the quality with a factor of about 250.

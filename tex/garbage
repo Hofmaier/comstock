@@ -396,3 +396,9 @@ userId,movieId,tag,timestamp
 Time in the ratings and tags dataset is formatted as timestamps that represends seconds since midnight Coordinated Universal Time (UTC) of January 1, 1970.
  Before we compute the indicator matrix we transform the rating file to an user action file. All ratings with a score above 4 are considered as likes.
 The co-occurence based recommender takes Boolean preferences as input. 
+As described in section \ref{sec:dataset} we generate a user action history with ``like'' actions. We calculate the \gls{llr} strengths between all items and use the rrecent likes in the user's history as quer.y
+
+
+We created three recommenders. We measure precision and recall first with the recommender ``1.indicator''  Then we add the indicator ``user ratings'' to the multimodal recommender ``2 indicators'' and then we use all 3 indicators to retieve a \gls{topn} (``3. indicators''). 
+
+ on-personalized TopPopular algorithm and slightly worse than the itembased algorithm. The reason for this is the lack of a relevancy score for the similarities. The itembased algorithms considers the similirity value. The search engine does not have this information. Either a item id is part of a indicator field or not. This circumstance could be improved by using payloads in Solr.git 
