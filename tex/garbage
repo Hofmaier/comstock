@@ -413,4 +413,8 @@ The described design has the following benefits
 
 The proposed design by \cite{Dunning14} includes the application of the technologies Apache Solr, Apache Mahout und Apache Spark. 
 
-A \gls{topn} is created instantly because we exploit the capabilities of a optimized search engine. 
+A \gls{topn} is created instantly because we exploit the capabilities of a optimized search engine.
+
+ by quering the text search engine using rescents actions of the user as query
+
+ The recommender combines collaborative filtering and content-based filtering (hybrid approach).
