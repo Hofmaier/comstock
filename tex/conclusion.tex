@@ -1,35 +1,27 @@
 \section{Conclusion}
 \label{sec:conclusion}
 
-We have built a prototype of a co-occurence based, multimodel recommender. Creating a \gls{topn} is very fast because we exploit the capabilities of a optimized search engine. Another advantage is the ability to use collaborative filtering data and content data at the same time in order to increase the accuracy. Mahout \verb|spark-itemsimilarity| job allows us to compute LLR co-coccurence at scale.
+We have built a prototype of a \gls{multimodal} \gls{rec} with a search engine according to the suggestions of \cite{Dunning14}. 
+This approach simplifies the development process and lowers the entry barrier for developer without a strong mathematical background because we do not have to make descisions which algorithms or similarity metrics to choose. 
 
-\gls{coocc} is suitable because we can compute the \gls{indicatorm} distributet on Apache Spark.
-
-A large amount of work was required to convert formats between the user logs the Apache Mahout and Apache Solr.
-
-
-The described design has the following benefits
-\begin{itemize}
-\item Exploit existing search engine technology.
-\item The search engine can be used for conventional search as well.
-\item Users can use search engine to search for metadata.
-\item Recommender engine can be extended with additional indicators.
-\end{itemize}
+User interaction is the best clue what users want.
+The design allows to use a variety of user interactions and metadata as input data. This hybrid approach improves the performance of the \gls{topnt}. Multiple \glspl{indicator} are stored in distinct field within Solr. The recommender engine can be extended with additional \glspl{indicator}.
 
 
-The proposed design by \cite{Dunning14} includes the application of the technologies Apache Solr, Apache Mahout und Apache Spark. We did not have make descision about the similarity metrics or the used recommender algorithm. This simplifies the development process and lowers the entry barrier for developer without a strong mathematical background. 
+The calculation of \gls{coocc} indicator matrix and therefore the update process of the search engine is computational expensive. Mahout's \verb|spark-itemsimilarity| job allows us to compute \gls{indicatorm} at scale.
+The two part design of the \gls{rec} allows us to do the heavy lifting upfront. In return the \gls{topnt} is performed blazingly fast because Apache Solr is optimized for text retrieval queries. 
+
+A large amount of work was required to convert formats between the user history database, the Apache Mahout and Apache Solr. 
+
+The proposed design did not described the inclusion of item similarity values in the search engine. We used the payload mechanism of Apache Lucene to weight indicator with the corresponding similatity value.
 
 Unfortunatly \cite{Dunning14} does not descibe an evaluation method for the proposed design. We evaluated the recommnender with the accuracy metrics precision and recall. The usefulness of these metrics depends on the definition of relevant items. We defined items that the user has given a high rating as relevant. The evaluation method used in this report penalizes items that the user never has rated or even seen. 
 
-Another problem with precision and recall emerge when the preferences are Boolaen data. We used the MovieLens data set that contains preference values. If the preferences are boolean (like, dislike) we can not pick the $N$ best rated items and have to select them at random.
+Another problem with precision and recall emerges when the preferences are Boolaen data, like in the demo application, because we can not pick the $N$ best rated items and have to select them at random. For this reason we used the MovieLens data set that contains preference values and simulated user actions.
 
-The evaluation results of the co-occurence based recommender are not overwhelming. Compared to the TopPopular recommender the increase of quality is small. But the evaluation method only considers items that the users already liked as relevant. We do not know how usefull a recommendation for an individual user is. It could be that the co-occurence based recommender is suggesting items that the user never has seen and that are desirable for the user.
+The evaluation results of the co-occurence based recommender are not overwhelming. Compared to the \gls{itembased} recommender the increase of quality is small. But the evaluation method only considers items that the users already liked as relevant. We do not know how usefull a recommendation for an individual user is. It could be that the co-occurence based recommender is suggesting items that the user never has seen and that are desirable for the user.
 
-We improved the quality of the top-N recommendations list by extending the recommender with an additional indicators. It is possible to extend the recommender with additional indicators, hence the design is flexible.
-
-The calculation of indicators and therefore the update process of the search engine is computational expensive. The two part design of the recommnend allows us to do the heavy lifting upfront. In return the \gls{topn} is performed blazingly fast because Apache Solr is optimized for text retrieval queries. 
-
-The system may be improved throug 
+The system may be improved throug the use of 
 \begin{description}
 \item[Dithering] 
 \item[Anti-flood] 
@@ -37,4 +29,3 @@ The system may be improved throug
 \end{description}
 dithering.
 
-Mahout provides a large set of recommender algorithms. And it is easy to evaluate and compare several algorithms on a specific dataset.
