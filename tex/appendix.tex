@@ -42,7 +42,6 @@ The following software was used to build the evaluator, the search engine update
 
 \section{Apache Solr}
 \label{sec:solr}
-Before we describe why we use a the search engine Apache Solr to deploy a recommendation engine, we give a short introduction to Apache Solr.
 
 Apache Solr is a search engine that is optimized to search large volumes of text-centric data and return results sorted by relevance. It is built on Apache Lucene, an information retrieval library \cite{grainger}. Solr stores the documents in a flat structure and we can search for terms in the documents. It provides a HTTP API for all interactions, like quering, updating e.t.c.
 
@@ -50,7 +49,7 @@ The reason why we deploy a search engine in order to make recommendations is tha
 
 Another reason why we deploy a search engine is that the application is read-dominant. The recommender will query the data far more often than it will create new documents or update the indicators. Solr is optimized to for executing queries as opposed to storing data.
 
-Solr allows you to load custom code to perform 
+Solr allows you to load custom code to perform.
 Request are process by a request handler. Search handler is a request handler. The search handler has search components. One search componet is a Query Component. The Query Component has Query Parsers
  Solr stores the documents in a flat structure and we can search for terms in the documents.
 was ist faceting, hightlighting, spellchecking
@@ -101,29 +100,6 @@ In order to compute the \gls{llr} ratio of the \gls{coocc} among item $A$ and it
 
  \todo{llr contency table einfuegen und formel fuer llr}
 
-\section{Workflows}
-\label{sec:workflows}
-
-\begin{figure}
-\centering
-\begin{tikzpicture}[node distance=20mm,
-data/.style={
-rectangle,
-draw,
-thin,
-minimum height=3.5em
-},
-to/.style={->,>=stealth',shorten >=1pt,semithick,font=\footnotesize},
-]
-\node (web) [data] {Web server};
-\node (log) [data,below of = web, align=left] {User actions\\log file};
-\node (browser) [data,left of=web,node distance=50mm] {Webbrowser};
-\draw[to] (web) -- (log);
-\draw[to] (browser) -- node[midway,above] {user actions} (web);
-\end{tikzpicture}
-\caption{The webserver capture user behavior in a log file.}
-\end{figure}
-
 \section{Infrastructur}
 \label{sec:infrastructur}
 
@@ -152,29 +128,6 @@ The input has the following format:
 \label{sec:sparkdeploy}
 
 To run \verb|spark-itemsimilarity| we have to deploy Apache Spark and and start it in standalone mode with the script \verb|start-master.sh|. Once startet the script will print a URL which we can pass the \verb|spark-itemsimilarity| job as ``master'' argument and the job can connect to the cluster. 
-
-
-\tikzset{
- mynode/.style={rectangle,rounded corners,draw=black, top color=white, bottom color=yellow!50,very thick, inner sep=1em, minimum size=3em, text centered}
-}
-\tikzstyle{format} = [draw, thin, fill=blue!20]
-\tikzstyle{medium} = [ellipse, draw, thin, fill=green!20, minimum height=2.5em]
-\begin{figure}
-\centering
-\begin{tikzpicture}[node distance=20mm,
-data/.style={
-rectangle,
-draw,
-thin,
-fill=blue!20
-}]
-\node (recommender) [data] {Recommender};
-\node (topn) [data,right of = recommender, node distance=50mm] {Recommendations};
-\node (history) [data,below of = recommender] {Behavior log File};
-\node (db) [data,above of= recommender] {Search Engine};
-\end{tikzpicture}
-\caption{Recommender engine}
-\end{figure}
 
 \section{Sample Input Data}
 \label{sec:sampleinput}

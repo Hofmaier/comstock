@@ -2,30 +2,22 @@
 \label{sec:conclusion}
 
 We have built a prototype of a \gls{multimodal} \gls{rec} with a search engine according to the suggestions of \cite{Dunning14}. 
-This approach simplifies the development process and lowers the entry barrier for developer without a strong mathematical background because we do not have to make descisions which algorithms or similarity metrics to choose. 
+This approach simplifies the development process and lowers the entry barrier for developers without a strong mathematical background because we do not have to make decisions which algorithms or similarity metrics to choose. 
 
 User interaction is the best clue what users want.
-The design allows to use a variety of user interactions and metadata as input data. This hybrid approach improves the performance of the \gls{topnt}. Multiple \glspl{indicator} are stored in distinct field within Solr. The recommender engine can be extended with additional \glspl{indicator}.
+The design allows to use a variety of user interactions and meta data as input data. This hybrid approach improves the performance of the \gls{topnt}. Multiple \glspl{indicator} are stored in distinct fields within Solr. The recommender engine can be extended with additional \glspl{indicator}.
 
-
-The calculation of \gls{coocc} indicator matrix and therefore the update process of the search engine is computational expensive. Mahout's \verb|spark-itemsimilarity| job allows us to compute \gls{indicatorm} at scale.
-The two part design of the \gls{rec} allows us to do the heavy lifting upfront. In return the \gls{topnt} is performed blazingly fast because Apache Solr is optimized for text retrieval queries. 
+The calculation of the \gls{coocc} \gls{indicatorm} and therefore the update process of the search engine is computationally expensive. Mahout's \verb|spark-item-similarity| job can compute the \gls{indicatorm} at scale.
+The two part design of the \gls{rec} allows us to do the heavy lifting upfront. In return the \gls{topnt} is performed blazingly fast.
 
 A large amount of work was required to convert formats between the user history database, the Apache Mahout and Apache Solr. 
 
-The proposed design did not described the inclusion of item similarity values in the search engine. We used the payload mechanism of Apache Lucene to weight indicator with the corresponding similatity value.
+The proposed design did not described the inclusion of item similarity values in the search engine. We used the payload mechanism of Apache Lucene to weight indicators with the corresponding similarity value.
 
-Unfortunatly \cite{Dunning14} does not descibe an evaluation method for the proposed design. We evaluated the recommnender with the accuracy metrics precision and recall. The usefulness of these metrics depends on the definition of relevant items. We defined items that the user has given a high rating as relevant. The evaluation method used in this report penalizes items that the user never has rated or even seen. 
+Due the absence of evaluation tests in \cite{Dunning14} we evaluated the recommender with the accuracy metrics \gls{precision} and \gls{recall}. The usefulness of these metrics depends on the definition of relevant items. We defined items that the user has given a high rating as relevant. The evaluation method used in this report penalizes items that the user never has rated or even seen. 
 
-Another problem with precision and recall emerges when the preferences are Boolaen data, like in the demo application, because we can not pick the $N$ best rated items and have to select them at random. For this reason we used the MovieLens data set that contains preference values and simulated user actions.
+Another problem with precision and recall emerges when the \glspl{preference} are Boolean data, like in the demo application. Without a numerical rating value we can not pick the $N$ best rated items but we have to select $N$ items at random. For this reason we used the MovieLens data set that contains preference values and we simulated \glspl{useraction}.
 
-The evaluation results of the co-occurence based recommender are not overwhelming. Compared to the \gls{itembased} recommender the increase of quality is small. But the evaluation method only considers items that the users already liked as relevant. We do not know how usefull a recommendation for an individual user is. It could be that the co-occurence based recommender is suggesting items that the user never has seen and that are desirable for the user.
+The evaluation results of the \gls{rec} are not overwhelming. Compared to the \gls{itembased} recommender the increase of quality is small. But the evaluation method only considers items that the users already liked as relevant. We do not know how use-full a recommendation for an individual user is. It could be that the \gls{rec} is suggesting items that the user never has seen and that are desirable for the user.
 
-The system may be improved throug the use of 
-\begin{description}
-\item[Dithering] 
-\item[Anti-flood] 
-\item[Cross-coooccurence]
-\end{description}
-dithering.
-
+The system may be improved through the use of cross \gls{coocc}. The presented recommender engine maps every type of user interaction to one \gls{indicator}. For example we collect all purchase interaction and create a \gls{topn} for purchases. But we could also use other user interactions, like ``view'' in a so called cross-co-occurrence calculation, to create purchase indicators. 
