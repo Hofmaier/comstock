@@ -2,7 +2,6 @@ package ch.hsr.searchengineupdater;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;

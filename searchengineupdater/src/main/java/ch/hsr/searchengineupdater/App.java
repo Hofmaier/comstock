@@ -13,12 +13,33 @@ import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
 import org.apache.solr.common.SolrInputDocument;
 
+
 /**
  * Hello world!
  *
  */
 public class App {
 	public static void main(String[] args) {
+		if (args.length > 0) {
+			if(args[0].equals("-full")){
+				fullupdate();
+			}
+			if(args[0].equals("-update")){
+				updateSimilarities();
+			};
+		}
+		else{
+			System.out.println("usage: searchengineupdater [-full -file preferencefile | -db sqlitefile] \n"
+					+ "-update -file preferencefile");
+		}
+		fullupdate();
+	}
+	private static void updateSimilarities(){
+		SolrInputFactory inputfactory = new SolrInputFactory();
+		
+	}
+
+	private static void fullupdate() {
 		try {
 			String mlratings = "/home/lukas/Downloads/ml-latest-small/ratings.csv";
 			String tagdataset = "/home/lukas/comstock/data/tagid-itemid.csv";

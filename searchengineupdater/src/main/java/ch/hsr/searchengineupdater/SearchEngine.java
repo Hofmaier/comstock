@@ -18,8 +18,6 @@ public class SearchEngine {
 	Logger log = LoggerFactory.getLogger(SearchEngine.class);
 	
 	public void update(List<SolrInputDocument> solrdocs) {
-	
-
 		try {
 			clearSolr();
 			updateSolr(solrdocs);
@@ -28,7 +26,6 @@ public class SearchEngine {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
 	}
 	
 	private void clearSolr() {
@@ -41,8 +38,6 @@ public class SearchEngine {
 			log.error("could not connect to solr");
 		}
 	}
-	
-
 	
 	private void updateSolr(List<SolrInputDocument> solrdocs)
 			throws SolrServerException, IOException {
