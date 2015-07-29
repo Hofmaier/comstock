@@ -1,7 +1,7 @@
 \subsection{Why can we use a search engine to produce \gls{topn}?}
 \label{sec:relation}
 
-The \gls{rec} uses a search engine to produce a \gls{topn}. We can deploy a search engine in order to provide recommendations because there are similarities between the computation of top-N recommendation task and the retrieval of a ranked search result set.
+The \gls{rec} uses a search engine to produce a \gls{topn}. We can deploy a search engine in order to provide recommendations because there are similarities between the computation of the \gls{topnt} and the retrieval of a ranked search result set.
  This section explains why the deployment of a search engine is suitable for the top-N recommendation task.
 
 \subsubsection{Ranked retrieval}
@@ -9,7 +9,7 @@ A search engine enables user to search a collection of documents for specified k
 
 \subsubsection{Vector space model}
 One way to calculate the similarity between a query $q$ and a document $d$ is to use the vector space model.
-In the vector space model each document $d$ and the query $q$ are represented as vectors $\vec{v}(d)$ and $\vec{v}(q)$. The vector contains an element for each term. It maps every term $t$ of the collection to a tf-idf weight. tf-idf reflects how important a term is to document in the collection (see \cite{Manning} for a detailed description). 
+In the vector space model each document $d$ and the query $q$ are represented as vectors $\vec{v}(d)$ and $\vec{v}(q)$. The vector contains an element for each term. It maps every term $t$ of the collection to a tf-idf weight. tf-idf reflects how important a term is to a document in the collection (see \cite{Manning} for a detailed description). 
 The similarity score between two items is equal to the dot product.
 \begin{equation}
   \label{eq:score}
