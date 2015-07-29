@@ -1,16 +1,16 @@
 \section{Core concepts of the \gls{rec}}
 \label{sec:design}
 
-In order to set a context we will first give a broad overview of how the discussed recommender executes top-N recommendation task.
-The conceptual process of procucing a \gls{topn} can be divided into five steps. Figure \ref{fig:topndataflow} illustrates this simplified view.
+In order to set a context we will first give a broad overview of how the discussed recommender computes a \gls{topn}.
+The conceptual process can be divided into five steps. Figure \ref{fig:topndataflow} illustrates this simplified view.
 
 \begin{enumerate}
 \item A user requests a \gls{topn}.
 \item The recommender looks up items that appear in the recent user history. The history contains multiple types of past user actions.
-\item A query composed of user's action history is sent to the search engine.
-\item The search engine returns a ranked search result set of items according to the query. Because a \gls{rankedretrieval} is a way of finding similar documents according to a query we can use \gls{rankedretrieval} to find similar items to the ones the user already exressed some interest.
- We uses similarity indicators based on \gls{coocc} to score every items that matches the query.
-\item The recommender removes item already known to the user and present him a \gls{topn}.
+\item A query composed of items from the user's action history is sent to the search engine.
+\item The search engine returns a ranked search result set of items according to the query. Because a \gls{rankedretrieval} is a way of finding similar documents according to a query we can use \gls{rankedretrieval} to find similar items to the ones the user already expressed some interest.
+ We use similarity indicators based on \gls{coocc} to score every items that matches the query.
+\item The recommender removes items already known to the user and presents him a \gls{topn}.
 \end{enumerate}
 
 \tikzset{
@@ -41,15 +41,15 @@ se/.style={reco, fill=red!30
    \path (user) edge[bend left=40] node[anchor=south,above] {1. request top-N list}(rec);
    \path (rec) edge[bend left=40] node[anchor=north,below]{5. top-N list}(user);
   \end{tikzpicture}
-  \caption{The process of procucing top-N recommendations list a can be divided into five steps}
+  \caption{The process of producing top-N recommendations list a can be divided into five steps}
   \label{fig:topndataflow}
 \end{figure}
 
 In this section we deal mainly with the step 4, the scoring of items with respect to a user's history.
 A recommender needs some data in order to build a model, also called training data. 
 First we describe the kind of training data used by the \gls{rec}. 
-Then we explain how the \gls{topnt} works in theory and why we use the \gls{llr} ratio of \glspl{coocc} as a similariy metric.
-Next we describe the similarities of the top-N recommender task and a \gls{rankedretrieval} and how we extend the scoring function depending on the precomputed similarity strength among items. 
+Then we explain how the \gls{topn} is computed in theory and why we use the \gls{llr} ratio of \glspl{coocc} as a similarity metric.
+Next we show the similarities of the \gls{topnt} and a \gls{rankedretrieval}, how we map items to documents stored in Solr and how we extend Solr's scoring function to match our needs.
 
 \input{inputdata}
 \input{topnmath}

@@ -4,7 +4,7 @@
 This section describes how we integrate the components described in section \ref{sec:design}. The section is divided according the online and offline parts of the \gls{rec}.
 
 \begin{description}
-\item[Offline learning] In this part the systems uses the stored histories of user behavior to compute the \gls{llr} ratios of the \gls{coocc} among items. Then it updates all items in the in the NoSQL database/search engine Apache Solr. We use similar items as indicators and store the \gls{llr} ratios from the previous step as payloads. This task takes serveral minutes but the duration does not impact the user experience hence it can be executed overnight. 
+\item[Offline learning] In this part the systems uses the stored histories of user behavior to compute the \gls{llr} ratios of the \gls{coocc} among items. Then it updates the indicator fields of the Solr documents for every item. We use similar items as indicators and store the \gls{llr} ratios from the previous step as payloads. This task takes serveral minutes but the duration does not impact the user experience hence it can be executed overnight. 
 \item[Online logging and recommendation] The online part of the system records user activities used in the similarity analysis and creates personalized \gls{topn} if requested. If it receives a requerst for a recommendation list it constructs a query from the user history $h_u$. Then it uses the query to get a ranked list of items that are likely appealing to the user $u$. It removes all item's the user already knows and present the list as recommendation. In order to a  provide smooth user experience the top-N recommendation task should not take longer than a second.
 \end{description}
 
