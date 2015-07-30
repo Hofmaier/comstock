@@ -1,6 +1,5 @@
-
 \subsubsection{Ranked retrieval}
-A search engine enables user to search a collection of documents for specified keywords in a query. A document contains several fields. A field contains a sequence of terms or meta data. A user can search for documents that contain keywords only in specific fields. The search engine returns a sorted set of documents that match the query. The result set is sorted by relevancy. The top documents are the most relevant to the query. This process is called \gls{rankedretrieval}. The search engine does this by calculating a similarity score between each document and the query and then sorts the result by this score. The score indicates the strength of the match against the query. This is one of the main use cases where search engines shine compared to relational databases. There a row either matches a query or it does not. 
+A search engine enables user to search a collection of documents for specified keywords in a query. A document contains several \glspl{field}. A \gls{field} contains a sequence of terms or meta data about the document. A user can search for documents that contain keywords only in specific fields. The search engine returns a sorted set of documents that match the query. The result set is sorted by relevancy. The top documents are the most relevant to the query. This process is called \gls{rankedretrieval}. The search engine does this by calculating a similarity score between each document and the query and then sorts the result by this score. The score indicates the strength of the match against the query. This is one of the main use cases where search engines shine compared to relational databases. There a row either matches a query or it does not. 
 
 \subsubsection{Vector space model}
 One way to calculate the similarity between a query $q$ and a document $d$ is to use the vector space model.
@@ -19,6 +18,7 @@ $r$ maps every document to a relevancy score.
 This is similar to the computation of the \gls{topn} $r_u = M h_u$  described in section \ref{sec:problem}. The search engine returns documents with fields who's vector representation $\vec{d}$ is similar to the query vector $\vec{q}$. The recommender returns items that are similar to the items in the user's action history $h_u$. If we can map items to documents and the user's action history to a query we can use an existing search engine for the top-N recommendation task. This is desirable because search engines like Apache Solr are optimized for ranked retrieval and they are able to process big data at scale. 
 
 \subsubsection{How to map documents to items}
+\label{sec:mapping}
 
 \begin{lstlisting}[caption={Item meta data and similar items are stored in Solr.},label={lst:solrdoc}]
 {
@@ -35,13 +35,13 @@ The result of the search should contain a list of items. Hence we index items in
 
 Instead of finding documents that contain the keywords of the query in a field we want to find items that are similar to the items in the user's action history. We will first discuss a simple approach. 
 
-For item $i$ we store all items whose \gls{llr} ratio to $i$ is above a defined threshold in a separate field. For every type of user action we create such a field. These fields are called indicator fields. 
+For item $i$ we store all items whose \gls{llr} ratio (described in section \ref{sec:llrs} to $i$ is above a defined threshold in a separate field. For every type of user action we create such a field. These fields are called \glspl{indicatorfield}. 
 
 Figure \ref{lst:solrdoc} shows an example entry of a movie item formatted in JSON. The indicator fields \verb|likeindicator| and \verb|tagindicator| contain movie ID's of similar movies. In addition to the indicator fields, the entry contains meta data about the item. These fields can be used to retrieve items by meta data, such as title or genre.
 
 We query the search engine with items from the user's action history $h$. The search engine will transform the items in the query to the corresponding document vector. Table \ref{tbl:comparison} shows the mapping.
 
-This way the search engine computes a higher score for documents that contain the items in $h$ also in their indicator fields. The more items the query $h$ and an indicator field of $i$ have in common the higher the similarity score for a document. Hence the search engine returns similar items the user already liked. In addition the tf-idf weights of the document vectors will mitigate popular items. The drawback is that the \gls{llr} values of items above threshold are ignored.  
+This way the search engine computes a higher score for documents that contain the items in $h$ also in their indicator fields. The more items the query $h$ and an indicator field of $i$ have in common the higher the similarity score for a document. Hence the search engine returns similar items the user already liked. In addition the tf-idf weights of the document vectors will mitigate popular items. The drawback of this simplified approach is that it does not account for different \gls{llr} similiarity values betwenn items above threshold. They are ignored.
 
  We want to have some way to include the \gls{llr} ratios of the \gls{indicatorm} $M$ to boost items that have a high similarity to the item represented by the document. In order to include the similarity metric among items described in section \ref{sec:llr} we have to weight the tf-idf values in the document vector with the \gls{llr} ratios. This is the reason why we can't use a search engine out of the box without extending it's scoring function. 
 
@@ -64,7 +64,7 @@ payload & LLR similarity \\
 
 Note that we can emulate different recommendation engines by using different queries.
 \begin{itemize}
-\item If the query is composed with the user's action history we use collaborative filtering with an item-based approach.
+\item If the query is composed with the user's action history we use collaborative filtering with an \gls{itembased} approach.
 \item We can use a single item $i$ as query and get back all similar items. For instance, a top-N list of items retrieved with this query can be placed on a description page of item $i$ with the title ``Customers Who Liked This Item Also Liked''. This is a non-personalized approach.
 \item We can use user profile information in the query. If the user profile contains information about the user's favorite movie genre or favorite director and the search engine has indexed the corresponding meta data we can search for items that match the user' profile. This would be a content based approach.
 \end{itemize}

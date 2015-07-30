@@ -487,3 +487,29 @@ We have to replace the document vector with rows of the \gls{indicatorm} $M$.
 
 \subsubsection{Composing the query}
 We store items with metadata and the corresponding similar items as a dppocument in the search engine. To get a \gls{topn} Then it will find all items that have those recent history items as indicators.  Hence we get ranked list with the most similar items on top. Table \ref{tbl:comparison} shows the mapping.
+
+In order to use  of the \glspl{coocc} we need
+ per term and per document
+The default delimiter is the pipe symbol. With this fieldtype we can add payloads to terms in document be attaching a number to the term string.
+
+
+
+In this example \verb|23| is an item-id and \verb|0.9| is the similiarity value to the corresponding item.
+
+First we need to define a new field type in the schema.xml of our Solr configuration. Fields of this type contain terms with an added payload.
+To index the similarity value we define a custom field type that uses Lucene's DelimitedPayloadTokenFilter to extract a payload from every term. 
+<queryParser name="payloadparser" 
+   class="ch.hsr.solrpayload.PayloadParser" />
+
+
+After we stored the payload within the index we need a way to score a document match according the payload.
+Solr uses per default the vector space model to compute the score between a document $d$ and a query $q$. It only considers terms $t$ that appear in the query $q$. The tf-idf weight is multiplied by a boosting factor for a term $t$ \cite{grainger}.  
+
+In order to use the payload values in the ranked retrieval process we have to extend Solr with our own Query Component. 
+
+We can add a custom Query Component by implementing a \verb|QParserPlugin|. The implementation just returns the \verb|PayloadTermQuery|. \verb|PayloadTermQuery| matches all documents containing the specifed term and than applies a scoring factor based on the payload that is stored with each term.
+
+In addition we have to override the of the \\ \verb|DefaultSimilarity| class. \verb|PayloadTermQuery| will call \verb|scorePayload| to determine the payload of an item and then it multiplies the td-idf weights with the corresponding payload.
+
+
+An alternative to the use of payloads is to ignore similarities values once we removed the item below threshold from the index. In that case the scoring of a document only depends on the tf-idf weight. Only add items above a threshold to the indicator fields. This approach is easier to deploy but it doesn't account for different similaries. 

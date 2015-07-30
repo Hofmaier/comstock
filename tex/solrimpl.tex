@@ -1,0 +1,39 @@
+\subsubsection{Implementation}
+\label{sec:solrimpl}
+We deploy the search engine Apache Solr in our demo web application. Simply put, Solr is a Web API for Apache Lucene, an open source information retrieval software library. 
+
+We store items in Solr as described in section \ref{sec:mapping}. As pointed out we need a way to weight the tf-idf scores used for \gls{rankedretrieval} with the computed \gls{llr} ratios. Lucene provides this functionality with the \emph{playloads} feature. Payloads enable an application to store an arbitrary byte array for every term during indexing \cite{McCandless}.
+
+Unfortunately the feature is only implemented in Lucene, not in Solr. But we can extend Solr to use the Java classes that deal with payloads. Solr allows us to replace its default filter and query parser components with a custom implementation. It will load the custom implementations from directory defined in its solrconfig.xml configuration file. We replace two components.
+\begin{description}
+\item[Filter] First we need a way to store the \gls{llr} ratio per term and per document. In order to do that we have do define a new field type in Solr. A field type contains an analyzer that determines how the terms will be analyzed. The analyzer contains token filters, that can be used to transform tokens. We use Lucene's DelimitedPayloadTokenFilter to extract a value from every new term and store it as payload. In order to load this token filter we add the following field type definition to the schema.xml.
+\begin{lstlisting}[caption={Fieldtype definition for field with payload.}]
+<fieldtype name="payloads" class="solr.TextField" >
+ <analyzer>
+  <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+   <filter class="DelimitedPayloadTokenFilterFactory" />
+ </analyzer>
+</fieldtype>
+\end{lstlisting}
+This will parse any term stored in a field of type \verb|payloads| and store the value delimited with the pipe symbol as payload. For example if we store an indicator of the form \verb-23|0.9- the new filter will add the number 0.9 to the indicator \verb|23|.
+\item[Similarity] By default, Solr uses Lucene's DefaultSimilarity class to calculate similarity. Given a query $q$ and a document $d$ the similarity score is calculated as show in equation \ref{eq:solrsim} \cite{grainger}.
+\begin{equation}
+\label{eq:solrsim}
+\text{score}(q,d) = \sum_{t \in q} \text{tf-idf}(t,d) \cdot \text{boost}(t) 
+\end{equation}
+The DefaultSimilarity class defines a \verb|scorePayload| method, that always returns 1. We extend DefaultSimilarity and override \verb|scorePayload| to return the \gls{llr} ratio we saved before.
+\begin{lstlisting}
+@Override
+public float scorePayload(int start, int end, BytesRef payload) {
+    if (payload == null)
+	return 1.0F;
+    return PayloadHelper.decodeFloat(payload.bytes, payload.offset);
+}
+\end{lstlisting}
+This will multiply the term in the sum of equation \ref{eq:solrsim} with the \gls{llr} ratio.
+
+We have to tell Solr to use our custom similarity implementation \verb|PayloadSimilarity| by adding the following entries to the solrconfig.xml.
+\begin{lstlisting}
+<similarity class="ch.hsr.solrpayload.PayloadSimilarityFactory">
+\end{lstlisting}
+\end{description}
