@@ -477,3 +477,13 @@ fill=blue!20
 \end{description}
 dithering.
 
+The goal of our mapping is that the search engine finds the most similar items to the one in the user's action history.
+We have to replace the document vector with rows of the \gls{indicatorm} $M$.
+A simplified approach is to store all items whose \gls{llr} That means the \gls{llr} ratio of the item stored as document and the item in the query should be high. Therefore we replace the terms (words in free text) with items that are similar to the item represented by the document. 
+
+A search engine using the vector space model will use document vectors with tf-idf values to compute the score of a match. Tf-idf will mitigate popular items which is desirable but but it only accounts for the occurence of a term in a text. With the p
+roposed mapping the term frequency of indicator ID's will be 1 or 0. We want to have some way to include the \gls{llr} ratios to boost items that have a high similarity to the item represented by the document. In order to include the similarity metric among items described in section \ref{sec:llr} we have to weight the tf-idf values in the document vector with the \gls{llr} ratios. This is the reason why we can't use a search engine out of the box without extending it's scoring function.
+We have to replace the document vector with rows of the \gls{indicatorm} $M$. 
+
+\subsubsection{Composing the query}
+We store items with metadata and the corresponding similar items as a dppocument in the search engine. To get a \gls{topn} Then it will find all items that have those recent history items as indicators.  Hence we get ranked list with the most similar items on top. Table \ref{tbl:comparison} shows the mapping.
