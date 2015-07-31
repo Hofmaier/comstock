@@ -512,4 +512,6 @@ We can add a custom Query Component by implementing a \verb|QParserPlugin|. The 
 In addition we have to override the of the \\ \verb|DefaultSimilarity| class. \verb|PayloadTermQuery| will call \verb|scorePayload| to determine the payload of an item and then it multiplies the td-idf weights with the corresponding payload.
 
 
-An alternative to the use of payloads is to ignore similarities values once we removed the item below threshold from the index. In that case the scoring of a document only depends on the tf-idf weight. Only add items above a threshold to the indicator fields. This approach is easier to deploy but it doesn't account for different similaries. 
+An alternative to the use of payloads is to ignore similarities values once we removed the item below threshold from the index. In that case the scoring of a document only depends on the tf-idf weight. Only add items above a threshold to the indicator fields. This approach is easier to deploy but it doesn't account for different similaries.
+
+This results in a vector $r$ containing a score for each item that indicates the strength of the match (or similarity) of the item to the history $h_p$. The result $r$ is a vector of length $n$, that contains a score for every item.
