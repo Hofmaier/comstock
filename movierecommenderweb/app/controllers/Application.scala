@@ -56,7 +56,7 @@ class Application extends Controller {
     var jsonarr = JsArray()
     try {
       val stmt = conn.createStatement
-      val selectmoviestmnt = "SELECT id as ID, title as Title FROM movie LIMIT 10"
+      val selectmoviestmnt = "SELECT id as ID, title as Title FROM movie LIMIT 20"
       val rs: ResultSet = stmt.executeQuery(selectmoviestmnt)
       while (rs.next()) {
         val title = rs.getString("title")
