@@ -8,8 +8,7 @@ The conceptual process can be divided into five steps. Figure \ref{fig:topndataf
 \item A user requests a \gls{topn}.
 \item The recommender looks up items that appear in the recent user history. The history contains multiple types of past user actions.
 \item A query composed of items from the user's action history is sent to the search engine.
-\item The search engine returns a ranked search result set of items according to the query. Because a \gls{rankedretrieval} is a way of finding similar documents according to a query we can use \gls{rankedretrieval} to find similar items to the ones the user already expressed some interest.
- We use similarity indicators based on \gls{coocc} to score every items that matches the query.
+\item The search engine returns a ranked search result set of items according to the query. The search result contains recommendable items.
 \item The recommender removes items already known to the user and presents him a \gls{topn}.
 \end{enumerate}
 
@@ -45,7 +44,7 @@ se/.style={reco, fill=red!30
   \label{fig:topndataflow}
 \end{figure}
 
-In this section we deal mainly with the step 4, the scoring of items with respect to a user's history.
+In this section we deal mainly with the step 4, the \gls{rankedretrieval} and hence the scoring of items with respect to a user's history.
 A recommender needs some data in order to build a model, also called training data. 
 First we describe the kind of training data used by the \gls{rec}. 
 Then we explain how the \gls{topn} is computed in theory and why we use the \gls{llr} ratio of \glspl{coocc} as a similarity metric.

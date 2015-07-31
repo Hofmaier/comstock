@@ -68,7 +68,9 @@ To achieve these goals \cite{Dunning14} makes the following suggestions.
   \item Co-occurrence can be computed using the \gls{mapreduce} programming model. Hence the computation of the model can be distributed.
 \end{itemize}
 
-\item Use a text retrieval engine to produce the \gls{topn}. Producing a \gls{topn} with a neighborhood based collaborative filtering algorithm is similar to process a document query in a text retrieval system. The search engine indexes items represented as documents instead of text documents. The fields of these documents indicate similarity to other items. The query is composed of items that are associated with the user's past actions which we want to recommend. For instance, if we want to recommend items which the user can purchase then we use his purchase history. 
+\item Use a text retrieval engine to produce the \gls{topn}. Producing a \gls{topn} with a neighborhood based collaborative filtering algorithm is similar to process a document query in a text retrieval system. Because a \gls{rankedretrieval} is a way of finding similar documents according to a query we can use \gls{rankedretrieval} to find similar items to the ones the user already expressed some interest.
+ We use similarity indicators based on \gls{coocc} to score every item that matches the query.
+The search engine indexes items represented as documents instead of text documents. The fields of these documents contain similar items. The query is composed of items that are associated with the user's past actions which we want to recommend. For instance, if we want to recommend items which the user can purchase then we use his purchase history. 
 
 It is possible to store several indicators as fields within a document of the search engine. Hence we can use many types of user actions to improve recommendations. For instance we can use one field that indicates similarity with respect to purchases and one field that indicate similarity with respect to \glspl{tag}. In addition we can enhance the index with meta data about the items.
 
