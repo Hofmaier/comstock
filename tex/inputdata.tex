@@ -8,13 +8,13 @@
   \label{fig:gui}
 \end{figure}
 
-Many collaborative filtering recommender engines use excplicit user ratings to train their model. Explicit user ratings of a user for an item are expressed by numbers (e.g. a rating is a number between 1 and 5). The use of explicit feedback has some drawbacks.
+Many collaborative filtering recommender engines use explicit user ratings to train their model. Explicit user ratings of a user for an item are expressed by numbers (e.g. a rating is a number between 1 and 5). The use of explicit feedback has some drawbacks.
 \begin{itemize}
 \item Only a small subset of users will rate items. This leads to a model that is skewed against user who like to rate.
 \item The majority of ratings are associated with a small fraction of the most popular items \cite{Anderson}. As a result it is less likely that unknown items show up in the \gls{topn}. This behavior is undesirable because the goal of the recommender is to present items the a user would not find on his own.
 \end{itemize}
 
-Corresponding to \cite{Dunning14} the best choice of input data is the collection past user actions on a website. The stored behavior of one user is called the user's \gls{history}. It shows what users actually do. Hence the input data should consist of recorded \glspl{useraction} (e.g. purchase, view, like, tag).
+Corresponding to \cite{Dunning14} the best choice of input data is the collection of past user actions on a website. The stored behavior of one user is called the user's \gls{history}. The history records what users actually do. Hence the input data should consist of recorded \glspl{useraction} (e.g. purchase, view, like, tag).
 
 In our demo web application we record two different user actions:
 \begin{description}
@@ -26,7 +26,7 @@ Figure \ref{fig:gui} shows the simplistic user interface of our demo web app.
 
 The web browser sends every user action to the web server. The web server provides a REST Web API that receives the \glspl{useraction} as HTTP \verb|Post| request and saves them to a sqlite3 \footnote{https://www.sqlite.org/} database.
 
-In order to analyse the data later we want to retrieve the action history $h_u$ for a particular user $u$ for a defined action and a list of tags for every item. Hence we have to structure the data accordingly. Figure \ref{fig:er} shows the entity relationship diagram for the user actions \gls{like} and \gls{tag}
+In order to analyze the data later we want to retrieve the action history $h_u$ for a particular user $u$ for a defined action and a list of tags for every item. Hence we have to structure the data accordingly. Figure \ref{fig:er} shows the entity relationship diagram for the user actions \gls{like} and \gls{tag}
 
 \tikzset{multi  attribute/.style={attribute ,double  distance=1.5pt}}
 \tikzset{derived  attribute/.style={attribute ,dashed}}
@@ -50,5 +50,5 @@ In order to analyse the data later we want to retrieve the action history $h_u$ 
 \label{fig:er}
 \end{figure}
 
-It makes sense to start recording behavioral data month's before depoying the recommender engine because the recommender engine has to analyze the data and build a model of similarty among items in order to create personalized recommendations.
+It makes sense to start recording behavioral data month's before deploying the recommender engine because the recommender engine has to analyze the data and build a model of similarity among items in order to create personalized recommendations.
 
