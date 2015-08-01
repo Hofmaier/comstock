@@ -29,8 +29,8 @@ se/.style={reco, fill=red!30
     \node[reco] (rec) at(180:3cm) {Recommender};
     \node[hist] (hist) at(60:3cm){History};
     \node[se] (se) at(300:3cm){Search engine};
-    \node (user) [left of=rec,node distance=5cm]{User};
-    \node(x)[align=left] at(120:1.7cm){2. lookup\\ user's history};
+    \node (user) [left of=rec,node distance=5cm]{user};
+    \node(x)[align=left] at(120:1.7cm){2. look up\\ user's history};
     \node(x)[align=left] at(0:2cm){3. user's\\ history};
     \node(x)[align=left] at(220:4cm){4. ranked \\ search result};
     \draw[->, >=latex] (170:3cm) arc  (170:100:3cm);
@@ -40,11 +40,11 @@ se/.style={reco, fill=red!30
    \path (user) edge[bend left=40] node[anchor=south,above] {1. request top-N list}(rec);
    \path (rec) edge[bend left=40] node[anchor=north,below]{5. top-N list}(user);
   \end{tikzpicture}
-  \caption{The process of producing top-N recommendations list a can be divided into five steps}
+  \caption{The process of producing top-N recommendations list can be divided into five steps}
   \label{fig:topndataflow}
 \end{figure}
 
-In this section we deal mainly with the step 4, the \gls{rankedretrieval} and hence the scoring of items with respect to a user's history.
+In this section we deal mainly with step 4, the \gls{rankedretrieval} and hence the scoring of items with respect to a user's history.
 A recommender needs some data in order to build a model, also called training data. 
 First we describe the kind of training data used by the \gls{rec}. 
 Then we explain how the \gls{topn} is computed in theory and why we use the \gls{llr} ratio of \glspl{coocc} as a similarity metric.
