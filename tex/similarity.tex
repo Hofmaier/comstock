@@ -101,7 +101,7 @@ Although item 5 shares all users with item 1 and 3, the log-likelihood ratio is 
 \subsubsection{Log-likelihood similarity implementation}
 \label{sec:llrimpl}
 
-Apache Mahout provides an implementation of log-likelihood similarity with the class \verb|LogLikelihoodSimilarity|. Unfortunately the \verb|LogLikelihoodSimilarity| is a non-distributed implementation. It would take too long to calculate the indicator matrix for a data set with over 10 million items and we would have difficulties to load all data into the memory. 
+Apache Mahout provides an implementation of log-likelihood similarity with the class \verb|LogLikelihoodSimilarity|. Unfortunately the LogLikelihoodSimilarity is a non-distributed implementation. It would take too long to calculate the indicator matrix for a data set with over 10 million items and we would have difficulties to load all data into the memory. 
 
 The computation of the \gls{coocc} of every item pair can be distributed and run in parallel by applying the MapReduce programming model as follows:
 \begin{description}
@@ -111,12 +111,12 @@ The computation of the \gls{coocc} of every item pair can be distributed and run
 
 This task can run in parallel on different nodes on a cluster computer framework, such as Apache Spark. Hence the computation of the \gls{indicatorm} is \gls{scalable}.
 In order to compute the \gls{llr} similarity distributed on a Spark cluster, Apache Mahout provides the \verb|spark-itemsimilarity| job. 
-\verb|spark-itemsimilarity| is a command line job and we can start it from the mahout shell.
+\verb|spark-itemsimilarity| is a command line job and we can start it from the Mahout shell.
 \begin{verbatim}
 ./mahout spark-itemsimilarity --input $infile --output $outfile
 \end{verbatim}
 The job connects to the Spark cluster instance defined by the environment variable \verb|MASTER| and computes the \gls{indicatorm} in parallel. With the \verb|spark-itemsimilarity| job the indicator matrix can be computed in $O(n)$ \cite{Schelter}. 
-The input text file has to be in the following format:
+The input text file contains a row for every user-item interaction. They have to be in the following format:
 \begin{verbatim}
 userID, action, itemID
 \end{verbatim}
@@ -125,24 +125,5 @@ The output will be a text file that represents the indicator matrix as sparse ve
 itemID1<tab>itemID2:similarityvalue<space>itemID3:simvalue...
 \end{verbatim}
 
-In our demo application we have written a python script to fetch the data from the sqlite3 database and transform to the Spark input format.
+In our demo application we have written a Python script to fetch the data from the sqlite3 database and transform to the Spark input format.
 
-\begin{figure}
-\centering
-\begin{tikzpicture}[node distance=40mm,
-data/.style={
-rectangle,
-draw,
-thin,
-minimum height=3.5em
-},
-to/.style={->,>=stealth',shorten >=1pt,semithick,font=\footnotesize},
-]
-\node (log) [data, align=left] {User actions\\log file};
-\node (spark) [data,right of=log,align=left] {Apache Spark\\LLR job};
-\node (model) [data,right of=spark,align=left] {Similarity\\model};
-\draw[to] (log) -- (spark);
-\draw[to] (spark) -- (model);
-\end{tikzpicture}
-\caption{The {\ttfamily spark-itemsimilarity} job of Apache Spark computes the LLR similarity based on the user behavior log file.}
-\end{figure}

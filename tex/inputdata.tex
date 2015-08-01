@@ -21,7 +21,7 @@ In our demo web application we record two different user actions:
 \item[like]  Users can express their positive feedback for a movie by clicking on a ``like'' button (the \gls{like} action is an explicit rating. We use it instead of a purchase or view action in order to keep the GUI simple).
 \item[tag] User can \gls{tag} items. Every item can be associated with a list of \glspl{tag}.
 \end{description}
-The recorded like and tag action are later used to compute similarity between items.
+The recorded like and tag actions are later used to compute similarity between items.
 Figure \ref{fig:gui} shows the simplistic user interface of our demo web app.
 
 The web browser sends every user action to the web server. The web server provides a REST Web API that receives the \glspl{useraction} as HTTP \verb|Post| request and saves them to a sqlite3 \footnote{https://www.sqlite.org/} database.

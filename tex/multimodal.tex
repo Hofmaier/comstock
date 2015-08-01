@@ -1,14 +1,14 @@
 \subsection{Using more than one type of behavior}
 \label{sec:multimodal}
 
-Most collaborative filtering algorithms use only explicit or implicit ratings to compute similarity.
-But we can improve the performance of the recommender engine by using multiple types of user actions. In addition to likes we could use tag-associations to compute the similariy. In table \ref{tbl:llr1} we count co-occurence of items in a user's like-action history. Instead of the action history we could use tags that are associated width items. We count the co-occurence of each items associated with a tag.
+Most collaborative filtering algorithms use only explicit or implicit ratings to compute similarity. Hence they only use one type of user behavior.
+But we can improve the performance of the recommender engine by using multiple types of user actions. As described in section \ref{sec:inputdata} we record tag-associations. In addition to likes we can use tagging activity to compute similarity. In table \ref{tbl:llr1} we count the co-occurrence of items in user's like-action history. Instead of the like history we could use tags that are associated with items. We count the \gls{coocc} of each items with respect to item-tag associations.
 
-Suppose we compute a \gls{indicatorm} based on likes $M_l$ and one based on tag associations $M_t$. An $h_l$ is a user's history of ``likes'' and $h_t$ is the user's tag history. Then we can compute the recommendation vector (see equation \ref{eq:recommendation}) $r$ with
+Suppose we compute one \gls{indicatorm} based on likes $M_l$ and one based on tag associations $M_t$. And $h_l$ is a user's history of ``likes'' and $h_t$ is the user's tag history. We use both indicators to compute the recommendation vector $r$ by first calculation the matrix vector products of a indicator matrix with its corresponding history vector and then summing up the resulting vector (see equation \ref{eq:multi}).
 
 \begin{equation}
   \label{eq:multi}
   r = h_l M_l + h_t M_t
 \end{equation}
 
-In our demo web application we use ``likes'' and tags but virtually all user actions can be used to improve the recommendation.
+In our demo web application we use ``likes'' and tags but virtually all user actions can be used to improve the recommendations.
