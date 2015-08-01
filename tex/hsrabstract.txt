@@ -1,0 +1,13 @@
+A practical approach to creating recommendations.
+
+Building a recommendation engine can be a difficult and expensive task. Understanding all possible techniques and choosing the most suitable for the job at hand presupposes that you have a strong mathematical background. There are a lot of different algorithms and strategies and researchers are constantly coming up with new ones. Not all companies can afford to employ an army of data scientist and mathematicians to build a recommender system. They a have to trade-off the accuracy of a recommender against the development costs.
+
+This report describes a simple practical approach to build a recommender system that is more approachable for small development teams.
+In order to produce a list of recommendable items for a user, it uses the user's history of recent actions to query the search engine Apache Solr for similar items.
+Similarity among items is based on the log-likelihood ratio of  co-occurrence of items with respect to a variety of action types (e.g. purchase, view).
+This approach exploits existing and proved technologies to save development costs.
+Furthermore, the system is scaleable for big data because Solr is optimized for searching large volumes of data and co-occurrence can be computed at scale with Apache Mahout's \verb|spark-itemsimilarity| job.
+
+This report explains the core concepts of this practical approach on the basis of a small demo web application. It explains the similarities between the weighting of indicator scores of a memory-based model and the process of ranked retrieval.
+
+The evaluation of the described approach shows that the accuracy of the top-N recommendations task matches the accuracy of a sophisticated item-based algorithm.
