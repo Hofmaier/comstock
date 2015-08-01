@@ -49,24 +49,6 @@ The reason why we deploy a search engine in order to make recommendations is tha
 
 Another reason why we deploy a search engine is that the application is read-dominant. The recommender will query the data far more often than it will create new documents or update the indicators. Solr is optimized to for executing queries as opposed to storing data.
 
-Solr allows you to load custom code to perform.
-Request are process by a request handler. Search handler is a request handler. The search handler has search components. One search componet is a Query Component. The Query Component has Query Parsers
- Solr stores the documents in a flat structure and we can search for terms in the documents.
-was ist faceting, hightlighting, spellchecking
-
-We can weight fields to 
-We want to deliver relevant results.
-
-We have to write our own query parser.
-QParser Plugin beschrieben in chapter 7.
-
-\subsection{Concepts of Solr}
-\label{sec:solrconcepts}
-
-\begin{description}
-\item[core] A is a document index with the corresponding \verb|schema.xml|
-\end{description}
-
 \section{Apache Mahout}
 \label{sec:mahout}
 
@@ -77,20 +59,6 @@ Mahout provides a large set of recommender algorithms. And it is easy to evaluat
 \label{sec:datarepresentation}
 
 Apache Mahout uses it's own data structures to store and access preference data. Mahout provides it's own map implementation \verb|FastByIDMap|. Keys in \verb|FastByIDMap| are long primitives instead of java objects. In addition \verb|FastByIDMap| has no additional \verb|Map.Entry| object per entry. The avoidance of java object saves memory. Depending on the implementation of the JVM a java object allocates about 28 bytes of memory. \verb|FastByIDMap| consumes about 28 bytes per entry, compared to about 84 byte per entry for \verb|HashMap| from \verb|java.util|.
-
-\subsection{Why we did not use Mahout'ss evaluator}
-\label{sec:mahouteval}
-
-The library Apache Mahout provides a method to evaluate precision and recall. It is implemented in 
- \verb|GenericRecommenderIRStatsEvaluator| in the package \verb|org.apache.mahout.cf.taste.impl.eval|. The problem with this method is that the number of retrieved document $n$ is equal to the number of relevant documents and if a user has many items above threshold  \verb|GenericRecommenderIRStatsEvaluator| takes only $n$ of those. It's desirable to parameterize the definition of relevant items and number of retrieved items independently.
-
-\begin{quote}
-For each user, these implementation determine the top n preferences, then evaluate the IR statistics based on a DataModel that does not have these values. This number n is the "at" value, as in "precision at 5". For example, this would mean precision evaluated by removing the top 5 preferences for a user and then finding the percentage of those 5 items included in the top 5 recommendations for that user. 
-\end{quote}
-
-\begin{quote}
-  items whose preference value is at least this value are considered "relevant" for the purposes of computations
-\end{quote}
 
 \section{Log-likelihood ratio}
 \label{sec:llrratio}
@@ -113,17 +81,7 @@ sbt build
 This assumes that the scala build tool (sbt) is installed.
 \subsection{Apache Spark}
 \label{sec:spark}
-Apache Spark is a cluster computer framework. It allows user programs to load data into a cluster's memory. It is well suited to machine learning algorithms \cite{Karau}.
-
-Apache Spark is a parallel execution engine.
-\verb|spark-rowsimilarity| is a script that comes with spark. It takes as input a text file representation of a matrix of sparse vectors. It finds similar rows. The input is in text-delimited form where there are three delimiters used. By default it reads (rowID<tab>columnID1:strength1<space>columnID2:strength2...) The job only supports LLR similarity. This job only supports LLR similarity.
-The input has the following format:
-\begin{verbatim}
-1	1
-2	2
-3	3 
-\end{verbatim}
-
+Apache Spark is a cluster computer framewor. It allows user programs to load data into a cluster's memory. It is well suited to machine learning algorithms \cite{Karau}.
 \subsubsection{How to deploy Spark}
 \label{sec:sparkdeploy}
 
@@ -151,11 +109,3 @@ itemid, userid, timestamp
 5,104,980731208  
 \end{lstlisting}
 
-\section{Parameters}
-\label{sec:parameters}
-
-This section descripes the paratemter of the recommender discussed in this report.
-\begin{description}
-\item[similarity threshold] We have to define a threshold to separate similar items occording to the LLR similarity from the rest (e.g. 0.5).
-\item[user history to consider] We retrieve recommendations with a part of the user history. We have to define the number of log entries to consider.
-\end{description}
