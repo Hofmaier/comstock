@@ -518,3 +518,71 @@ This results in a vector $r$ containing a score for each item that indicates the
 \verb|spark-itemsimilarity| will output an indicator matrix created by collecting and counting all \glspl{coocc} and calculating the \gls{llr} ratio strenght.
 
 The co-occurence based recommender uses the user behavior log in order to compute a similarity model. 
+
+\section{Parameters}
+\label{sec:parameters}
+
+This section descripes the paratemter of the recommender discussed in this report.
+\begin{description}
+\item[similarity threshold] We have to define a threshold to separate similar items occording to the LLR similarity from the rest (e.g. 0.5).
+\item[user history to consider] We retrieve recommendations with a part of the user history. We have to define the number of log entries to consider.
+\end{description}
+n
+
+\subsection{Why we did not use Mahout'ss evaluator}
+\label{sec:mahouteval}
+
+The library Apache Mahout provides a method to evaluate precision and recall. It is implemented in 
+ \verb|GenericRecommenderIRStatsEvaluator| in the package \verb|org.apache.mahout.cf.taste.impl.eval|. The problem with this method is that the number of retrieved document $n$ is equal to the number of relevant documents and if a user has many items above threshold  \verb|GenericRecommenderIRStatsEvaluator| takes only $n$ of those. It's desirable to parameterize the definition of relevant items and number of retrieved items independently.
+
+\begin{quote}
+For each user, these implementation determine the top n preferences, then evaluate the IR statistics based on a DataModel that does not have these values. This number n is the "at" value, as in "precision at 5". For example, this would mean precision evaluated by removing the top 5 preferences for a user and then finding the percentage of those 5 items included in the top 5 recommendations for that user. 
+\end{quote}
+
+\begin{quote}
+  items whose preference value is at least this value are considered "relevant" for the purposes of computations
+\end{quote}
+
+ Solr stores the documents in a flat structure and we can search for terms in the documents.
+was ist faceting, hightlighting, spellchecking
+
+We can weight fields to 
+We want to deliver relevant results.
+
+We have to write our own query parser.
+QParser Plugin beschrieben in chapter 7.
+
+\subsection{Concepts of Solr}
+\label{sec:solrconcepts}
+
+\begin{description}
+\item[core] A is a document index with the corresponding \verb|schema.xml|
+\end{description}
+
+Solr allows you to load custom code to perform.
+Request are process by a request handler. Search handler is a request handler. The search handler has search components. One search componet is a Query Component. The Query Component has Query Parsers.
+\begin{figure}
+\centering
+\begin{tikzpicture}[node distance=40mm,
+data/.style={
+rectangle,
+draw,
+thin,
+minimum height=3.5em
+},
+to/.style={->,>=stealth',shorten >=1pt,semithick,font=\footnotesize},
+]
+\node (log) [data, align=left] {User actions\\log file};
+\node (spark) [data,right of=log,align=left] {Apache Spark\\LLR job};
+\node (model) [data,right of=spark,align=left] {Similarity\\model};
+\draw[to] (log) -- (spark);
+\draw[to] (spark) -- (model);
+\end{tikzpicture}
+\caption{The {\ttfamily spark-itemsimilarity} job of Apache Spark computes the LLR similarity based on the user behavior log file.}
+\end{figure}
+
+ Items with a small similarity value do not contribute to the performance.
+ In order to retrieve all actions that belong to user $u$ the user activity is stored in a relational database.
+
+search engine based, multimodal recommender
+The meaning, value, and purpose of a particular tag is determined by each user.
