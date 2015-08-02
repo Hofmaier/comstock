@@ -11,3 +11,7 @@ Furthermore, the system is scaleable for big data because Solr is optimized for 
 This report explains the core concepts of this practical approach on the basis of a small demo web application. It explains the similarities between the weighting of indicator scores of a memory-based model and the process of ranked retrieval.
 
 The evaluation of the described approach shows that the accuracy of the top-N recommendations task matches the accuracy of a sophisticated item-based algorithm.
+
+In the demo web application the user can like and tag movies. The recommender will produce a top-N recommendations list based on these actions.
+
+The process of producing top-N recommendations list a can be divided into five steps.

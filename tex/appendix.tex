@@ -40,6 +40,35 @@ The following software was used to build the evaluator, the search engine update
 \end{lstlisting}
 
 
+\begin{lstlisting}[label=lst:toppop, caption={Implementation of top popular recommender}]
+Map<Long, Integer> item2pop = new HashMap<Long, Integer>();
+LongPrimitiveIterator iter = dataModel.getUserIDs();
+while (iter.hasNext()) {
+PreferenceArray prefs = dataModel.getPreferencesFromUser(iter
+	.nextLong());
+for (int i = 0; i < prefs.length(); i++) {
+	Integer counter = item2pop.get(prefs.getItemID(i));
+	if (counter == null) {
+		item2pop.put(prefs.getItemID(i), 1);
+	} else {
+		item2pop.put(prefs.getItemID(i), counter + 1);
+	}
+      }
+}
+List<RecommendedItem> popitems = transfom2list(item2pop);
+Collections.sort(itemidcounter, new RecommenderItemComparator()); 
+return popitems
+\end{lstlisting}
+
+
+\begin{lstlisting}[caption={To transform SolrDocument to JSON Object we define a implicit definition of Writes[SolrDocment].}, label={lst:writes}]
+implicit val solrdocWrites = new Writes[SolrDocument] {
+  def writes(solrdoc: SolrDocument) = Json.obj(
+     "title" -> solrdoc.getFieldValue("title").toString().filter { _ != '[' }.filter { ']' != _ },
+     "id" -> solrdoc.getFieldValue("id").toString().toLong)
+}  
+\end{lstlisting}
+
 \section{Apache Solr}
 \label{sec:solr}
 
