@@ -2,7 +2,7 @@
 \label{sec:multimodal}
 
 Most collaborative filtering algorithms use only explicit or implicit ratings to compute similarity. Hence they only use one type of user behavior.
-But we can improve the performance of the recommender engine by using multiple types of user actions. As described in section \ref{sec:inputdata} we record tag-associations. In addition to likes we can use tagging activity to compute similarity. In table \ref{tbl:llr1} we count the co-occurrence of items in user's like-action history. Instead of the like history we could use tags that are associated with items. We count the \gls{coocc} of each items with respect to item-tag associations.
+But we can improve the performance of the recommender engine by using multiple types of user actions. As described in section \ref{sec:inputdata} we record tag-associations. In addition to likes we can use tagging activity to compute similarity. In table \ref{tbl:llr1} we count the co-occurrence of items in user's like-action history. Instead of the like history we could use tags that are associated with items. We count the \gls{coocc} of each items pair associated the same tag.
 
 Suppose we compute one \gls{indicatorm} based on likes $M_l$ and one based on tag associations $M_t$. And $h_l$ is a user's history of ``likes'' and $h_t$ is the user's tag history. We use both indicators to compute the recommendation vector $r$ by first calculation the matrix vector products of a indicator matrix with its corresponding history vector and then summing up the resulting vector (see equation \ref{eq:multi}).
 

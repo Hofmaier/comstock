@@ -5,7 +5,7 @@ In the last section (\ref{sec:problem}) we use a matrix $M$ that contains simila
 
 In order to compute the similarity between two items we count the \gls{coocc} among two items with respect to a particular user action and then compute the the \gls{llr} ratio of that \gls{coocc}.
 
-\subsubsection{\Gls{coocc}}
+\subsubsection{Co-occurrence}
 \label{sec:cooccurence}
 
 Co-occurrence in the context of a recommender system is the number of times a pair of items appear together in some user's action history or another item-interaction (e.g. tag-item). For instance, if there are 5 users who all liked items $A$ and $B$ then $A$ and $B$ co-occur 5 times. \Gls{coocc} indicates similarity. The more two items turn up together, the more related they probably are. We can count the \gls{coocc} of items with respect to any action or entity. For instance, we can count how many times two items are associated with the same tag or purchased by the same users.
@@ -47,7 +47,7 @@ According to \cite{Dunning14} using the \gls{llr} ratio of the \gls{coocc} has s
 \label{sec:llrexample}
 
 We describe the log-likelihood based similarity with a small example data set. Suppose we analyze the user action history for the action ``like'' given in table \ref{tbl:llr1}. 
-Table \ref{tbl:llr1} shows the likes of four users for five items. The items are represented with ids 1-4 and the users with ids 101 - 104  (see appendix listing \ref{lst:sampledata} for raw web log).
+Table \ref{tbl:llr1} shows the likes of four users for five items. The items are represented with integers 1-4 and the users with integers 101 - 104  (see appendix listing \ref{lst:sampledata} for raw web log).
 In the example data set of table \ref{tbl:llr1} the items 1 and 2 are similar because three users liked both of them.
 
 We compute the \gls{indicatorm} in two steps as shown in figure \ref{fig:llrworkflow}.
@@ -67,7 +67,7 @@ We compute the \gls{indicatorm} in two steps as shown in figure \ref{fig:llrwork
 5 & x & x & x & x\\
 \end{tabular}
 \end{center}
-\caption{Example dataset. The columns represent the user interaction with an item. Items are named 1 - 4 and users 101 - 104}
+\caption{Example data set. The columns represent the user interaction with an item. Items are named 1 - 4 and users 101 - 104}
 \label{tbl:llr1}
 \end{table}
 
@@ -110,7 +110,7 @@ The computation of the \gls{coocc} of every item pair can be distributed and run
 \end{description}
 
 This task can run in parallel on different nodes on a cluster computer framework, such as Apache Spark. Hence the computation of the \gls{indicatorm} is \gls{scalable}.
-In order to compute the \gls{llr} similarity distributed on a Spark cluster, Apache Mahout provides the \verb|spark-itemsimilarity| job. 
+In order to compute the \gls{llr} similarity distributed on a Spark cluster, Apache Mahout provides the \verb|spark-item-| \verb|similarity| job. 
 \verb|spark-itemsimilarity| is a command line job and we can start it from the Mahout shell.
 \begin{verbatim}
 ./mahout spark-itemsimilarity --input $infile --output $outfile

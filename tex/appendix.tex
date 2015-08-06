@@ -40,7 +40,7 @@ The following software was used to build the evaluator, the search engine update
 \end{lstlisting}
 
 
-\begin{lstlisting}[label=lst:toppop, caption={Implementation of top popular recommender}]
+\begin{lstlisting}[ caption={Implementation of top popular recommender}]
 Map<Long, Integer> item2pop = new HashMap<Long, Integer>();
 LongPrimitiveIterator iter = dataModel.getUserIDs();
 while (iter.hasNext()) {

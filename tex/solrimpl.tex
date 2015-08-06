@@ -21,7 +21,7 @@ This will parse any term stored in a field of type \verb|payloads| and store the
 \label{eq:solrsim}
 \text{score}(q,d) = \sum_{t \in q} \text{tf-idf}(t,d) \cdot \text{boost}(t) 
 \end{equation}
-The DefaultSimilarity class defines a \verb|scorePayload| method, that always returns 1. We extend DefaultSimilarity and override \verb|scorePayload| to return the \gls{llr} ratio we saved before.
+The DefaultSimilarity class defines a \verb|scorePayload| method, that always returns 1. We extend DefaultSimilarity and override the method \verb|scorePayload| to return the \gls{llr} ratio we saved before.
 
 \begin{figure}
   \centering
@@ -49,7 +49,7 @@ public float scorePayload(int start, int end, BytesRef payload) {
 \end{lstlisting}
 This will multiply the term in the sum of equation \ref{eq:solrsim} with the \gls{llr} ratio.
 
-We have to tell Solr to use our custom similarity implementation \verb|PayloadSimilarity| by adding the following entries to the solrconfig.xml.
+We have to tell Solr to use our custom similarity implementation PayloadSimilarity by adding the following entries to the solrconfig.xml.
 \begin{lstlisting}
 <similarity class="ch.hsr.solrpayload.PayloadSimilarityFactory">
 \end{lstlisting}

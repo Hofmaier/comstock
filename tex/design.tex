@@ -1,4 +1,4 @@
-\section{Core concepts of the \gls{rec}}
+\section{Core concepts of the co-occurrence based recommender}
 \label{sec:design}
 
 In order to set a context we will first give a broad overview of how the discussed recommender computes a \gls{topn}.
@@ -9,7 +9,7 @@ The conceptual process can be divided into five steps. Figure \ref{fig:topndataf
 \item The recommender looks up items that appear in the recent user history. The history contains multiple types of past user actions.
 \item A query composed of items from the user's action history is sent to the search engine.
 \item The search engine returns a ranked search result set of items according to the query. The search result contains recommendable items.
-\item The recommender removes items already known to the user and presents him a \gls{topn}.
+\item The recommender removes items already known to the user and pre\-sents him a \gls{topn}.
 \end{enumerate}
 
 \tikzset{
