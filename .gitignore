@@ -119,3 +119,6 @@ solr/collection1/conf/clustering
 updatesolr/target
 tex/node
 python/movie.db
+python/inputfile
+*.pyc
+
