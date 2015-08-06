@@ -10,7 +10,7 @@ Evaluation is important because:
   \item Evaluation allows us to adjust the parameters in order to get better results.
 \end{itemize}
 
-\subsection{How to measure the performance of the \gls{topnt}?}
+\subsection{How to measure the performance of the top-N recommendation task?}
 
 Most commonly accepted evaluation measure for recommender systems is the Mean Average Error or Root \gls{mae} of the predicted ratings and the actual one \cite{Ricci}\cite{jannach11}.
 As described in section \ref{sec:problem} the \gls{rec} does not estimate preference values. It produces a \glspl{topn}. Hence we can not use \gls{mae} as a performance metric. 
@@ -100,8 +100,7 @@ Listing \ref{lst:irstats} shows the implementation of precision and recall.
 The variable \verb|rec| contains an object of type \verb|Recommender|. \verb|Recommender| provides the method \verb|recommend|. \verb|recommend| takes the ID of the active user and the size $N$ of the top-N list as parameters. The argument \verb|topNsize| corresponds to $TP+FP$. It returns a top-N list for the active user. 
 
 The variable \verb|relevantItem| contains a list with relevant items for the active user.
-
-We count how many items in the top-N list are also in the list \verb|relevantItems| and assign the result to \verb|relevantItemsRetrieved|. \verb|relevantItemsRetrieved| corresponds to the $TP$ value. In order or compute precision or recall we divide \verb|relevantItemsRetrieved| by \verb|topNsize| or the size of the collection\\ \verb|relevantItems|.
+We count how many items in the top-N list are also in the list \verb|relevantItems| and assign the result to \verb|relevantItemsRetrieved|. The integer variable \verb|relevantItemsRetrieved| corresponds to the $TP$ value. In order or compute precision or recall we divide \verb|relevantItemsRetrieved| by \verb|topNsize| or the size of the collection\\ \verb|relevantItems|.
 
 
 \begin{lstlisting}[caption=Implementation of precision and recall,label=lst:irstats]
@@ -237,8 +236,8 @@ To compare the performance of the \glspl{rec} with variable number of \glspl{ind
 
 \begin{description}
 \item[\Gls{coocc} user likes] It only considers \gls{coocc} of the user's action \gls{like} as described by equation \ref{eq:recommendation} (section \ref{sec:problem}).
-\item[\Gls{coocc} of likes and tags] In addition to likes we use tag-associations to compute the similarity as described by equation \ref{eq:multi}. We use the tags associated with an item to compute a tag \gls{indicator} matrix and store these indicator in a separate field in Solr. We add tags that are associated with the \gls{au} to the query.
-\item[\Gls{coocc} of likes, tags and user ratings] We use the \gls{coocc} based similarity metric described in section \ref{sec:llr} to compute similarity based on all preferences from the MovieLens data set. We can count \gls{coocc} of preferences between items and ignore the score value. To query this \gls{indicator} field we use the user's recent likes.
+\item[\Gls{coocc} of likes and tags] In addition to likes we use tag\-asso\-cia\-tions to compute the similarity as described by equation \ref{eq:multi}. We use the tags associated with an item to compute a tag \gls{indicator} matrix and store these indicator in a separate field in Solr. We add tags that are associated with the \gls{au} to the query.
+\item[\Gls{coocc} of likes, tags and user ratings] We use the co\--oc\-cur\-ren\-ce based similarity metric described in section \ref{sec:llr} to compute similarity based on all preferences from the MovieLens data set. We can count \gls{coocc} of preferences between items and ignore the score value. To query this \gls{indicator} field we use the user's recent likes.
 \end{description}
 
 We measure precision and recall at $N=10$ for all three recommenders and the baseline algorithms. Hence we retrieve a list of 10 items. Relevant items are the 10 best rated items above the threshold. For every user we compute his average rating value $\mu$ and the standard deviation $\sigma$. We set the threshold to $\mu + \sigma$.
@@ -265,7 +264,7 @@ x tick label style={/pgf/number format/fixed}
 \legend{Precision, Recall};
 \end{axis}
 \end{tikzpicture} 
-\caption{Precision and recall comparison of the recommender algorithms, random generated recommendations, Top Popular, itembased  and three \glspl{rec} with a variable number of indicators with precision at 10 and $N$ = 10 (number of recommended items)}
+\caption{Precision and recall comparison of the recommender algorithms, random generated recommendations, TopPopular, itembased  and three \glspl{rec} with a variable number of indicators with precision at 10 and $N$ = 10 (number of recommended items)}
   \label{fig:precisionrecallvalues}
 \end{figure}
 

@@ -57,7 +57,7 @@ public class SolrDocumentFactory {
 			}
 			//log.info("finished similarity analysis for one item");
 			String similaritemidstr = simrstr.toString();
-			doc.addField("simr", similaritemidstr);
+			doc.addField("like", similaritemidstr);
 			doc.addField("tags", tagsimstr.toString());
 			doc.addField("llr", llrstr.toString());
 			doc.addField(llrfield, llrindicatorstrbld.toString());
