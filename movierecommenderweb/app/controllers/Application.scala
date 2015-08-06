@@ -145,7 +145,8 @@ class Application extends Controller {
       "title" -> solrdoc.getFieldValue("title").toString().filter { _ != '[' }.filter { ']' != _ },
       "id" -> solrdoc.getFieldValue("id").toString().toLong)
   }
-
+  
+  
   def topn = Action { request =>
     val userid: Int = request.session.get(useridkey).map { _.toInt }.getOrElse(0)
     val likehistory: String = "SELECT movieid FROM LIKE WHERE userid = ?"
@@ -166,5 +167,9 @@ class Application extends Controller {
     val unknownItems = solrResponse.filter {!itemIsKnown(_)}
     Ok(Json.toJson(unknownItems))
   }
+  
+  def recommendations = Action { request => 
+        Ok(views.html.recommender())
+    }
 }
 

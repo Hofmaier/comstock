@@ -5,6 +5,7 @@
 # Home page
 GET     /                           controllers.Application.index
 GET	 	/movies						controllers.Application.movies
+GET		/recommendations			controllers.Application.recommendations
 GET		/topn						controllers.Application.topn
 POST	/like						controllers.Application.like
 POST	/tag						controllers.Application.tag

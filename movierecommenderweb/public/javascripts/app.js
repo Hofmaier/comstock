@@ -69,4 +69,10 @@
 			$scope.userlike = "test";
 		}
 	});
+	
+	app.controller('Recommendations',function($scope, $http){
+		$http.get('/topn').success(function(data){
+			$scope.recommendations = data;
+		});
+	});
 })();
