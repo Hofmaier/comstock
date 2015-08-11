@@ -1,0 +1,28 @@
+The updateSolr.py script updates a Solr instance with similarity indicators computed from a sqlite user history.
+
+Prerequisites:
+-A Apache Mahout shell is installed
+-A database containing the table like and tag with user histories.
+-A running Spark instance.
+-A running Solr instance.
+
+The script executes 3 tasks.
+
+1. Read a sqlite database that contains the tables like and tag and writes the interactions to a file.  The database file path is the first parameter of the script.
+
+2. It starts the spark-itemsimilarity job that reads the interactions and computes the similarities
+
+3. It add the items with the corresponding indicators to a Solr instance. The URL of the Solr instance is the second parameter.
+
+The script takes the following parameters:
+1. sqlite database filepath
+2. solr instance URL
+
+The following environment variables must be set:
+-MAHOUT_HOME: directory of the mahout installation.
+-JAVA_HOME: directory of jdk
+-SPARK_HOME: directory of Spark installation
+-MASTER: url of spark master node(e.g. spark://localhost:7077
+
+Example usage:
+python updateSolr.py movie.db http://localhost:8983/solr/movies
