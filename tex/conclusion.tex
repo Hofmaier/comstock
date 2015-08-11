@@ -14,7 +14,11 @@ A large amount of work was required to convert formats between the user history 
 
 The proposed design did not describe the inclusion of item similarity values in the search engine. We used the payload mechanism of Apache Lucene to weight indicators with corresponding similarity value.
 
-Due to the absence of evaluation tests in \cite{Dunning14} we evaluated the recommender with the accuracy metrics \gls{precision} and \gls{recall}. The usefulness of these metrics depends on the definition of relevant items. We defined items that the user has given a high rating as relevant. The evaluation method used in this report penalizes items that the user never has rated or even seen. 
+Due to the absence of evaluation tests in \cite{Dunning14} we evaluated the recommender with the accuracy metrics \gls{precision} and \gls{recall}. 
+
+The usefulness of these metrics depends on the definition of relevant items. We defined items that the user has given a high rating as relevant. The evaluation method used in this report penalizes items that the user never has rated or even seen. 
+
+A problem with precision and recall is that they are computed using unordered sets of items. Hence they do not measure if the retrieved items in the \gls{topn} are shown in the right order. An alternative evaluation metric to precision and recall is the expected percentile ranking \cite{Hu}. Expected percentile ranking accounts for the percentile ranking of an item in the \gls{topn}. We used precision and recall in this report because they are common evaluation metrics for search engines \cite{grainger} and because they are easy to implement.
 
 Another problem with precision and recall emerges when the \glspl{preference} are Boolean data, like in the demo application. Without a numerical rating value we can not pick the $N$ best rated items but we have to select $N$ items at random. For this reason we used the MovieLens data set that contains preference values and we simulated \glspl{useraction}.
 
