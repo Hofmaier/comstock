@@ -120,5 +120,6 @@ updatesolr/target
 tex/node
 python/movie.db
 python/inputfile
+python/outfile
 *.pyc
 
