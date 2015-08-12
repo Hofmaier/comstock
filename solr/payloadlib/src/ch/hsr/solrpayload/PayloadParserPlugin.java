@@ -14,10 +14,9 @@ public class PayloadParserPlugin extends QParserPlugin {
 	}
 
 	@Override
-	public QParser createParser(String arg0, SolrParams arg1, SolrParams arg2,
-			SolrQueryRequest arg3) {
-		// TODO Auto-generated method stub
-		return null;
+	public QParser createParser(String qstr, SolrParams localParams, SolrParams params,
+			SolrQueryRequest req) {
+		return new PayloadQParser(qstr, localParams, params, req);
 	}
 
 }
