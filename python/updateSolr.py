@@ -26,9 +26,16 @@ dbfilepath = args.db
 solrinstance = args.solr
 rawdatafilepath = './inputfile'
 sparkoutputdir = './outfile'
-mahouthome = os.getenv('MAHOUT_HOME')
-print mahouthome
-mahoutshellpath = mahouthome + 'bin/mahout spark-itemsimilarity'
+likeindicatorfield = 'likeindicator'
+#'/home/lukas/Downloads/apache-mahout-distribution-0.10.1/bin/mahout spark-itemsimilarity'
+os.putenv('JAVA_HOME','/usr/lib/jvm/java-1.8.0-openjdk-amd64')
+os.putenv('MAHOUT_HOME','/home/lukas/Downloads/apache-mahout-distribution-0.10.1/')
+os.putenv('SPARK_HOME','/home/lukas/Downloads/spark-1.3.1/')
+os.putenv('MASTER','spark://case:7077')
+
+#mahouthome = os.getenv('MAHOUT_HOME')
+#print mahouthome
+#mahoutshellpath = mahouthome + 'bin/mahout spark-itemsimilarity'
 
 def line2indicators(line):
     idsims = line.split('\t')
@@ -46,7 +53,7 @@ def line2indicators(line):
         return (idsims[0],indicators)
     return (idsims[0].strip(),'')
 
-#'/home/lukas/Downloads/apache-mahout-distribution-0.10.1/bin/mahout spark-itemsimilarity'
+
 
 con = sqlite3.connect(dbfilepath)
 print 'start update solr process'
@@ -57,12 +64,8 @@ with open(rawdatafilepath, 'w') as rawdatafile:
     for r in cursor:
         csvwriter.writerow([r[0],r[1],'like'])
 
-#os.putenv('JAVA_HOME','/usr/lib/jvm/java-1.8.0-openjdk-amd64')
-#os.putenv('MAHOUT_HOME','/home/lukas/Downloads/apache-mahout-distribution-0.10.1/')
-#os.putenv('SPARK_HOME','/home/lukas/Downloads/spark-1.3.1/')
-#os.putenv('MASTER','spark://case:7077')
 
-executellrcmd = mahoutshellpath + ' --input ' + rawdatafilepath + ' --output ' + sparkoutputdir
+#executellrcmd = mahoutshellpath + ' --input ' + rawdatafilepath + ' --output ' + sparkoutputdir
 #os.system(executellrcmd)
 
 solr = pysolr.Solr(solrinstance)
@@ -71,9 +74,10 @@ solrdocs = []
 movies = {}
 cursor.execute('''SELECT * FROM movie''')
 for m in cursor:
+    titlestr = m[1]
     movies[m[0]]= {
         'id':m[0],
-        'title':m[1],
+        'title':titlestr,
         'payloads':''
         }
            
@@ -82,7 +86,7 @@ with open(sparkoutputfile, 'r') as similarityfile:
     for line in lines:
         midindicator = line2indicators(line)
         movie = movies[midindicator[0]]
-        movie['payloads'] = midindicator[1]
+        movie[likeindicatorfield] = midindicator[1]
       
 solr.delete(q='*:*')
 l = [movie for k, movie in movies.iteritems()]

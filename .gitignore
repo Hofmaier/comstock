@@ -110,11 +110,23 @@ sympy-plots-for-*.tex/
 *.tex~
 *.org~
 
-solr/collection1/data/
-solr/collection1/conf/velocity/
-solr/collection1/conf/xslt/
-solr/collection1/conf/lang/
-solr/collection1/conf/clustering
+solr/solr/movielens/data/
+solr/solr/movielens/conf/velocity/
+solr/solr/movielens/conf/xslt/
+solr/solr/movielens/conf/lang/
+solr/solr/movielens/conf/clustering/
+logs/
+solr/example-schemaless/solr/collection1/
+solr/payloadlib/payloadlib.jar
+*.vm
+*.fdt
+*.fdx
+*.nvd
+*.si
+*.doc
+*.pos
+*.tim
+*.tip
 
 updatesolr/target
 tex/node
