@@ -1,6 +1,7 @@
 import sqlite3
 import csv
 import os
+import shutil
 import pysolr
 import json
 import argparse
@@ -27,15 +28,15 @@ solrinstance = args.solr
 rawdatafilepath = './inputfile'
 sparkoutputdir = './outfile'
 likeindicatorfield = 'likeindicator'
+tagindicatorfield = 'tagindicator'
 #'/home/lukas/Downloads/apache-mahout-distribution-0.10.1/bin/mahout spark-itemsimilarity'
 os.putenv('JAVA_HOME','/usr/lib/jvm/java-1.8.0-openjdk-amd64')
-os.putenv('MAHOUT_HOME','/home/lukas/Downloads/apache-mahout-distribution-0.10.1/')
+os.putenv('MAHOUT_HOME','/home/lukas/Downloads/mahout-distribution-0.10.0/')
 os.putenv('SPARK_HOME','/home/lukas/Downloads/spark-1.3.1/')
 os.putenv('MASTER','spark://case:7077')
 
-#mahouthome = os.getenv('MAHOUT_HOME')
-#print mahouthome
-#mahoutshellpath = mahouthome + 'bin/mahout spark-itemsimilarity'
+mahouthome = os.getenv('MAHOUT_HOME')
+mahoutshellpath = mahouthome + 'bin/mahout spark-itemsimilarity'
 
 def line2indicators(line):
     idsims = line.split('\t')
@@ -53,25 +54,33 @@ def line2indicators(line):
         return (idsims[0],indicators)
     return (idsims[0].strip(),'')
 
+def writeinputfile(table, con):
+    cursor = con.cursor()
+    sqlstmnt = '''SELECT * FROM {0}'''
+    cursor.execute(sqlstmnt.format(table))
+    with open(rawdatafilepath, 'w') as rawdatafile:
+        csvwriter = csv.writer(rawdatafile)
+        for r in cursor:
+            csvwriter.writerow([r[0],r[1],'like'])
 
+def startItemsimilarity():
+    print 'start update solr process'
+    executellrcmd = mahoutshellpath + ' --input ' + rawdatafilepath + ' --output ' + sparkoutputdir
+    if os.path.isdir(sparkoutputdir):
+        shutil.rmtree(sparkoutputdir)
+   # shutil.copytree('/home/lukas/Documents/outfile/',sparkoutputdir)
+    os.system(executellrcmd)
 
+            
 con = sqlite3.connect(dbfilepath)
-print 'start update solr process'
-cursor = con.cursor()
-cursor.execute('''SELECT * FROM like''')
-with open(rawdatafilepath, 'w') as rawdatafile:
-    csvwriter = csv.writer(rawdatafile)
-    for r in cursor:
-        csvwriter.writerow([r[0],r[1],'like'])
-
-
-#executellrcmd = mahoutshellpath + ' --input ' + rawdatafilepath + ' --output ' + sparkoutputdir
-#os.system(executellrcmd)
+writeinputfile('like',con)
+startItemsimilarity()
 
 solr = pysolr.Solr(solrinstance)
 sparkoutputfile = sparkoutputdir + '/similarity-matrix/part-00000'
 solrdocs = []
 movies = {}
+cursor = con.cursor()
 cursor.execute('''SELECT * FROM movie''')
 for m in cursor:
     titlestr = m[1]
@@ -80,17 +89,26 @@ for m in cursor:
         'title':titlestr,
         'payloads':''
         }
-           
+
+print sparkoutputfile
 with open(sparkoutputfile, 'r') as similarityfile:
     lines = list(similarityfile)
     for line in lines:
         midindicator = line2indicators(line)
         movie = movies[midindicator[0]]
         movie[likeindicatorfield] = midindicator[1]
+
+writeinputfile('tag',con)
+startItemsimilarity()
+with open(sparkoutputfile, 'r') as similarityfile:
+    lines = list(similarityfile)
+    for line in lines:
+        midindicator = line2indicators(line)
+        movie = movies[midindicator[0]]
+        movie[tagindicatorfield] = midindicator[1]
       
 solr.delete(q='*:*')
 l = [movie for k, movie in movies.iteritems()]
 solr.add(l)
 
-
-        
+con.close()

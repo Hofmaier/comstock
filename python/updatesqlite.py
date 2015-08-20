@@ -1,9 +1,9 @@
 import sqlite3
 import csv
 
-moviesfilepath = '/home/lukas/Downloads/ml-latest-small/movies.csv'
-ratingsfilepath = '/home/lukas/Downloads/ml-latest-small/ratings.csv'
-tagsfilepath = '/home/lukas/Downloads/ml-latest-small/tags.csv'
+moviesfilepath = '../data/ml-latest-small/movies.csv'
+ratingsfilepath = '../data/ml-latest-small/ratings.csv'
+tagsfilepath = '../data/ml-latest-small/tags.csv'
 
 con = sqlite3.connect('movie.db')
 print 'start sqlite process'
@@ -15,7 +15,6 @@ with open(moviesfilepath, 'r') as csvfile:
     csvreader = csv.reader(csvfile)
     for row in csvreader:
         if row[0] == 'movieId':
-            print 'found header'
             continue
         movieid = unicode(row[0])
         title = unicode(row[1],errors='ignore')
