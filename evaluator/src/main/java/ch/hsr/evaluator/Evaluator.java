@@ -5,18 +5,12 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.eval.RecommenderBuilder;
 import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
-import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
 import org.apache.mahout.cf.taste.impl.model.GenericBooleanPrefDataModel;
 import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
 import org.apache.mahout.cf.taste.impl.model.GenericUserPreferenceArray;
 import org.apache.mahout.cf.taste.impl.recommender.GenericBooleanPrefItemBasedRecommender;
-import org.apache.mahout.cf.taste.impl.recommender.GenericItemBasedRecommender;
-import org.apache.mahout.cf.taste.impl.recommender.RandomRecommender;
-import org.apache.mahout.cf.taste.impl.recommender.svd.ALSWRFactorizer;
-import org.apache.mahout.cf.taste.impl.recommender.svd.SVDRecommender;
 import org.apache.mahout.cf.taste.impl.similarity.UncenteredCosineSimilarity;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Preference;
@@ -37,6 +31,7 @@ public class Evaluator {
 		int nrOfRecommendedItems = 100;
 		
 		DataModel trainingDataModel = removeRelevantItemsFromDataModel(dataModel,userID,threshold);
+		trainingDataModel.getItemIDs();
 		Recommender rec = itembasedr(dataModel);
 		List<RecommendedItem> recommendations = rec.recommend(userID, nrOfRecommendedItems);
 		List<Preference> relevantItems = relevantItems(userID, dataModel, threshold);
@@ -45,22 +40,23 @@ public class Evaluator {
 		log.info("nr of recommendations: " + recommendations.size());
 
 		int topNsize = 0;
-		FastIDSet relevantItemIDs = null;
+		//FastIDSet relevantItemIDs = null;
 		
 double precision = 0;
 
 int relevantItemsRetrieved = 0;
 
-List<RecommendedItem> reItems = rec.recommend(userID, topNsize);
-	for (RecommendedItem recommendedItem : reItems) {
-		if (relevantItemIDs.contains(recommendedItem.getItemID())){
+List<RecommendedItem> recommendedItems = rec.recommend(userID, topNsize);
+	for (RecommendedItem recommendedItem : recommendedItems) {
+		trainingDataModel.getItemIDsFromUser(recommendedItem.getItemID());
+		/*if (relevantItemIDs.contains(recommendedItem.getItemID())){
 			relevantItemsRetrieved++;
-		}
+		}*/
 	}
 
 // Precision
-int numRecommendedItems = reItems.size();
-precision = ((double) relevantItemsRetrieved / (double) topNsize);
+int numRecommendedItems = recommendedItems.size();
+precision = ((double) relevantItemsRetrieved / (double) numRecommendedItems);
 		      
 // Recall
 double recall = 0;
@@ -122,6 +118,7 @@ recall =  relevantItemsRetrieved / (double) relevantItems.size();
 	}
 	
 	
+	@SuppressWarnings("deprecation")
 	public Recommender itembasedr(DataModel dataModel) throws TasteException{
 		GenericBooleanPrefDataModel booleanDatamodel = new GenericBooleanPrefDataModel(dataModel);
 		ItemSimilarity similarity = new UncenteredCosineSimilarity(dataModel);

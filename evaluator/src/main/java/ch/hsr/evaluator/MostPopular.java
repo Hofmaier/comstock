@@ -13,7 +13,6 @@ import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
 import org.apache.mahout.cf.taste.impl.recommender.GenericRecommendedItem;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.PreferenceArray;
 import org.apache.mahout.cf.taste.recommender.IDRescorer;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
@@ -22,14 +21,19 @@ import org.apache.mahout.cf.taste.recommender.Recommender;
 public class MostPopular implements Recommender {
 
 	DataModel dataModel;
-	private List<RecommendedItem> recommendedItems;
-	private List<RecommendedItem> recommendedItems2;
+	List<RecommendedItem> recommendedItems;
 
 	public MostPopular(DataModel dm) throws TasteException {
 		this.dataModel = dm;
-		LongPrimitiveIterator iter2 = dataModel.getItemIDs();
-		recommendedItems = new ArrayList<RecommendedItem>();
 
+		Map<Long, Integer> item2pop = createPopularityMap();
+		List<RecommendedItem> itemidcounter = transfom2list(item2pop);
+		Collections.sort(itemidcounter, new RecommenderItemComparator());
+
+		this.recommendedItems = itemidcounter;
+	}
+
+	private Map<Long, Integer> createPopularityMap() throws TasteException {
 		Map<Long, Integer> item2pop = new HashMap<Long, Integer>();
 		LongPrimitiveIterator iter = dataModel.getUserIDs();
 		while (iter.hasNext()) {
@@ -44,23 +48,7 @@ public class MostPopular implements Recommender {
 				}
 			}
 		}
-		List<RecommendedItem> itemidcounter = transfom2list(item2pop);
-		Collections.sort(itemidcounter, new RecommenderItemComparator());
-
-		recommendedItems2 = itemidcounter;
-		while (iter2.hasNext()) {
-			Long itemID = iter2.next();
-			PreferenceArray prefs = dm.getPreferencesForItem(itemID);
-			float sum = 0;
-			for (Preference pref : prefs) {
-				sum += pref.getValue();
-			}
-			float mean = sum / (float) prefs.length();
-			recommendedItems.add(new GenericRecommendedItem(itemID, mean));
-		}
-		Collections.sort(recommendedItems, new RecommenderItemComparator() {
-
-		});
+		return item2pop;
 	}
 
 	private List<RecommendedItem> transfom2list(Map<Long, Integer> item2pop) {
@@ -75,16 +63,13 @@ public class MostPopular implements Recommender {
 	}
 
 	@Override
-	public void refresh(Collection<Refreshable> alreadyRefreshed) {
-		// TODO Auto-generated method stub
-
-	}
+	public void refresh(Collection<Refreshable> alreadyRefreshed) {}
 
 	@Override
 	public List<RecommendedItem> recommend(long userID, int howMany)
 			throws TasteException {
 		dataModel.getItemIDs();
-		List<RecommendedItem> temp = recommendedItems2.subList(0, howMany);
+		List<RecommendedItem> temp = recommendedItems.subList(0, howMany);
 		return temp;
 	}
 
@@ -97,27 +82,22 @@ public class MostPopular implements Recommender {
 	@Override
 	public float estimatePreference(long userID, long itemID)
 			throws TasteException {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
 	public void setPreference(long userID, long itemID, float value)
 			throws TasteException {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void removePreference(long userID, long itemID)
 			throws TasteException {
-		// TODO Auto-generated method stub
 
 	}
 
 	@Override
 	public DataModel getDataModel() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 

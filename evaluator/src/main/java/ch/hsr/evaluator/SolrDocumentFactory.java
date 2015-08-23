@@ -2,7 +2,6 @@ package ch.hsr.evaluator;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
@@ -14,57 +13,65 @@ import org.slf4j.LoggerFactory;
 
 public class SolrDocumentFactory {
 	Logger log = LoggerFactory.getLogger(SolrDocumentFactory.class);
-	public List<SolrInputDocument> createSolrDocs(DataModel dm,
-			ItemSimilarity tagsim, 
-			ItemSimilarity similarity, 
-			ItemSimilarity llrSimilarity,
-			Map<Long, Movie> movies) throws TasteException {
+
+	public List<SolrInputDocument> createSolrDocs(DataModel likedm,
+			ItemSimilarity tagSimilarity, ItemSimilarity cosineSimilarity,
+			ItemSimilarity llrSimilarity) throws TasteException {
 		log.info("start analysis");
 		ArrayList<SolrInputDocument> solrdocs = new ArrayList<SolrInputDocument>();
-		LongPrimitiveIterator iter = dm.getItemIDs();
+		LongPrimitiveIterator iter = likedm.getItemIDs();
 		while (iter.hasNext()) {
-			SolrInputDocument doc = new SolrInputDocument();
 			long itemid = iter.nextLong();
-			doc.addField("id", itemid);
-			String title = movies.get(itemid).title;
-			doc.addField("title", title);
-			double similaritythreshold = 0.99;
-			double likesimilaritythreshold = 1.0;
-			StringBuilder simrstr = new StringBuilder();
-			StringBuilder tagsimstr = new StringBuilder();
-			StringBuilder llrstr = new StringBuilder();
-			StringBuilder llrindicatorstrbld = new StringBuilder();
-			LongPrimitiveIterator iter2 = dm.getItemIDs();
-			while (iter2.hasNext()) {
-
-				long otheritemid = iter2.nextLong();
-				double sim = similarity.itemSimilarity(itemid, otheritemid);
-				double tagsimval = tagsim.itemSimilarity(itemid, otheritemid);
-				double llrsim = llrSimilarity.itemSimilarity(itemid, otheritemid);
-				if(!Double.isNaN(llrsim)){
-					String llrsimstr = String.format("%.1f", llrsim);
-					llrindicatorstrbld.append(otheritemid + "|" + llrsimstr + " ");
-				}
-				if (!Double.isNaN(sim) && sim > similaritythreshold) {
-					simrstr.append(" " + otheritemid);
-				}
-				if (!Double.isNaN(tagsimval) && tagsimval > 0.5) {
-					tagsimstr.append(" " + otheritemid);
-				}
-				if (!Double.isNaN(llrsim) && llrsim > likesimilaritythreshold) {
-					llrstr.append(" " + otheritemid);
-				}
-			}
-			//log.info("finished similarity analysis for one item");
-			String similaritemidstr = simrstr.toString();
-			doc.addField("like", similaritemidstr);
-			doc.addField("tags", tagsimstr.toString());
-			doc.addField("llr", llrstr.toString());
-			doc.addField(llrfield, llrindicatorstrbld.toString());
+			SolrInputDocument doc = buildSolrDoc(likedm, tagSimilarity,
+					cosineSimilarity, llrSimilarity, itemid);
 			solrdocs.add(doc);
 		}
-		log.info("solr doc created" );
+		log.info("solr docs created");
 		return solrdocs;
 	}
 
+	private SolrInputDocument buildSolrDoc(DataModel datamodel,
+			ItemSimilarity tagSimilariy, ItemSimilarity cosineSimilarity,
+			ItemSimilarity llrSimilarity, long itemid) throws TasteException {
+		SolrInputDocument doc = new SolrInputDocument();
+
+		StringBuilder simrstr = new StringBuilder();
+		StringBuilder tagsimstr = new StringBuilder();
+		StringBuilder llrstr = new StringBuilder();
+		LongPrimitiveIterator iter2 = datamodel.getItemIDs();
+
+		while (iter2.hasNext()) {
+			buildIndicatorStrings(tagSimilariy, cosineSimilarity,
+					llrSimilarity, itemid, simrstr, tagsimstr, llrstr, iter2);
+		}
+
+		doc.addField("id", itemid);
+		doc.addField(FieldIdentifier.likes, simrstr.toString());
+		doc.addField(FieldIdentifier.tags, tagsimstr.toString());
+		doc.addField(FieldIdentifier.llr, llrstr.toString());
+		return doc;
+	}
+
+	private void buildIndicatorStrings(ItemSimilarity tagsim,
+			ItemSimilarity similarity, ItemSimilarity llrSimilarity,
+			long itemid, StringBuilder simrstr, StringBuilder tagsimstr,
+			StringBuilder llrstr, LongPrimitiveIterator iter2)
+			throws TasteException {
+		double similaritythreshold = 0.99;
+		double likesimilaritythreshold = 1.0;
+		long otheritemid = iter2.nextLong();
+		double sim = similarity.itemSimilarity(itemid, otheritemid);
+		double tagsimval = tagsim.itemSimilarity(itemid, otheritemid);
+		double llrsim = llrSimilarity.itemSimilarity(itemid, otheritemid);
+
+		if (!Double.isNaN(sim) && sim > similaritythreshold) {
+			simrstr.append(" " + otheritemid);
+		}
+		if (!Double.isNaN(tagsimval) && tagsimval > 0.5) {
+			tagsimstr.append(" " + otheritemid);
+		}
+		if (!Double.isNaN(llrsim) && llrsim > likesimilaritythreshold) {
+			llrstr.append(" " + otheritemid);
+		}
+	}
 }
