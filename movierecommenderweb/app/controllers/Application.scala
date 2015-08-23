@@ -20,31 +20,14 @@ import scala.collection.JavaConversions.iterableAsScalaIterable
 
 class Application extends Controller {
   val useridkey = "userid"
-  val solrConStr = "http://localhost:8983/solr/collection1"
+  val solrConStr = "http://localhost:8983/solr/movielens"
 
   def index = Action {
     Logger.info("index")
     val userid = 1
     Ok(views.html.main()).withSession(useridkey -> userid.toString())
   }
-  /*
-  case class Movie(title:String)
-  
-  object Movie{
-    implicit val movieformat = Json.format[Movie]
-  }
-  val form:Form[Movie]=Form{
-    mapping(
-      "query" -> text  
-    )(Movie.apply)(Movie.unapply)
-  }
-  
-  def findmovies = Action {implicit request =>
-    val query = form.bindFromRequest.get
-    Logger.info(query.title)
-    Redirect(routes.Application.index())
-    }
-  */
+
   implicit val movieWrites = new Writes[Movie] {
     def writes(movie: Movie) = JsObject(Seq("title" -> JsString(movie.title),
       "tags" -> JsArray(movie.tags.map(JsString))))
@@ -52,29 +35,23 @@ class Application extends Controller {
   }
   def movies = Action { request =>
 
-    val conn = DB.getConnection()
+    val conn:Connection = DB.getConnection()
     var jsonarr = JsArray()
     try {
       val stmt = conn.createStatement
       val selectmoviestmnt = "SELECT id as ID, title as Title FROM movie LIMIT 20"
-      val rs: ResultSet = stmt.executeQuery(selectmoviestmnt)
-      while (rs.next()) {
-        val title = rs.getString("title")
-        val id = rs.getString("id")
-        val gettagquerystr = "SELECT tag as Tag FROM tag WHERE movieid = ?";
-        val preparedstatement: PreparedStatement = conn.prepareStatement(gettagquerystr);
-        preparedstatement.setString(1, id)
-        val tagresultset = preparedstatement.executeQuery()
-        var tags: List[String] = Nil
-        while (tagresultset.next()) {
-          tags = tagresultset.getString("Tag") :: tags
-        }
-        if (tags.length != 0) {
-          val tagjson = JsArray(for (t <- tags) yield JsString(t))
+      val resultset: ResultSet = stmt.executeQuery(selectmoviestmnt)
+
+      while (resultset.next()) {
+        val title = resultset.getString("title")
+        val id = resultset.getString("id")
+        
+        val taglist = gettags(id, conn)
+        if (taglist.length != 0) {
           val json = JsObject(Seq(
             "title" -> JsString(title),
             "id" -> JsString(id),
-            "tags" -> tagjson))
+            "tags" -> JsArray(for (t <- taglist) yield JsString(t))))
           jsonarr = jsonarr :+ json
         }
       }
@@ -159,11 +136,8 @@ class Application extends Controller {
 
     val solrClient: SolrClient = new HttpSolrClient(solrConStr);
     val response: QueryResponse = solrClient.query(new SolrQuery().setParam("q", history.mkString(" ")).set("rows", 10))
-    val list: SolrDocumentList = response.getResults()
-    val solrResponse: Iterable[SolrDocument] = list
-    def itemIsKnown(x: SolrDocument) =
-      history.contains(x.getFieldValue("id").toString())
-      
+    val solrResponse: Iterable[SolrDocument] = response.getResults()
+    def itemIsKnown(x: SolrDocument) = history.contains(x.getFieldValue("id").toString())
     val unknownItems = solrResponse.filter {!itemIsKnown(_)}
     Ok(Json.toJson(unknownItems))
   }
@@ -171,5 +145,18 @@ class Application extends Controller {
   def recommendations = Action { request => 
         Ok(views.html.recommender())
     }
+  
+  def gettags(movieId:String, conn:Connection):List[String] = {
+        val gettagquerystr = "SELECT tag as Tag FROM tag WHERE movieid = ?";
+        val preparedstatement: PreparedStatement = conn.prepareStatement(gettagquerystr);
+        preparedstatement.setString(1, movieId)
+        val tagresultset = preparedstatement.executeQuery()
+        val iter = new Iterator[String] {
+          override def hasNext = tagresultset.next()
+          override def next = tagresultset.getString("Tag")
+        }
+        val taglist: List[String] = iter.toList
+        return taglist
+  }
 }
 

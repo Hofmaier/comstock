@@ -1,4 +1,14 @@
-This is your new Play application
-=================================
+This directory contains the Play application
+============================================
 
-This file will be packaged with your application, when using `activator dist`.
+The application can be built with sbt.
+To run the recommender demo web application execute 
+   sbt run
+
+sbt has to be installed on your machine.
+
+The application depends on a local database.
+The JDBC driver can be configured in the file /movierecommenderweb/conf/application.conf
+For example:
+db.default.driver=org.sqlite.JDBC
+db.default.url="jdbc:sqlite:./movie.db"
