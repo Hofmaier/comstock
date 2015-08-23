@@ -12,13 +12,13 @@ public class EvaluatorTest extends TestCase{
 
 	@Test
 	public void testItembased() {
-		RecommenderFactory test = new RecommenderFactory();
+		RecommenderFactory test = new RecommenderFactory("", null, null);
 		assertNotNull(test.itembased()); 
 	}
 
 	@Test
 	public void testRandom() {
-		RecommenderFactory test = new RecommenderFactory();
+		RecommenderFactory test = new RecommenderFactory("", null, null);
 		assertNotNull(test.random());
 	}
 
