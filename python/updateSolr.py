@@ -32,7 +32,7 @@ tagindicatorfield = 'tagindicator'
 #'/home/lukas/Downloads/apache-mahout-distribution-0.10.1/bin/mahout spark-itemsimilarity'
 os.putenv('JAVA_HOME','/usr/lib/jvm/java-1.8.0-openjdk-amd64')
 os.putenv('MAHOUT_HOME','/home/lukas/Downloads/mahout-distribution-0.10.0/')
-os.putenv('SPARK_HOME','/home/lukas/Downloads/spark-1.3.1/')
+os.putenv('SPARK_HOME','/home/lukas/Downloads/spark-1.1.1/')
 os.putenv('MASTER','spark://case:7077')
 
 mahouthome = os.getenv('MAHOUT_HOME')
@@ -104,11 +104,15 @@ with open(sparkoutputfile, 'r') as similarityfile:
     lines = list(similarityfile)
     for line in lines:
         midindicator = line2indicators(line)
-        movie = movies[midindicator[0]]
-        movie[tagindicatorfield] = midindicator[1]
+        if midindicator[0] == 'movieId':
+            print 'found movie'
+        else:
+            movie = movies[midindicator[0]]
+            movie[tagindicatorfield] = midindicator[1]
       
 solr.delete(q='*:*')
 l = [movie for k, movie in movies.iteritems()]
+print str(len(l))
 solr.add(l)
 
 con.close()
