@@ -163,7 +163,7 @@
         highlighting document content. Use the "text" field to search the content. -->
    <field name="content" type="text_general" indexed="false" stored="true" multiValued="true"/>
 
-   <field name="simr" type="text_general" indexed="true" stored="true"/>  
+   <field name="likes" type="text_general" indexed="true" stored="true"/>  
    <field name="tags" type="text_general" indexed="true" stored="true"/>  
   <field name="llr" type="text_general" indexed="true" stored="true"/>  
 
@@ -181,6 +181,7 @@
 
    <field name="payloads" type="payloads" indexed="true" stored="true"/>
    <field name="likeindicator" type="payloads" indexed="true" stored="true"/>
+   <field name="tagindicator" type="payloads" indexed="true" stored="true"/>
 
    <!--
      Some fields such as popularity and manu_exact could be modified to
