@@ -3,7 +3,7 @@ Solr example
 
 This directory contains a Solr instance. The configuration creates a movielens core in order to save movies with their indicator.
 
-To run this example:
+To start a Solr instance with the movielens core run
 
   java -jar start.jar
 

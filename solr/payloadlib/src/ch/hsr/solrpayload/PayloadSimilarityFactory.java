@@ -15,5 +15,4 @@ public class PayloadSimilarityFactory extends SimilarityFactory{
 	public Similarity getSimilarity() {
 		return new PayloadSimilarity();
 	}
-
 }
