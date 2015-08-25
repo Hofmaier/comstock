@@ -1,0 +1,16 @@
+ In order to build the evaluator run the maven command
+
+mvn clean compile assembly:single
+
+This creates an executable jar archive. To start the evaluation run 
+
+java -jar target/evaluator-0.0.1-jar-with-dependencies.jar
+
+The program expects the following parameters:
+
+- precisionat: Set the size $N$ of the top-N list.
+- Solr instance:  URL of the Solr instance.
+- Ratings filepath: File path of a CSV file that contains user ratings
+- Tags filepath: File path of a CSV file that contains tag - item interactions.
+
+The shell script startevaluator.sh starts an example evaluation.
