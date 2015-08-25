@@ -20,7 +20,6 @@ import scala.collection.JavaConversions.iterableAsScalaIterable
 
 class Application extends Controller {
   val useridkey = "userid"
-  val solrConStr = "http://localhost:8983/solr/movielens"
 
   def index = Action {
     Logger.info("index")
@@ -41,7 +40,7 @@ class Application extends Controller {
       val stmt = conn.createStatement
       val selectmoviestmnt = "SELECT id as ID, title as Title FROM movie LIMIT 20"
       val resultset: ResultSet = stmt.executeQuery(selectmoviestmnt)
-
+   
       while (resultset.next()) {
         val title = resultset.getString("title")
         val id = resultset.getString("id")
@@ -62,10 +61,6 @@ class Application extends Controller {
   }
 
   case class Like(id: String)
-
-  //  implicit val likeReads: Reads[Like] = new Reads[Like]{
-  //    def reads()
-  //  }
 
   def like = Action(BodyParsers.parse.json) { request =>
     val userid = request.session.get(useridkey).map { _.toInt }.getOrElse(0)
@@ -133,7 +128,7 @@ class Application extends Controller {
       override def next = resultset.getString("movieid")
     }
     var history: List[String] = iter.toList
-
+    val solrConStr = Play.current.configuration.getString("solr.url").getOrElse("solr config not found")
     val solrClient: SolrClient = new HttpSolrClient(solrConStr);
     val response: QueryResponse = solrClient.query(new SolrQuery().setParam("q", history.mkString(" ")).set("rows", 10))
     val solrResponse: Iterable[SolrDocument] = response.getResults()

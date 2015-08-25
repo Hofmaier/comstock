@@ -2,13 +2,21 @@ This directory contains the Play application
 ============================================
 
 The application can be built with sbt.
-To run the recommender demo web application execute 
-   sbt run
+To run the recommender demo web application execute
+
+sbt run
 
 sbt has to be installed on your machine.
 
-The application depends on a local database.
+The application depends on a local database and on running Solr instance.
+
+To start a Solr instance with the movielens core run
+
+java -jar start.jar
+
+in the solr (../solr) directory.
+
 The JDBC driver can be configured in the file /movierecommenderweb/conf/application.conf
 For example:
 db.default.driver=org.sqlite.JDBC
-db.default.url="jdbc:sqlite:./movie.db"
+db.default.url="jdbc:sqlite:../data/movie.db"
