@@ -1,18 +1,84 @@
-\section{Tools, libraries and frameworks}
-
-The following software was used to build the evaluator, the search engine update job and the web application.
+\section{Installation Guide}
+This section describes the usage of the various scipts and the demo web application created during the project.
+\subsection{Tools, libraries and frameworks}
+The web application demo and the evaluator were developed on a Ubuntu 15.04. 
+The following software was used to build the evaluator, the search engine update job and the web application. We assume that they are installed on the user's computer.
 \begin{itemize}
 \item JVM 1.8.45 OpenJDK. Solr, Spark and Play run on the JVM.
 \item Scala Compiler 2.11.7. The web application is written in Scala.
-\item Maven Java build tool. Maven was used to build Spark and evaluator and the search engine. version 3.19
+\item sbt 0.13.8 (Scala Build Tool) . The web application can be build with sbt.
+\item Maven 3.19 (Java build tool). Maven was used to build Spark and the evaluator.
 \item Solr version 4.7.2
-\item Spark version 1.4.0
-\item Play version 2.4. We used the Play framework because it runs on the JVM and we can use the Solr Client Library in the Webserver.
+\item Spark version 1.1.1. The Mahout shell job \verb|spark-itemsimiliarity| uses Spark to compute LLR ratios.
+\item Play version 2.4. We used the Play framework because it runs on the JVM and we can use the Solr Client Library in the web server.
 \item AngularJS. Javascript Framework. Used for WebGUI.
-\item Mahout 0.9 
-\item sqlite3 3.8.7.4 We use sqlite3 because there are JDBC driver and a python interface.
-\item python 2.7.9. Python is used to transform the date from sqlite3 to the input format of Apache Spark.
+\item Mahout 0.10.0. The machine learning library Apache Mahout is used to compute the LLR ratios and for the evaluation.
+\item sqlite3 3.8.7.4. We use sqlite3 because there are JDBC drivers and a python interface.
+\item python 2.7.9. Python is used to transform the date from sqlite3 to the inpu
+t format of Apache Spark.
 \end{itemize}
+
+\subsection{Starting Apache Solr}
+\label{sec:startsolr}
+The demo web application and the update script depend on a running Solr instance.
+To start a Solr instance with the movielens core run
+\begin{verbatim}
+java -jar start.jar
+\end{verbatim}
+in the directory \verb|solr|.
+This will start a Jetty instance that is listening on port 8983. To access the administration web interface visit \verb|http://localhost:8983/solr/| with a web browser.
+
+\subsection{Start the demo web application}
+
+The demo web application requires a running Solr instance. Make sure you executed the steps described in section \ref{sec:startsolr} before you start the web application. The Solr instance that the web application will use can be configured in the file \verb|movierecommender/conf/application.conf|. The URL of the Solr instance can be set with the key \verb|solr.url|. For example
+\begin{verbatim}
+solr.url="http://localhost:8983/solr/movielens"
+\end{verbatim}
+
+To run the demo web application change to the directory \verb|movierecommender| and execute the sbt command \verb|sbt run|.
+
+\subsection{Running the evaluation}
+
+The directory \verb|evaluator| contains the evaluation program descibed in section \ref{sec:evaluation}. In order to build it change to the directory \verb|evaluator| and run the maven command
+\begin{verbatim}
+mvn clean compile assembly:single
+\end{verbatim}
+This creates an executable jar archive. To start the evaluation run 
+\begin{verbatim}
+java -jar target/evaluator-0.0.1-jar-with-dependencies.jar
+\end{verbatim}
+
+The program expects the following parameters:
+\begin{description}
+\item[precisionat] Set the size $N$ of the top-N list.
+\item[Solr instance URL] URL of the Solr instance.
+\item[Ratings filepath] File path of a CSV file that contains user ratings
+\item[Tags filepath] File path of a CSV file that contains tag - item interactions.
+\end{description}
+
+The shell script \verb|startevaluator.sh| starts an example evaluation.
+
+\subsection{Indicator computation- and update script}
+In order to run the Python script \verb|updateSolr.py| the following environment is required.
+\begin{itemize}
+\item Apache Mahout shell is installed.
+\item sqlite3 client is installed (can be installed with \verb|apt-get install sqlite3| on a system with Aptitude). 
+\item The script requires a running spark instance. Apache Spark can be downloaded from \url{http://spark.apache.org/downloads.html}. Spark contains a shell script \verb|sbin/start-master.sh| to start a master node.
+\item A running Solr instance with the movielens core. The solr directory contains the \verb|start.jar| application. To start a Solr instance with the movielens core run \verb|java -jar start.jar|.
+\end{itemize}
+
+In addition the following environment variables must be set:
+\begin{description}
+\item[MAHOUT\_HOME] Directory of the Mahout installation.
+\item[JAVA\_HOME] JDK installation directory.
+\item[SPARK\_HOME] Directory of the Spark installation.
+\item[MASTER] Url of the spark master node (e.g. spark://localhost:7077).
+\end{description}
+
+The script takes two parameters. The file of the sqlite3 database and the URL of the Solr instance. For example:
+\begin{verbatim}
+python updateSolr.py movie.db http://localhost:8983/solr/movielens
+\end{verbatim}
 
 \section{Source code listings}
 \label{sec:listings}
