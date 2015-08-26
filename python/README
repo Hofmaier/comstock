@@ -22,7 +22,7 @@ The following environment variables must be set:
 -MAHOUT_HOME: directory of the mahout installation.
 -JAVA_HOME: directory of jdk
 -SPARK_HOME: directory of Spark installation
--MASTER: url of spark master node(e.g. spark://localhost:7077
+-MASTER: url of spark master node(e.g. spark://localhost:7077)
 
 Example usage:
-python updateSolr.py movie.db http://localhost:8983/solr/movielens
+python updateSolr.py ../data/movie.db http://localhost:8983/solr/movielens
