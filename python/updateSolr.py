@@ -29,11 +29,6 @@ rawdatafilepath = './inputfile'
 sparkoutputdir = './outfile'
 likeindicatorfield = 'likeindicator'
 tagindicatorfield = 'tagindicator'
-#'/home/lukas/Downloads/apache-mahout-distribution-0.10.1/bin/mahout spark-itemsimilarity'
-os.putenv('JAVA_HOME','/usr/lib/jvm/java-1.8.0-openjdk-amd64')
-os.putenv('MAHOUT_HOME','/home/lukas/Downloads/mahout-distribution-0.10.0/')
-os.putenv('SPARK_HOME','/home/lukas/Downloads/spark-1.1.1/')
-os.putenv('MASTER','spark://case:7077')
 
 mahouthome = os.getenv('MAHOUT_HOME')
 mahoutshellpath = mahouthome + 'bin/mahout spark-itemsimilarity'
@@ -68,10 +63,8 @@ def startItemsimilarity():
     executellrcmd = mahoutshellpath + ' --input ' + rawdatafilepath + ' --output ' + sparkoutputdir
     if os.path.isdir(sparkoutputdir):
         shutil.rmtree(sparkoutputdir)
-   # shutil.copytree('/home/lukas/Documents/outfile/',sparkoutputdir)
     os.system(executellrcmd)
 
-            
 con = sqlite3.connect(dbfilepath)
 writeinputfile('like',con)
 startItemsimilarity()
@@ -105,7 +98,7 @@ with open(sparkoutputfile, 'r') as similarityfile:
     for line in lines:
         midindicator = line2indicators(line)
         if midindicator[0] == 'movieId':
-            print 'found movie'
+            pass
         else:
             movie = movies[midindicator[0]]
             movie[tagindicatorfield] = midindicator[1]
