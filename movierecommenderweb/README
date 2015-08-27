@@ -8,7 +8,7 @@ sbt run
 
 sbt has to be installed on your machine.
 
-The application depends on a local database and on running Solr instance.
+The application depends on a local database and on a running Solr instance.
 
 To start a Solr instance with the movielens core run
 
@@ -16,7 +16,10 @@ java -jar start.jar
 
 in the solr (../solr) directory.
 
-The JDBC driver can be configured in the file /movierecommenderweb/conf/application.conf
+The JDBC driver and the url of the solr instance can be configured in the file /movierecommenderweb/conf/application.conf
 For example:
 db.default.driver=org.sqlite.JDBC
 db.default.url="jdbc:sqlite:../data/movie.db"
+solr.url="http://localhost:8983/solr/movielens"
+
+
