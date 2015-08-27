@@ -14,8 +14,7 @@ The following software was used to build the evaluator, the search engine update
 \item AngularJS. Javascript Framework. Used for WebGUI.
 \item Mahout 0.10.0. The machine learning library Apache Mahout is used to compute the LLR ratios and for the evaluation.
 \item sqlite3 3.8.7.4. We use sqlite3 because there are JDBC drivers and a python interface.
-\item python 2.7.9. Python is used to transform the date from sqlite3 to the inpu
-t format of Apache Spark.
+\item python 2.7.9. Python is used to transform the date from sqlite3 to the input format of Apache Spark.
 \end{itemize}
 
 \subsection{Starting Apache Solr}
@@ -36,27 +35,6 @@ solr.url="http://localhost:8983/solr/movielens"
 \end{verbatim}
 
 To run the demo web application change to the directory \verb|movierecommender| and execute the sbt command \verb|sbt run|.
-
-\subsection{Running the evaluation}
-
-The directory \verb|evaluator| contains the evaluation program descibed in section \ref{sec:evaluation}. In order to build it change to the directory \verb|evaluator| and run the maven command
-\begin{verbatim}
-mvn clean compile assembly:single
-\end{verbatim}
-This creates an executable jar archive. To start the evaluation run 
-\begin{verbatim}
-java -jar target/evaluator-0.0.1-jar-with-dependencies.jar
-\end{verbatim}
-
-The program expects the following parameters:
-\begin{description}
-\item[precisionat] Set the size $N$ of the top-N list.
-\item[Solr instance URL] URL of the Solr instance.
-\item[Ratings filepath] File path of a CSV file that contains user ratings
-\item[Tags filepath] File path of a CSV file that contains tag - item interactions.
-\end{description}
-
-The shell script \verb|startevaluator.sh| starts an example evaluation.
 
 \subsection{Indicator computation- and update script}
 In order to run the Python script \verb|updateSolr.py| the following environment is required.
@@ -79,6 +57,29 @@ The script takes two parameters. The file of the sqlite3 database and the URL of
 \begin{verbatim}
 python updateSolr.py movie.db http://localhost:8983/solr/movielens
 \end{verbatim}
+
+The shell script \verb|startUpdateSolr.sh| will run this script with an example configuration.
+
+\subsection{Running the evaluation}
+
+The directory \verb|evaluator| contains the evaluation program descibed in section \ref{sec:evaluation}. In order to build it change to the directory \verb|evaluator| and run the maven command
+\begin{verbatim}
+mvn clean compile assembly:single
+\end{verbatim}
+This creates an executable jar archive. To start the evaluation run 
+\begin{verbatim}
+java -jar target/evaluator-0.0.1-jar-with-dependencies.jar
+\end{verbatim}
+
+The program expects the following parameters:
+\begin{description}
+\item[precisionat] Set the size $N$ of the top-N list.
+\item[Solr instance URL] URL of the Solr instance.
+\item[Ratings filepath] File path of a CSV file that contains user ratings
+\item[Tags filepath] File path of a CSV file that contains tag - item interactions.
+\end{description}
+
+The shell script \verb|startevaluator.sh| starts an example evaluation.
 
 \section{Source code listings}
 \label{sec:listings}
