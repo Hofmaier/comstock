@@ -51,7 +51,7 @@ public class MostPopular implements Recommender {
 		return item2pop;
 	}
 
-	private List<RecommendedItem> transfom2list(Map<Long, Integer> item2pop) {
+	public List<RecommendedItem> transfom2list(Map<Long, Integer> item2pop) {
 		Set<Long> set = item2pop.keySet();
 
 		List<RecommendedItem> itemidcounter = new ArrayList<RecommendedItem>();

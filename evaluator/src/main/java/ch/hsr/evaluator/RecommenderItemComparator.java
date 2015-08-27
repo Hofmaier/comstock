@@ -13,6 +13,4 @@ public class RecommenderItemComparator implements Comparator<RecommendedItem> {
 		if(a.getValue() == b.getValue()) return 0;
 		return 0;
 	}
-
-
 }

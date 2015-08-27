@@ -39,48 +39,41 @@ public class AverageRatingRecommender implements Recommender {
 	
 	@Override
 	public void refresh(Collection<Refreshable> alreadyRefreshed) {
-		// TODO Auto-generated method stub
 
 	}
 
 	@Override
 	public List<RecommendedItem> recommend(long userID, int howMany)
 			throws TasteException {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public List<RecommendedItem> recommend(long userID, int howMany,
 			IDRescorer rescorer) throws TasteException {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public float estimatePreference(long userID, long itemID)
 			throws TasteException {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
 	public void setPreference(long userID, long itemID, float value)
 			throws TasteException {
-		// TODO Auto-generated method stub
 
 	}
 
 	@Override
 	public void removePreference(long userID, long itemID)
 			throws TasteException {
-		// TODO Auto-generated method stub
 
 	}
 
 	@Override
 	public DataModel getDataModel() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 

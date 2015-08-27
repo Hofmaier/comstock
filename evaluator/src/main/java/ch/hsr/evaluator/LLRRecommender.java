@@ -71,7 +71,7 @@ public class LLRRecommender implements Recommender {
 		return recommendations;
 	}
 
-	private SolrQuery createSolrQuery(long userID, int howMany) throws TasteException {
+	public SolrQuery createSolrQuery(long userID, int howMany) throws TasteException {
 		PreferenceArray prefs = likeDataModel.getPreferencesFromUser(userID);
 		prefs.sortByValueReversed();
 		int prefsToConsider = 10;
