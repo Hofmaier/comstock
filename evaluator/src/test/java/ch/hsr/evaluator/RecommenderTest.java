@@ -2,22 +2,17 @@ package ch.hsr.evaluator;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import junit.framework.TestCase;
 
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.model.file.FileDataModel;
-import org.apache.mahout.cf.taste.impl.recommender.GenericRecommendedItem;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class RecommenderTest extends TestCase{
@@ -54,6 +49,7 @@ public class RecommenderTest extends TestCase{
 		long userid1 = 1;
 		try {
 			SolrQuery solrQuery = recommender.createSolrQuery(userid1, 10);
+			assertNotNull(solrQuery);
 		} catch (TasteException e) {
 			Assert.fail(e.getMessage());
 		}
