@@ -113,7 +113,7 @@ sympy-plots-for-*.tex/
 solr/solr/movielens/data/
 solr/solr/movielens/conf/velocity/
 solr/solr/movielens/conf/xslt/
-solr/solr/movielens/conf/lang/
+
 solr/solr/movielens/conf/clustering/
 logs/
 solr/example-schemaless/solr/collection1/
