@@ -79,8 +79,7 @@ for m in cursor:
     titlestr = m[1]
     movies[m[0]]= {
         'id':m[0],
-        'title':titlestr,
-        'payloads':''
+        'title':titlestr
         }
 
 print sparkoutputfile

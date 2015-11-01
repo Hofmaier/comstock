@@ -42,7 +42,7 @@ In order to run the Python script \verb|updateSolr.py| the following environment
 \item Apache Mahout shell is installed.
 \item sqlite3 client is installed (can be installed with \verb|apt-get install sqlite3| on a system with Aptitude). 
 \item The script requires a running spark instance. Apache Spark can be downloaded from \url{http://spark.apache.org/downloads.html}. Spark contains a shell script \verb|sbin/start-master.sh| to start a master node.
-\item A running Solr instance with the movielens core. The solr directory contains the \verb|start.jar| application. To start a Solr instance with the movielens core run \verb|java -jar start.jar|.
+\item A running Solr instance with the movielens core. Make sure you executed the steps described in section \ref{sec:startsolr} before you start the web application.
 \end{itemize}
 
 In addition the following environment variables must be set:
